@@ -1,0 +1,8 @@
+[
+    {
+        "delete": "providers",
+        "deletes": [
+            { "q": { "name": "Github" } }
+        ]
+    }
+]

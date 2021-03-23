@@ -1,0 +1,39 @@
+[
+    { "create": "providers" },
+    {
+        "createIndexes": "providers",
+        "indexes": [
+            { "name": "name_unique", "unique": true, "key": { "name": 1 } },
+            { "name": "key_unique", "unique": true, "key": { "key": 1 } },
+            { "name": "uri_unique", "unique": true, "key": { "uri": 1 } }
+        ]
+    },
+    { "create": "projects" },
+    {
+        "createIndexes": "projects",
+        "indexes": [
+            { "name": "projects_unique", "unique": true, "key": { "provider_id": 1, "provider_arguments": 1 } }
+        ]
+    },
+    { "create": "scan_requests" },
+    {
+        "createIndexes": "scan_requests",
+        "indexes": [
+            { "name": "scan_requests_unique", "unique": true, "key": { "project_id": 1, "reference": 1 } }
+        ]
+    },
+    { "create": "users" },
+    {
+        "createIndexes": "users",
+        "indexes": [
+            { "name": "users_unique", "unique": true, "key": { "github_id": 1 } }
+        ]
+    },
+    { "create": "sessions" },
+    {
+        "createIndexes": "sessions",
+        "indexes": [
+            { "name": "sessions_unique", "unique": true, "key": { "token": 1 } }
+        ]
+    }
+]

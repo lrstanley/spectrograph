@@ -1,0 +1,34 @@
+{
+  "name": "spectrograph-http",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "watch": "node_modules/parcel-bundler/bin/cli.js watch --hmr-port 8081 --log-level 4 --public-url '/static/dist' index.html",
+    "build": "node_modules/parcel-bundler/bin/cli.js build --no-autoinstall --log-level 4 --public-url '/static/dist' index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "prettier": {
+    "printWidth": 140,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "arrowParens": "always"
+  },
+  "dependencies": {
+    "@vue/component-compiler-utils": "^3.0.0",
+    "axios": "^0.18.0",
+    "components": "^0.1.0",
+    "parcel-bundler": "^1.12.3",
+    "snackbarstack": "^1.0.18",
+    "vue": "^2.6.10",
+    "vue-axios": "^2.1.4",
+    "vue-hot-reload-api": "^2.3.3",
+    "vue-progressbar": "^0.7.5",
+    "vue-router": "^3.0.3",
+    "vue-template-compiler": "^2.6.10",
+    "vuetify": "^1.5.11",
+    "vuex": "^3.1.0"
+  }
+}
