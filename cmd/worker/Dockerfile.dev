@@ -1,2 +1,4 @@
 FROM golang:alpine
 RUN apk add --no-cache g++ make
+
+CMD ["/bin/sh", "-c", "cd /build/cmd/worker && make debug"]

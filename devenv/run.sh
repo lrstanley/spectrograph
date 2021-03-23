@@ -14,4 +14,12 @@ if [ ! -z "$DANGLING" ];then
     docker rmi $DANGLING 2>/dev/null
 fi
 
-docker-compose -f ./devenv/docker-compose.yml up --always-recreate-deps --abort-on-container-exit --remove-orphans --build --timeout 0
+docker-compose \
+    --project-name "$(basename $PWD)" \
+    --file ./devenv/docker-compose.yml \
+    up \
+        --always-recreate-deps \
+        --abort-on-container-exit \
+        --remove-orphans \
+        --build \
+        --timeout 0

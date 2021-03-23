@@ -1,15 +1,11 @@
 {
-  "name": "spectrograph-http",
+  "name": "frontend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "private": true,
-  "scripts": {
-    "watch": "node_modules/parcel-bundler/bin/cli.js watch --hmr-port 8081 --log-level 4 --public-url '/static/dist' index.html",
-    "build": "node_modules/parcel-bundler/bin/cli.js build --no-autoinstall --log-level 4 --public-url '/static/dist' index.html"
-  },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "prettier": {
     "printWidth": 140,
     "tabWidth": 2,

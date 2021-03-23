@@ -2,36 +2,34 @@ version: "3"
 volumes:
     frontend_cache: {}
     frontend_dist: {}
+    frontend_modules: {}
     go_cache: {}
     go_path: {}
 services:
     frontend:
         depends_on: []
-        ports: []
-        # command: sh -c "cd /build/cmd/frontend && make debug"
+        ports: [8081:8081]
         build:
             context: ../
             dockerfile: ./cmd/frontend/Dockerfile.dev
         volumes:
             - frontend_cache:/build/cmd/frontend/.cache
             - frontend_dist:/build/cmd/frontend/dist
+            - frontend_modules:/build/cmd/frontend/node_modules
             - ../:/build/ # root of repository
     http-server:
-        depends_on: ["mongo"] # "nats-1"
-        ports: [8080:8080,8081:8081]
-        command: sh -c "cd /build/cmd/http-server && ./debug.sh"
+        depends_on: ["mongo"]
+        ports: [8080:8080]
         build:
             context: ../
             dockerfile: ./cmd/http-server/Dockerfile.dev
         volumes:
-            - frontend_cache:/build/cmd/http-server/public/.cache
             - frontend_dist:/build/cmd/http-server/public/dist
             - go_cache:/root/.cache/go-build
             - go_path:/go
             - ../:/build/ # root of repository
     worker:
-        depends_on: [] # "nats-1"
-        command: sh -c "cd /build/cmd/worker && make debug"
+        depends_on: []
         build:
             context: ../
             dockerfile: ./cmd/worker/Dockerfile.dev

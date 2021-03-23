@@ -6,7 +6,7 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 fetch: ## Fetches the necessary dependencies to build.
-	test -d public/node_modules || npm install
+	npm install --no-audit --no-fund --loglevel verbose
 
 clean: ## Cleans up generated files/folders from the build.
 	/bin/rm -rfv "tmp" "dist/*"
@@ -15,7 +15,15 @@ clean-cache: ## Cleans up generated cache (speeds up during dev time).
 	/bin/rm -rfv ".cache"
 
 build: fetch clean clean-cache ## Builds the frontend.
-	npm run build
+	./node_modules/parcel-bundler/bin/cli.js build \
+		--no-autoinstall \
+		--log-level 4 \
+		--public-url '/static/dist' \
+		index.html
 
-debug: ## Runs the frontend in debug mode
-	npm run watch
+debug: fetch clean ## Runs the frontend in debug mode
+	./node_modules/parcel-bundler/bin/cli.js watch \
+		--hmr-port 8081 \
+		--log-level 4 \
+		--public-url '/static/dist' \
+		index.html
