@@ -1,4 +1,4 @@
 FROM node:15-alpine
 RUN apk add --no-cache make
 
-CMD ["/bin/sh", "-c", "cd /build/cmd/frontend && make debug"]
+CMD ["/bin/sh", "-c", "make debug"]

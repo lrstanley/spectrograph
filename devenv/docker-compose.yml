@@ -12,6 +12,7 @@ services:
         build:
             context: ../
             dockerfile: ./cmd/frontend/Dockerfile.dev
+        working_dir: /build/cmd/frontend
         volumes:
             - frontend_cache:/build/cmd/frontend/.cache
             - frontend_dist:/build/cmd/frontend/dist
@@ -23,6 +24,7 @@ services:
         build:
             context: ../
             dockerfile: ./cmd/http-server/Dockerfile.dev
+        working_dir: /build/cmd/http-server
         volumes:
             - frontend_dist:/build/cmd/http-server/public/dist
             - go_cache:/root/.cache/go-build
@@ -33,6 +35,7 @@ services:
         build:
             context: ../
             dockerfile: ./cmd/worker/Dockerfile.dev
+        working_dir: /build/cmd/worker
         volumes:
             - go_cache:/root/.cache/go-build
             - go_path:/go
