@@ -13,45 +13,26 @@ import (
 	"time"
 
 	rice "github.com/GeertJohan/go.rice"
-	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/recoverer"
 	"github.com/lrstanley/spectrograph/pkg/http/helpers"
 	lmiddleware "github.com/lrstanley/spectrograph/pkg/http/middleware"
-	"golang.org/x/oauth2"
 )
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-var (
-	oauthConfig *oauth2.Config
-	session     *scs.SessionManager
-)
-
 func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
-	// Initialize OAuth.
-	oauthConfig = &oauth2.Config{
-		ClientID:     cli.Auth.Github.ClientID,
-		ClientSecret: cli.Auth.Github.ClientSecret,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://github.com/login/oauth/authorize",
-			TokenURL: "https://github.com/login/oauth/access_token",
-		},
-		RedirectURL: "",
-		Scopes:      []string{}, // TODO: github scopes?
-	}
-
 	// Initialize http error handler with out logger.
 	helpers.DefaultHTTPErrorHandler = helpers.NewHTTPErrorHandler(logger)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 
-	if cli.Proxy {
+	if cli.HTTP.Proxy {
 		r.Use(middleware.RealIP)
 	}
 
@@ -82,21 +63,10 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 
 	registerHTTPRoutes(r)
 
-	// Initialize sessions.
-	session = scs.New()
-	session.ErrorFunc = func(w http.ResponseWriter, r *http.Request, err error) {
-		// http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		helpers.HTTPError(w, r, http.StatusInternalServerError, err)
-		logger.WithError(err).Error("session error")
-	}
-	session.Store = svcSessions
-	session.IdleTimeout = 7 * 24 * time.Hour
-	session.Lifetime = 30 * 24 * time.Hour
-
 	// Setup our http server.
 	srv := &http.Server{
-		Addr:    cli.HTTP,
-		Handler: session.LoadAndSave(r),
+		Addr:    cli.HTTP.BindAddr,
+		Handler: r,
 
 		// TODO: lower these at some point.
 		ReadTimeout:  30 * time.Second,
@@ -106,12 +76,12 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		logger.WithField("bind", cli.HTTP).Info("initializing http server")
+		logger.WithField("bind", cli.HTTP.BindAddr).Info("initializing http server")
 
 		var err error
 
-		if cli.TLS.Enabled {
-			err = srv.ListenAndServeTLS(cli.TLS.Cert, cli.TLS.Key)
+		if cli.HTTP.TLS.Enabled {
+			err = srv.ListenAndServeTLS(cli.HTTP.TLS.Cert, cli.HTTP.TLS.Key)
 		} else {
 			err = srv.ListenAndServe()
 		}

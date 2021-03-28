@@ -38,7 +38,9 @@ build: fetch clean generate compile ## Builds the application (with generate).
 
 debug: ## Runs the application in debug mode
 	# TODO: add -race, but add options for globally larger http timeouts (or timeouts in general?)
-	go run *.go --debug --http :8080 \
+	go run *.go --debug \
+		--http.bind-addr :8080 \
+		--http.base-url "http://localhost:8080/" \
 		--log.level debug \
 		--mongo.db-name spectrograph-dev \
 		--mongo.uri "mongodb://mongo:27017/?maxPoolSize=200" \
