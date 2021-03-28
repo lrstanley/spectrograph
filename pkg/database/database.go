@@ -21,7 +21,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 // Commands used during migration:
@@ -47,11 +46,7 @@ type mongoStore struct {
 	log    *log.Entry
 
 	// Pre-initialized collection configs.
-	project     *mongo.Collection
-	scanRequest *mongo.Collection
-	provider    *mongo.Collection
-	user        *mongo.Collection
-	session     *mongo.Collection
+	user *mongo.Collection
 }
 
 func (s *mongoStore) Setup(flags *models.FlagsHTTPServer) (err error) {
@@ -60,9 +55,9 @@ func (s *mongoStore) Setup(flags *models.FlagsHTTPServer) (err error) {
 
 	opts := &options.ClientOptions{}
 
+	// Set a handful of defaults, then we can override them as necessary in
+	// the connection URL.
 	opts.SetAppName("spectrograph")
-	// TODO: this makes things very slow. do we really need it?
-	// opts.SetCompressors([]string{"zstd", "zlib", "snappy"})
 	opts.SetConnectTimeout(15 * time.Second)
 	opts.SetDirect(true)
 	opts.SetMaxConnIdleTime(120 * time.Second)
@@ -86,15 +81,11 @@ func (s *mongoStore) Setup(flags *models.FlagsHTTPServer) (err error) {
 	}
 
 	// Anything that has a preference on write majority...
-	wcMajority := writeconcern.New(writeconcern.WMajority(), writeconcern.WTimeout(10*time.Second))
-	wcMajorityCollectionOpts := options.Collection().SetWriteConcern(wcMajority)
+	// wcMajority := writeconcern.New(writeconcern.WMajority(), writeconcern.WTimeout(10*time.Second))
+	// wcMajorityCollectionOpts := options.Collection().SetWriteConcern(wcMajority)
 
 	s.db = s.client.Database(flags.Mongo.DBName)
-	s.project = s.db.Collection("projects")
-	s.scanRequest = s.db.Collection("scan_requests", wcMajorityCollectionOpts)
-	s.provider = s.db.Collection("providers")
 	s.user = s.db.Collection("users")
-	s.session = s.db.Collection("sessions")
 
 	return nil
 }

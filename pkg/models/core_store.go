@@ -5,11 +5,8 @@
 package models
 
 import (
-	"context"
 	"fmt"
-	"time"
 
-	"github.com/alexedwards/scs/v2"
 	"github.com/apex/log"
 )
 
@@ -25,7 +22,6 @@ type Store interface {
 	Migrate(flags *FlagsHTTPServer) (err error)
 
 	NewUserService() UserService
-	NewSessionService(ctx context.Context, cleanup time.Duration) scs.Store
 }
 
 // MigrateLogger implements the migrate.Logger interface.
