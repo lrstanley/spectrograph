@@ -19,17 +19,24 @@ type UserService interface {
 }
 
 type User struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	GithubID int                `bson:"github_id" validate:"required" json:"github_id"`
-	Token    string             `bson:"token" validate:"required" json:"-"`
+	ID             primitive.ObjectID `bson:"_id,omitempty"   json:"id"`
+	AccountCreated time.Time          `bson:"account_created" json:"account_created"`
+	AccountUpdated time.Time          `bson:"account_updated" json:"account_updated"`
 
-	AvatarURL string `bson:"avatar_url" validate:"required" json:"avatar_url"`
-	Username  string `bson:"username" validate:"required" json:"username"`
-	Name      string `bson:"name" validate:"required" json:"name"`
-	Email     string `bson:"email" validate:"required,email" json:"-"`
+	Discord struct {
+		LastLogin time.Time `bson:"last_login" json:"last_login"`
 
-	AccountCreated time.Time `bson:"account_created" json:"-"`
-	AccountUpdated time.Time `bson:"account_updated" json:"-"`
+		ID           string    `bson:"id"            json:"id"         validate:"required"`
+		Email        string    `bson:"email"         json:"email"      validate:"required"`
+		Name         string    `bson:"name"          json:"name"       validate:"required"`
+		NameID       string    `bson:"name_id"       json:"name_id"    validate:"required"`
+		AvatarURL    string    `bson:"avatar_url"    json:"avatar_url" validate:"required"`
+		AccessToken  string    `bson:"access_token"  json:"-"          validate:"required"`
+		RefreshToken string    `bson:"refresh_token" json:"-"          validate:"required"`
+		ExpiresAt    time.Time `bson:"expires_at"    json:"-"          validate:"required"`
+
+		RawData map[string]interface{} `bson:"raw_data" json:"-"`
+	} `bson:"discord" json:"discord"`
 }
 
 func (r *User) Validate() error {
