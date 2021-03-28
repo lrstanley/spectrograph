@@ -9,8 +9,10 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -18,11 +20,14 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/apex/log"
 	"github.com/golang-migrate/migrate"
-	"github.com/jessevdk/go-flags"
+	"github.com/gorilla/sessions"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/spectrograph/pkg/database"
 	"github.com/lrstanley/spectrograph/pkg/models"
 	"github.com/lrstanley/spectrograph/pkg/util/logging"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/discord"
 )
 
 func init() {
@@ -41,22 +46,54 @@ var (
 
 	logger *log.Logger
 
+	session *sessions.CookieStore
+
 	svcUsers    models.UserService
 	svcSessions scs.Store
 )
 
 func main() {
-	_, err := flags.Parse(&cli)
-	if err != nil {
-		if FlagErr, ok := err.(*flags.Error); ok && FlagErr.Type == flags.ErrHelp {
-			os.Exit(0)
-		}
-
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-
+	_ = models.FlagParse(&cli)
 	logger = logging.ParseConfig(cli.Logger, cli.Debug)
+
+	var err error
+
+	if cli.HTTP.BaseURL, err = url.Parse(cli.HTTP.RawBaseURL); err != nil {
+		logger.WithError(err).Fatalf("invalid base url provided: %v", cli.HTTP.RawBaseURL)
+	}
+	if !strings.HasPrefix(cli.HTTP.BaseURL.Scheme, "http") {
+		logger.WithError(err).Fatalf("invalid base url provided: %v", cli.HTTP.RawBaseURL)
+	}
+	cli.HTTP.BaseURL.Path = strings.TrimRight(cli.HTTP.BaseURL.Path, "/")
+
+	// TODO: this can be thrown in mongo, just need to make an implementation.
+	// This isn't updated, so would have to maintain my own version:
+	//   - https://github.com/kidstuff/mongostore
+	sessionKeys := make([][]byte, len(cli.HTTP.SessionKeys))
+	for key := range cli.HTTP.SessionKeys {
+		sessionKeys[key] = []byte(cli.HTTP.SessionKeys[key])
+	}
+	session = sessions.NewCookieStore(sessionKeys...)
+	session.MaxAge(86400 * 7)                    // 7 days.
+	session.Options.Path = cli.HTTP.BaseURL.Path // "/"
+	session.Options.HttpOnly = true              // HttpOnly should always be enabled.
+	if cli.HTTP.BaseURL.Scheme == "https" {
+		session.Options.Secure = true
+	}
+	gothic.Store = session
+
+	goth.UseProviders(
+		discord.New(
+			cli.Auth.Discord.ID,
+			cli.Auth.Discord.Secret,
+			cli.HTTP.BaseURL.String()+"/api/v1/auth/discord/callback",
+
+			// Scopes.
+			discord.ScopeIdentify,
+			discord.ScopeEmail,
+			discord.ScopeGuilds,
+		),
+	)
 
 	// Initialize storer/database.
 	var store models.Store
@@ -99,7 +136,6 @@ func main() {
 
 	// Initialize services.
 	svcUsers = store.NewUserService()
-	svcSessions = store.NewSessionService(ctx, 5*time.Minute)
 
 	// Initialize the http/https server.
 	httpServer(ctx, wg, errorChan)
