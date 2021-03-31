@@ -1,4 +1,4 @@
 FROM golang:alpine
-RUN apk add --no-cache g++ make
+RUN apk add --no-cache g++ make entr
 
-CMD ["/bin/sh", "-c", "make debug"]
+CMD ["/bin/sh", "-c", "{ find ../../pkg -type f; ls -d *; } | entr -r -n -d -s -- 'sleep 2;make debug'"]
