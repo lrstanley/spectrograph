@@ -31,8 +31,9 @@ func (s *userService) Upsert(ctx context.Context, user *models.User) (err error)
 
 	var res models.User
 
+	// TODO: if multi-auth, do "$or".
 	err = s.store.user.FindOne(ctx,
-		bson.M{"github_id": user.GithubID},
+		bson.M{"discord.id": user.Discord.ID},
 		options.FindOne().SetProjection(bson.M{"_id": 1}), // TODO: bson.D{}?
 	).Decode(&res)
 
@@ -46,7 +47,7 @@ func (s *userService) Upsert(ctx context.Context, user *models.User) (err error)
 
 	_, err = s.store.user.UpdateOne(
 		ctx,
-		bson.M{"github_id": user.GithubID}, bson.M{"$set": user},
+		bson.M{"discord.id": user.Discord.ID}, bson.M{"$set": user},
 		options.Update().SetUpsert(true),
 	)
 	return errorWrapper(err)

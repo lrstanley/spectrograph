@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/lrstanley/pt"
-	"github.com/lrstanley/spectrograph/pkg/models"
 	"github.com/markbates/goth/gothic"
 )
 
@@ -54,7 +53,7 @@ func authDiscordCallback(w http.ResponseWriter, r *http.Request) {
 	user, err := gothic.CompleteUserAuth(w, gothic.GetContextWithProvider(r, "discord"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		pt.JSON(w, r, pt.M{"error": err})
+		pt.JSON(w, r, pt.M{"error": err.Error()})
 		return
 	}
 
@@ -73,7 +72,20 @@ func authDiscordCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func authDiscordRedirect(w http.ResponseWriter, r *http.Request) {
-	gothic.BeginAuthHandler(w, gothic.GetContextWithProvider(r, "discord"))
+	// gothic.BeginAuthHandler(w, gothic.GetContextWithProvider(r, "discord"))
+
+	url, err := gothic.GetAuthURL(w, gothic.GetContextWithProvider(r, "discord"))
+	if err == nil {
+		// See: https://github.com/markbates/goth/issues/401
+		url += "&prompt=none"
+
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		return
+	}
+
+	w.WriteHeader(http.StatusBadRequest)
+	pt.JSON(w, r, pt.M{"authenticated": false, "error": http.StatusText(http.StatusBadRequest)})
+	return
 }
 
 func authDiscordLogout(w http.ResponseWriter, r *http.Request) {
@@ -85,26 +97,36 @@ func authDiscordLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func authSelf(w http.ResponseWriter, r *http.Request) {
-	id := session.GetString(r.Context(), "user_id")
-	if id == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		pt.JSON(w, r, pt.M{"authenticated": false, "error": http.StatusText(http.StatusUnauthorized)})
-		return
-	}
+	// id := session.GetString(r.Context(), "user_id")
+	// gothic.
+	// if id == "" {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	pt.JSON(w, r, pt.M{"authenticated": false, "error": http.StatusText(http.StatusUnauthorized)})
+	// 	return
+	// }
 
-	user, err := svcUsers.Get(r.Context(), id)
+	// user, err := svcUsers.Get(r.Context(), id)
+	// if err != nil {
+	// 	if models.IsNotFound(err) {
+	// 		session.Remove(r.Context(), "user_id")
+	// 		w.WriteHeader(http.StatusUnauthorized)
+	// 		pt.JSON(w, r, pt.M{"authenticated": false, "error": http.StatusText(http.StatusUnauthorized)})
+	// 		return
+	// 	}
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	pt.JSON(w, r, pt.M{"authenticated": false, "error": "An internal server error occurred."})
+	// 	return
+	// }
+
+	// pt.JSON(w, r, pt.M{"authenticated": true, "user": user})
+
+	user, err := gothic.CompleteUserAuth(w, gothic.GetContextWithProvider(r, "discord"))
 	if err != nil {
-		if models.IsNotFound(err) {
-			session.Remove(r.Context(), "user_id")
-			w.WriteHeader(http.StatusUnauthorized)
-			pt.JSON(w, r, pt.M{"authenticated": false, "error": http.StatusText(http.StatusUnauthorized)})
-			return
-		}
-		w.WriteHeader(http.StatusInternalServerError)
-		pt.JSON(w, r, pt.M{"authenticated": false, "error": "An internal server error occurred."})
+		logger.WithError(err).Error("unable to retreive auth information")
+		w.WriteHeader(http.StatusBadRequest)
+		pt.JSON(w, r, pt.M{"error": err})
 		return
 	}
-
 	pt.JSON(w, r, pt.M{"authenticated": true, "user": user})
 }
 
@@ -112,6 +134,7 @@ func registerAuthRoutes(r chi.Router) {
 	r.Get("/api/v1/auth/discord/callback", authDiscordCallback)
 	r.Get("/api/v1/auth/discord/redirect", authDiscordRedirect)
 	r.Get("/api/v1/auth/logout", authDiscordLogout)
+	r.Get("/api/v1/auth/discord/self", authSelf)
 
 	// r.Get("/api/v1/auth/github/redirect", func(w http.ResponseWriter, r *http.Request) {
 	// 	state := helpers.GenRandString(15)
