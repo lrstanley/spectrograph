@@ -15,10 +15,6 @@ import (
 	"github.com/lrstanley/spectrograph/pkg/models"
 )
 
-const (
-	maxReplyAttempts = 5
-)
-
 var (
 	// For use with goreleaser, it will auto-inject version/commit/date/etc.
 	version = "master"
@@ -46,13 +42,10 @@ func main() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, os.Interrupt)
 
-	for {
-		select {
-		case <-signals:
-			logger.Info("received signal, closing connections")
+	for range signals {
+		logger.Info("received signal, closing connections")
 
-			logger.Info("done cleaning up; exiting")
-			os.Exit(1)
-		}
+		logger.Info("done cleaning up; exiting")
+		os.Exit(1)
 	}
 }

@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	rice "github.com/GeertJohan/go.rice"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/lrstanley/spectrograph/pkg/httpware"
 )
 

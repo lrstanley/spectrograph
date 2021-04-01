@@ -5,14 +5,13 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/lrstanley/pt"
 	"github.com/lrstanley/spectrograph/pkg/httpware"
 	"github.com/lrstanley/spectrograph/pkg/models"
@@ -117,14 +116,14 @@ func authCallback(w http.ResponseWriter, r *http.Request) {
 		// Only check CSRF tokens if we're out of debug mode.
 		state := session.GetString(r.Context(), "state")
 		if state == "" {
-			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("Session token not found, possible CSRF (or cookies disabled)? Please try again."))
+			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? Please try again"))
 			return
 		}
 
 		session.Remove(r.Context(), "state")
 
 		if state != r.FormValue("state") {
-			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("Session token not found, possible CSRF (or cookies disabled)? Please try again."))
+			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? Please try again"))
 			return
 		}
 	}
@@ -155,7 +154,7 @@ func authCallback(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		httpware.HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("Discord responded with %d when trying to fetch user information", resp.StatusCode))
+		httpware.HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("discord responded with %d when trying to fetch user information", resp.StatusCode))
 		return
 	}
 
@@ -216,9 +215,9 @@ func authLogout(w http.ResponseWriter, r *http.Request) {
 	pt.JSON(w, r, pt.M{"authenticated": false})
 }
 
-func authRefreshToken(ctx context.Context, config *oauth2.Config, refreshToken string) (*oauth2.Token, error) {
-	token := &oauth2.Token{RefreshToken: refreshToken}
-	ts := config.TokenSource(ctx, token)
+// func authRefreshToken(ctx context.Context, config *oauth2.Config, refreshToken string) (*oauth2.Token, error) {
+// 	token := &oauth2.Token{RefreshToken: refreshToken}
+// 	ts := config.TokenSource(ctx, token)
 
-	return ts.Token()
-}
+// 	return ts.Token()
+// }

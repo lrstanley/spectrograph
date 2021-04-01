@@ -102,7 +102,7 @@ type FlagsHTTPServer struct {
 
 	Mongo struct {
 		DBName string `env:"DB_NAME" long:"db-name" default:"spectrograph" description:"database name to use"`
-		URI    string `env:"URI"     long:"uri"     default:"mongodb://localhost:27017/?maxPoolSize=64" description:"mongodb connection string (see: https://docs.mongodb.com/manual/reference/connection-string/)" env:"DB_URI"`
+		URI    string `env:"URI"     long:"uri"     default:"mongodb://localhost:27017/?maxPoolSize=64" description:"mongodb connection string (see: https://docs.mongodb.com/manual/reference/connection-string/)"`
 	} `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
 }
 

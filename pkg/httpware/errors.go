@@ -21,7 +21,7 @@ func HandleError(w http.ResponseWriter, r *http.Request, statusCode int, err err
 	// TODO: err being passed in should be interface{} so we can support passing
 	// in things other than errors (like strings!).
 	if statusCode == http.StatusNotFound && err == nil {
-		err = errors.New("The requested resource was not found")
+		err = errors.New("the requested resource was not found")
 	}
 
 	if err == nil {

@@ -19,7 +19,7 @@ func DecodeData(w http.ResponseWriter, r *http.Request, v interface{}) (ok bool)
 	var err, rerr error
 
 	if err = r.ParseForm(); err != nil {
-		rerr = fmt.Errorf("Error parsing %s parameters, invalid request", r.Method)
+		rerr = fmt.Errorf("error parsing %s parameters, invalid request", r.Method)
 	} else {
 		switch r.Method {
 		case http.MethodGet:
@@ -34,7 +34,7 @@ func DecodeData(w http.ResponseWriter, r *http.Request, v interface{}) (ok bool)
 			}
 		}
 		if err != nil {
-			rerr = fmt.Errorf("Error decoding %s request into required format (%T): validate request parameters", r.Method, v)
+			rerr = fmt.Errorf("error decoding %s request into required format (%T): validate request parameters", r.Method, v)
 		}
 	}
 
