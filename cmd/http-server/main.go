@@ -22,6 +22,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/spectrograph/pkg/database"
 	"github.com/lrstanley/spectrograph/pkg/models"
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -31,12 +32,12 @@ var (
 	commit  = "latest"
 	date    = "-"
 
-	cli models.FlagsHTTPServer
-
+	cli    models.FlagsHTTPServer
 	logger *log.Logger
 
 	svcUsers    models.UserService
 	svcSessions scs.Store
+	oauthConfig *oauth2.Config
 )
 
 func main() {
@@ -52,6 +53,19 @@ func main() {
 		logger.WithError(err).Fatalf("invalid base url provided: %v", cli.HTTP.RawBaseURL)
 	}
 	cli.HTTP.BaseURL.Path = strings.TrimRight(cli.HTTP.BaseURL.Path, "/")
+
+	oauthConfig = &oauth2.Config{
+		ClientID:     cli.Auth.Discord.ID,
+		ClientSecret: cli.Auth.Discord.Secret,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://discord.com/api/oauth2/authorize",
+			TokenURL: "https://discord.com/api/oauth2/token",
+		},
+		RedirectURL: cli.HTTP.BaseURL.String() + "/api/auth/callback",
+		Scopes: []string{
+			"identify", "email", "guilds",
+		},
+	}
 
 	// Initialize storer/database.
 	var store models.Store

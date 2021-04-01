@@ -6,9 +6,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -19,6 +21,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/recoverer"
+	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/authhandler"
 	"github.com/lrstanley/spectrograph/pkg/httpware"
 )
 
@@ -31,40 +34,6 @@ var (
 )
 
 func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(httpware.StructuredLogger(logger, !cli.Debug))
-
-	if cli.HTTP.Proxy {
-		r.Use(middleware.RealIP)
-	}
-
-	r.Use(middleware.Compress(5))
-	r.Use(recoverer.New(recoverer.Options{
-		Logger: &recoverer.LeveledLoggerWriter{Logger: logger},
-		Show:   cli.Debug,
-		Simple: false,
-	}))
-	r.Use(middleware.Timeout(30 * time.Second))
-	r.Use(middleware.StripSlashes)
-
-	r.Mount("/static/dist", http.StripPrefix("/static/dist", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Vary", "Accept-Encoding")
-		w.Header().Set("Cache-Control", "public, max-age=7776000")
-		http.FileServer(rice.MustFindBox("public/dist").HTTPBox()).ServeHTTP(w, r)
-	})))
-	r.Mount("/static", http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Vary", "Accept-Encoding")
-		w.Header().Set("Cache-Control", "public, max-age=7776000")
-		http.FileServer(rice.MustFindBox("public/static").HTTPBox()).ServeHTTP(w, r)
-	})))
-
-	if cli.Debug {
-		r.Mount("/debug", middleware.Profiler())
-	}
-
-	registerHTTPRoutes(r)
-
 	// Initialize sessions.
 	session = scs.New()
 	session.ErrorFunc = func(w http.ResponseWriter, r *http.Request, err error) {
@@ -82,6 +51,47 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	if cli.HTTP.BaseURL.Scheme == "https" {
 		session.Cookie.Secure = true
 	}
+
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(httpware.StructuredLogger(logger, !cli.Debug))
+	r.Use(httpware.Debug(cli.Debug))
+
+	if cli.HTTP.Proxy {
+		r.Use(middleware.RealIP)
+	}
+
+	r.Use(middleware.Compress(5))
+	r.Use(recoverer.New(recoverer.Options{
+		Logger: &recoverer.LeveledLoggerWriter{Logger: logger},
+		Show:   cli.Debug,
+		Simple: false,
+	}))
+	// TODO: throttle or httprate: https://github.com/go-chi/httprate
+	r.Use(middleware.Timeout(30 * time.Second))
+	r.Use(middleware.StripSlashes)
+
+	// Bind/mount routes here.
+	r.Mount("/static/dist", http.StripPrefix("/static/dist", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Vary", "Accept-Encoding")
+		w.Header().Set("Cache-Control", "public, max-age=7776000")
+		http.FileServer(rice.MustFindBox("public/dist").HTTPBox()).ServeHTTP(w, r)
+	})))
+	r.Mount("/static", http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Vary", "Accept-Encoding")
+		w.Header().Set("Cache-Control", "public, max-age=7776000")
+		http.FileServer(rice.MustFindBox("public/static").HTTPBox()).ServeHTTP(w, r)
+	})))
+
+	if cli.Debug {
+		r.Mount("/debug", middleware.Profiler())
+	}
+
+	// Because it's Vue, serve the index.html when possible.
+	r.Get("/", serveIndex)
+	r.NotFound(serveIndex)
+	r.Route("/api/auth", authhandler.New(svcUsers, oauthConfig, session).Route)
+	registerAdminRoutes(r)
 
 	// Setup our http server.
 	srv := &http.Server{
@@ -120,4 +130,16 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 			errors <- fmt.Errorf("unable to shutdown http server: %v", err)
 		}
 	}()
+}
+
+func serveIndex(w http.ResponseWriter, r *http.Request) {
+	if strings.HasPrefix(r.URL.Path, "/api/") {
+		httpware.HandleError(w, r, http.StatusNotFound, nil)
+		return
+	}
+	if r.Method != http.MethodGet {
+		httpware.HandleError(w, r, http.StatusMethodNotAllowed, errors.New(http.StatusText(http.StatusMethodNotAllowed)))
+		return
+	}
+	w.Write(rice.MustFindBox("public/dist").MustBytes("index.html"))
 }

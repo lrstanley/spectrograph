@@ -2,7 +2,7 @@
 // of this source code is governed by the MIT license that can be found in
 // the LICENSE file.
 
-package main
+package authhandler
 
 import (
 	"encoding/json"
@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
+	"github.com/apex/log"
 	"github.com/go-chi/chi/v5"
 	"github.com/lrstanley/pt"
 	"github.com/lrstanley/spectrograph/pkg/httpware"
@@ -53,42 +55,38 @@ import (
 //     }
 // }
 
-var (
-	oauthConfig *oauth2.Config
-)
-
 const (
 	discordUserEndpoint   = "https://discord.com/api/users/@me"
 	discordGuildsEndpoint = "https://discord.com/api/users/@me/guilds"
 )
 
-func registerAuthRoutes(r chi.Router) {
-	// Initialize OAuth.
-	oauthConfig = &oauth2.Config{
-		ClientID:     cli.Auth.Discord.ID,
-		ClientSecret: cli.Auth.Discord.Secret,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://discord.com/api/oauth2/authorize",
-			TokenURL: "https://discord.com/api/oauth2/token",
-		},
-		RedirectURL: cli.HTTP.BaseURL.String() + "/api/v1/auth/callback",
-		Scopes: []string{
-			"identify", "email", "guilds",
-		},
-	}
-
-	r.Get("/api/v1/auth/redirect", authRedirect)
-	r.Get("/api/v1/auth/callback", authCallback)
-	r.Get("/api/v1/auth/self", authSelf)
-	r.Get("/api/v1/auth/logout", authLogout)
+type Handler struct {
+	users   models.UserService
+	session *scs.SessionManager
+	config  *oauth2.Config
 }
 
-func authRedirect(w http.ResponseWriter, r *http.Request) {
-	if id := session.GetString(r.Context(), "user_id"); id != "" {
-		_, err := svcUsers.Get(r.Context(), id)
+func New(users models.UserService, config *oauth2.Config, session *scs.SessionManager) *Handler {
+	return &Handler{
+		users:   users,
+		config:  config,
+		session: session,
+	}
+}
+
+func (h *Handler) Route(r chi.Router) {
+	r.Get("/redirect", h.getRedirect)
+	r.Get("/callback", h.getCallback)
+	r.Get("/self", h.getSelf)
+	r.Get("/logout", h.getLogout)
+}
+
+func (h *Handler) getRedirect(w http.ResponseWriter, r *http.Request) {
+	if id := h.session.GetString(r.Context(), "user_id"); id != "" {
+		_, err := h.users.Get(r.Context(), id)
 		if err != nil {
 			if models.IsNotFound(err) {
-				session.Remove(r.Context(), "user_id")
+				h.session.Remove(r.Context(), "user_id")
 				goto redirect
 			}
 
@@ -102,8 +100,8 @@ func authRedirect(w http.ResponseWriter, r *http.Request) {
 
 redirect:
 	state := util.GenRandString(15)
-	session.Put(r.Context(), "state", state)
-	http.Redirect(w, r, oauthConfig.AuthCodeURL(
+	h.session.Put(r.Context(), "state", state)
+	http.Redirect(w, r, h.config.AuthCodeURL(
 		state,
 		// Provide AuthCodeOptions.
 		oauth2.AccessTypeOffline,
@@ -111,31 +109,31 @@ redirect:
 	), http.StatusFound)
 }
 
-func authCallback(w http.ResponseWriter, r *http.Request) {
-	if !cli.Debug {
+func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
+	if !httpware.IsDebug(r) {
 		// Only check CSRF tokens if we're out of debug mode.
-		state := session.GetString(r.Context(), "state")
+		state := h.session.GetString(r.Context(), "state")
 		if state == "" {
 			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? Please try again"))
 			return
 		}
 
-		session.Remove(r.Context(), "state")
+		h.session.Remove(r.Context(), "state")
 
 		if state != r.FormValue("state") {
 			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? Please try again"))
 			return
 		}
 	}
-	session.Remove(r.Context(), "state")
+	h.session.Remove(r.Context(), "state")
 
-	token, err := oauthConfig.Exchange(r.Context(), r.FormValue("code"))
+	token, err := h.config.Exchange(r.Context(), r.FormValue("code"))
 	if err != nil {
 		httpware.HandleError(w, r, http.StatusBadRequest, fmt.Errorf("error getting token: %w", err))
 		return
 	}
 
-	client := oauthConfig.Client(r.Context(), token)
+	client := h.config.Client(r.Context(), token)
 
 	req, err := http.NewRequest("GET", discordUserEndpoint, nil)
 	if err != nil {
@@ -172,29 +170,33 @@ func authCallback(w http.ResponseWriter, r *http.Request) {
 	user.Discord.RefreshToken = token.RefreshToken
 	user.Discord.ExpiresAt = token.Expiry
 
-	if err := svcUsers.Upsert(r.Context(), user); err != nil {
+	if err := h.users.Upsert(r.Context(), user); err != nil {
 		httpware.HandleError(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	// TODO: prevent session fixation: https://github.com/alexedwards/scs#preventing-session-fixation
-	session.Put(r.Context(), "user_id", user.ID.Hex())
+	h.session.Put(r.Context(), "user_id", user.ID.Hex())
 
 	w.WriteHeader(http.StatusOK)
 	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public()})
 }
 
-func authSelf(w http.ResponseWriter, r *http.Request) {
-	id := session.GetString(r.Context(), "user_id")
+func (h *Handler) getSelf(w http.ResponseWriter, r *http.Request) {
+	if httpware.IsDebug(r) {
+		log.FromContext(r.Context()).Info("THIS IS A TEST THIS IS A TEST")
+	}
+
+	id := h.session.GetString(r.Context(), "user_id")
 	if id == "" {
 		httpware.HandleError(w, r, http.StatusUnauthorized, errors.New("not logged in"))
 		return
 	}
 
-	user, err := svcUsers.Get(r.Context(), id)
+	user, err := h.users.Get(r.Context(), id)
 	if err != nil {
 		if models.IsNotFound(err) {
-			session.Remove(r.Context(), "user_id")
+			h.session.Remove(r.Context(), "user_id")
 			httpware.HandleError(w, r, http.StatusUnauthorized, err)
 			return
 		}
@@ -205,8 +207,8 @@ func authSelf(w http.ResponseWriter, r *http.Request) {
 	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public()})
 }
 
-func authLogout(w http.ResponseWriter, r *http.Request) {
-	session.Remove(r.Context(), "user_id")
+func (h *Handler) getLogout(w http.ResponseWriter, r *http.Request) {
+	h.session.Remove(r.Context(), "user_id")
 
 	// TODO: https://discord.com/api/oauth2/token/revoke ? only do if removing
 	// the account?
