@@ -46,7 +46,8 @@ type mongoStore struct {
 	log    *log.Entry
 
 	// Pre-initialized collection configs.
-	user *mongo.Collection
+	user    *mongo.Collection
+	session *mongo.Collection
 }
 
 func (s *mongoStore) Setup(flags *models.FlagsHTTPServer) (err error) {
@@ -86,6 +87,7 @@ func (s *mongoStore) Setup(flags *models.FlagsHTTPServer) (err error) {
 
 	s.db = s.client.Database(flags.Mongo.DBName)
 	s.user = s.db.Collection("users")
+	s.session = s.db.Collection("sessions")
 
 	return nil
 }
