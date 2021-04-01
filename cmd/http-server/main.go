@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 	"net/url"
 	"os"
 	"os/signal"
@@ -20,20 +19,10 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/apex/log"
 	"github.com/golang-migrate/migrate"
-	"github.com/gorilla/sessions"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/spectrograph/pkg/database"
 	"github.com/lrstanley/spectrograph/pkg/models"
-	"github.com/lrstanley/spectrograph/pkg/util/logging"
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/discord"
 )
-
-func init() {
-	// TODO: this still needed?
-	rand.Seed(time.Now().UnixNano())
-}
 
 var (
 	// For use with goreleaser, it will auto-inject version/commit/date/etc.
@@ -46,15 +35,13 @@ var (
 
 	logger *log.Logger
 
-	session *sessions.CookieStore
-
 	svcUsers    models.UserService
 	svcSessions scs.Store
 )
 
 func main() {
 	_ = models.FlagParse(&cli)
-	logger = logging.ParseConfig(cli.Logger, cli.Debug)
+	logger = cli.Logger.Parse(cli.Debug)
 
 	var err error
 
@@ -65,35 +52,6 @@ func main() {
 		logger.WithError(err).Fatalf("invalid base url provided: %v", cli.HTTP.RawBaseURL)
 	}
 	cli.HTTP.BaseURL.Path = strings.TrimRight(cli.HTTP.BaseURL.Path, "/")
-
-	// TODO: this can be thrown in mongo, just need to make an implementation.
-	// This isn't updated, so would have to maintain my own version:
-	//   - https://github.com/kidstuff/mongostore
-	sessionKeys := make([][]byte, len(cli.HTTP.SessionKeys))
-	for key := range cli.HTTP.SessionKeys {
-		sessionKeys[key] = []byte(cli.HTTP.SessionKeys[key])
-	}
-	session = sessions.NewCookieStore(sessionKeys...)
-	session.MaxAge(86400 * 7)                    // 7 days.
-	session.Options.Path = cli.HTTP.BaseURL.Path // "/"
-	session.Options.HttpOnly = true              // HttpOnly should always be enabled.
-	if cli.HTTP.BaseURL.Scheme == "https" {
-		session.Options.Secure = true
-	}
-	gothic.Store = session
-
-	goth.UseProviders(
-		discord.New(
-			cli.Auth.Discord.ID,
-			cli.Auth.Discord.Secret,
-			cli.HTTP.BaseURL.String()+"/api/v1/auth/discord/callback",
-
-			// Scopes.
-			discord.ScopeIdentify,
-			discord.ScopeEmail,
-			discord.ScopeGuilds,
-		),
-	)
 
 	// Initialize storer/database.
 	var store models.Store
@@ -136,6 +94,7 @@ func main() {
 
 	// Initialize services.
 	svcUsers = store.NewUserService()
+	svcSessions = store.NewSessionService(ctx, 5*time.Minute)
 
 	// Initialize the http/https server.
 	httpServer(ctx, wg, errorChan)

@@ -13,7 +13,6 @@ import (
 	"github.com/jessevdk/go-flags"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/spectrograph/pkg/models"
-	"github.com/lrstanley/spectrograph/pkg/util/logging"
 )
 
 const (
@@ -40,7 +39,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger = logging.ParseConfig(cli.Logger, cli.Debug)
+	logger = cli.Logger.Parse(cli.Debug)
 
 	// Start listening for signals here, to prevent corruption during potential database
 	// migrations.

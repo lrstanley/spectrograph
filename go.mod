@@ -14,7 +14,7 @@ require (
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.12.2
-	github.com/gorilla/sessions v1.1.1
+	github.com/google/go-cmp v0.5.2 // indirect
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/joho/godotenv v1.3.0
@@ -23,11 +23,14 @@ require (
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lrstanley/pt v0.0.0-20180304040151-203b3db5ff8f
 	github.com/lrstanley/recoverer v0.0.0-20201006185043-0e0d2b46e675
-	github.com/markbates/goth v1.67.1
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	go.mongodb.org/mongo-driver v1.4.1
 	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0 // indirect
+	golang.org/x/net v0.0.0-20200930145003-4acb6c075d10 // indirect
+	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sys v0.0.0-20210326220804-49726bf1d181 // indirect
+	google.golang.org/genproto v0.0.0-20200929141702-51c3e5b607fe // indirect
+	google.golang.org/grpc v1.32.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect

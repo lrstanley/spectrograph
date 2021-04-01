@@ -5,15 +5,20 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/lrstanley/pt"
-	"github.com/markbates/goth/gothic"
+	"github.com/lrstanley/spectrograph/pkg/httpware"
+	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/pkg/util"
+	"golang.org/x/oauth2"
 )
-
-// https://github.com/markbates/goth
-// https://github.com/volatiletech/authboss
 
 // {
 //     "authenticated":true,
@@ -49,210 +54,173 @@ import (
 //     }
 // }
 
-func authDiscordCallback(w http.ResponseWriter, r *http.Request) {
-	user, err := gothic.CompleteUserAuth(w, gothic.GetContextWithProvider(r, "discord"))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		pt.JSON(w, r, pt.M{"error": err.Error()})
+var (
+	oauthConfig *oauth2.Config
+)
+
+const (
+	discordUserEndpoint   = "https://discord.com/api/users/@me"
+	discordGuildsEndpoint = "https://discord.com/api/users/@me/guilds"
+)
+
+func registerAuthRoutes(r chi.Router) {
+	// Initialize OAuth.
+	oauthConfig = &oauth2.Config{
+		ClientID:     cli.Auth.Discord.ID,
+		ClientSecret: cli.Auth.Discord.Secret,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://discord.com/api/oauth2/authorize",
+			TokenURL: "https://discord.com/api/oauth2/token",
+		},
+		RedirectURL: cli.HTTP.BaseURL.String() + "/api/v1/auth/callback",
+		Scopes: []string{
+			"identify", "email", "guilds",
+		},
+	}
+
+	r.Get("/api/v1/auth/redirect", authRedirect)
+	r.Get("/api/v1/auth/callback", authCallback)
+	r.Get("/api/v1/auth/self", authSelf)
+	r.Get("/api/v1/auth/logout", authLogout)
+}
+
+func authRedirect(w http.ResponseWriter, r *http.Request) {
+	if id := session.GetString(r.Context(), "user_id"); id != "" {
+		_, err := svcUsers.Get(r.Context(), id)
+		if err != nil {
+			if models.IsNotFound(err) {
+				session.Remove(r.Context(), "user_id")
+				goto redirect
+			}
+
+			httpware.HandleError(w, r, http.StatusServiceUnavailable, errors.New("unable to query user"))
+			return
+		}
+
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
-	// if err := svcUsers.Upsert(r.Context(), user); err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	pt.JSON(w, r, pt.M{"error": "Error writing user to database"})
-	// 	logger.WithError(err).Error("error writing user to database")
-	// 	return
-	// }
+redirect:
+	state := util.GenRandString(15)
+	session.Put(r.Context(), "state", state)
+	http.Redirect(w, r, oauthConfig.AuthCodeURL(
+		state,
+		// Provide AuthCodeOptions.
+		oauth2.AccessTypeOffline,
+		oauth2.SetAuthURLParam("prompt", "none"),
+	), http.StatusFound)
+}
 
-	// // TODO: prevent session fixation: https://github.com/alexedwards/scs#preventing-session-fixation
-	// session.Put(r.Context(), "user_id", user.ID.Hex())
+func authCallback(w http.ResponseWriter, r *http.Request) {
+	if !cli.Debug {
+		// Only check CSRF tokens if we're out of debug mode.
+		state := session.GetString(r.Context(), "state")
+		if state == "" {
+			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("Session token not found, possible CSRF (or cookies disabled)? Please try again."))
+			return
+		}
+
+		session.Remove(r.Context(), "state")
+
+		if state != r.FormValue("state") {
+			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("Session token not found, possible CSRF (or cookies disabled)? Please try again."))
+			return
+		}
+	}
+	session.Remove(r.Context(), "state")
+
+	token, err := oauthConfig.Exchange(r.Context(), r.FormValue("code"))
+	if err != nil {
+		httpware.HandleError(w, r, http.StatusBadRequest, fmt.Errorf("error getting token: %w", err))
+		return
+	}
+
+	client := oauthConfig.Client(r.Context(), token)
+
+	req, err := http.NewRequest("GET", discordUserEndpoint, nil)
+	if err != nil {
+		httpware.HandleError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		httpware.HandleError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		httpware.HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("Discord responded with %d when trying to fetch user information", resp.StatusCode))
+		return
+	}
+
+	user := &models.User{
+		AccountUpdated: time.Now(),
+	}
+	err = json.NewDecoder(resp.Body).Decode(&user.Discord)
+	if err != nil {
+		httpware.HandleError(w, r, http.StatusInternalServerError, errors.New("received an invalid response from Discord"))
+		return
+	}
+
+	user.Discord.LastLogin = time.Now()
+	user.Discord.AccessToken = token.AccessToken
+	user.Discord.RefreshToken = token.RefreshToken
+	user.Discord.ExpiresAt = token.Expiry
+
+	if err := svcUsers.Upsert(r.Context(), user); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		pt.JSON(w, r, pt.M{"error": "Error writing user to database"})
+		logger.WithError(err).Error("error writing user to database")
+		return
+	}
+
+	// TODO: prevent session fixation: https://github.com/alexedwards/scs#preventing-session-fixation
+	session.Put(r.Context(), "user_id", user.ID.Hex())
 
 	w.WriteHeader(http.StatusOK)
 	pt.JSON(w, r, pt.M{"authenticated": true, "user": user})
 }
 
-func authDiscordRedirect(w http.ResponseWriter, r *http.Request) {
-	// gothic.BeginAuthHandler(w, gothic.GetContextWithProvider(r, "discord"))
-
-	url, err := gothic.GetAuthURL(w, gothic.GetContextWithProvider(r, "discord"))
-	if err == nil {
-		// See: https://github.com/markbates/goth/issues/401
-		url += "&prompt=none"
-
-		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+func authSelf(w http.ResponseWriter, r *http.Request) {
+	id := session.GetString(r.Context(), "user_id")
+	if id == "" {
+		httpware.HandleError(w, r, http.StatusUnauthorized, errors.New("not logged in"))
 		return
 	}
 
-	w.WriteHeader(http.StatusBadRequest)
-	pt.JSON(w, r, pt.M{"authenticated": false, "error": http.StatusText(http.StatusBadRequest)})
-	return
+	user, err := svcUsers.Get(r.Context(), id)
+	if err != nil {
+		if models.IsNotFound(err) {
+			session.Remove(r.Context(), "user_id")
+			httpware.HandleError(w, r, http.StatusUnauthorized, err)
+			return
+		}
+		httpware.HandleError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public()})
 }
 
-func authDiscordLogout(w http.ResponseWriter, r *http.Request) {
-	_ = gothic.Logout(w, gothic.GetContextWithProvider(r, "discord")) // TODO
-	// w.Header().Set("Location", "/")
-	// w.WriteHeader(http.StatusTemporaryRedirect)
+func authLogout(w http.ResponseWriter, r *http.Request) {
+	session.Remove(r.Context(), "user_id")
+
+	// TODO: https://discord.com/api/oauth2/token/revoke ? only do if removing
+	// the account?
+
 	w.WriteHeader(http.StatusOK)
 	pt.JSON(w, r, pt.M{"authenticated": false})
 }
 
-func authSelf(w http.ResponseWriter, r *http.Request) {
-	// id := session.GetString(r.Context(), "user_id")
-	// gothic.
-	// if id == "" {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	pt.JSON(w, r, pt.M{"authenticated": false, "error": http.StatusText(http.StatusUnauthorized)})
-	// 	return
-	// }
+func authRefreshToken(ctx context.Context, config *oauth2.Config, refreshToken string) (*oauth2.Token, error) {
+	token := &oauth2.Token{RefreshToken: refreshToken}
+	ts := config.TokenSource(ctx, token)
 
-	// user, err := svcUsers.Get(r.Context(), id)
-	// if err != nil {
-	// 	if models.IsNotFound(err) {
-	// 		session.Remove(r.Context(), "user_id")
-	// 		w.WriteHeader(http.StatusUnauthorized)
-	// 		pt.JSON(w, r, pt.M{"authenticated": false, "error": http.StatusText(http.StatusUnauthorized)})
-	// 		return
-	// 	}
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	pt.JSON(w, r, pt.M{"authenticated": false, "error": "An internal server error occurred."})
-	// 	return
-	// }
-
-	// pt.JSON(w, r, pt.M{"authenticated": true, "user": user})
-
-	user, err := gothic.CompleteUserAuth(w, gothic.GetContextWithProvider(r, "discord"))
-	if err != nil {
-		logger.WithError(err).Error("unable to retreive auth information")
-		w.WriteHeader(http.StatusBadRequest)
-		pt.JSON(w, r, pt.M{"error": err})
-		return
-	}
-	pt.JSON(w, r, pt.M{"authenticated": true, "user": user})
-}
-
-func registerAuthRoutes(r chi.Router) {
-	r.Get("/api/v1/auth/discord/callback", authDiscordCallback)
-	r.Get("/api/v1/auth/discord/redirect", authDiscordRedirect)
-	r.Get("/api/v1/auth/logout", authDiscordLogout)
-	r.Get("/api/v1/auth/discord/self", authSelf)
-
-	// r.Get("/api/v1/auth/github/redirect", func(w http.ResponseWriter, r *http.Request) {
-	// 	state := helpers.GenRandString(15)
-
-	// 	if id := session.GetString(r.Context(), "user_id"); id != "" {
-	// 		_, err := svcUsers.Get(r.Context(), id)
-	// 		if err != nil {
-	// 			if models.IsNotFound(err) {
-	// 				session.Remove(r.Context(), "user_id")
-	// 				goto redirect
-	// 			}
-
-	// 			helpers.HTTPError(w, r, http.StatusServiceUnavailable, errors.New("unable to query user"))
-	// 			return
-	// 		}
-
-	// 		http.Redirect(w, r, "/", http.StatusFound)
-	// 		return
-	// 	}
-
-	// redirect:
-	// 	session.Put(r.Context(), "state", state)
-	// 	http.Redirect(w, r, oauthConfig.AuthCodeURL(state), http.StatusFound)
-	// })
-
-	// r.Get("/api/v1/auth/github/manage", func(w http.ResponseWriter, r *http.Request) {
-	// 	http.Redirect(w, r, "https://github.com/settings/connections/applications/"+cli.Auth.Github.ClientID, http.StatusFound)
-	// })
-
-	// r.Get("/api/v1/auth/github/callback", func(w http.ResponseWriter, r *http.Request) {
-	// 	if !cli.Debug {
-	// 		// Only check CSRF tokens if we're out of debug mode.
-	// 		state := session.GetString(r.Context(), "state")
-	// 		if state == "" {
-	// 			w.WriteHeader(http.StatusBadRequest)
-	// 			pt.JSON(w, r, pt.M{"error": "Session token not found, possible CSRF (or cookies disabled)? Please try again."})
-	// 			return
-	// 		}
-
-	// 		session.Remove(r.Context(), "state")
-
-	// 		if state != r.FormValue("state") {
-	// 			w.WriteHeader(http.StatusBadRequest)
-	// 			pt.JSON(w, r, pt.M{"error": "Session token not found, possible CSRF (or cookies disabled)? Please try again."})
-	// 			return
-	// 		}
-	// 	}
-	// 	session.Remove(r.Context(), "state")
-
-	// 	token, err := oauthConfig.Exchange(r.Context(), r.FormValue("code"))
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusBadRequest)
-	// 		pt.JSON(w, r, pt.M{"error": "Error getting token: " + err.Error()})
-	// 		return
-	// 	}
-
-	// 	client := github.NewClient(oauthConfig.Client(r.Context(), token))
-
-	// 	guser, _, err := client.Users.Get(r.Context(), "")
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 		pt.JSON(w, r, pt.M{"error": "Error obtaining user information: " + err.Error()})
-	// 		return
-	// 	}
-
-	// 	user := &models.User{
-	// 		GithubID:       int(guser.GetID()),
-	// 		Token:          token.AccessToken,
-	// 		AvatarURL:      guser.GetAvatarURL(),
-	// 		Username:       guser.GetLogin(),
-	// 		Name:           guser.GetName(),
-	// 		Email:          guser.GetEmail(),
-	// 		AccountCreated: guser.GetCreatedAt().Time,
-	// 		AccountUpdated: guser.GetUpdatedAt().Time,
-	// 	}
-
-	// 	if err := svcUsers.Upsert(r.Context(), user); err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 		pt.JSON(w, r, pt.M{"error": "Error writing user to database"})
-	// 		logger.WithError(err).Error("error writing user to database")
-	// 		return
-	// 	}
-
-	// 	// TODO: prevent session fixation: https://github.com/alexedwards/scs#preventing-session-fixation
-	// 	session.Put(r.Context(), "user_id", user.ID.Hex())
-
-	// 	w.WriteHeader(http.StatusOK)
-	// 	pt.JSON(w, r, pt.M{"authenticated": true, "user": user})
-	// })
-
-	// r.Get("/api/v1/auth/self", func(w http.ResponseWriter, r *http.Request) {
-	// 	id := session.GetString(r.Context(), "user_id")
-	// 	if id == "" {
-	// 		w.WriteHeader(http.StatusUnauthorized)
-	// 		pt.JSON(w, r, pt.M{"authenticated": false, "error": http.StatusText(http.StatusUnauthorized)})
-	// 		return
-	// 	}
-
-	// 	user, err := svcUsers.Get(r.Context(), id)
-	// 	if err != nil {
-	// 		if models.IsNotFound(err) {
-	// 			session.Remove(r.Context(), "user_id")
-	// 			w.WriteHeader(http.StatusUnauthorized)
-	// 			pt.JSON(w, r, pt.M{"authenticated": false, "error": http.StatusText(http.StatusUnauthorized)})
-	// 			return
-	// 		}
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 		pt.JSON(w, r, pt.M{"authenticated": false, "error": "An internal server error occurred."})
-	// 		return
-	// 	}
-
-	// 	pt.JSON(w, r, pt.M{"authenticated": true, "user": user})
-	// })
-
-	// r.Get("/api/v1/auth/logout", func(w http.ResponseWriter, r *http.Request) {
-	// 	session.Remove(r.Context(), "user_id")
-
-	// 	w.WriteHeader(http.StatusOK)
-	// 	pt.JSON(w, r, pt.M{"authenticated": false})
-	// })
+	return ts.Token()
 }

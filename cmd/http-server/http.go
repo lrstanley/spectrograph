@@ -13,30 +13,32 @@ import (
 	"time"
 
 	rice "github.com/GeertJohan/go.rice"
+	"github.com/alexedwards/scs/v2"
+	"github.com/apex/log"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/recoverer"
-	"github.com/lrstanley/spectrograph/pkg/http/helpers"
-	lmiddleware "github.com/lrstanley/spectrograph/pkg/http/middleware"
+	"github.com/lrstanley/spectrograph/pkg/httpware"
 )
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
-	// Initialize http error handler with out logger.
-	helpers.DefaultHTTPErrorHandler = helpers.NewHTTPErrorHandler(logger)
+var (
+	session *scs.SessionManager
+)
 
+func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
+	r.Use(httpware.StructuredLogger(logger, !cli.Debug))
 
 	if cli.HTTP.Proxy {
 		r.Use(middleware.RealIP)
 	}
 
-	r.Use(lmiddleware.StructuredLoggerMiddleware(logger, !cli.Debug))
 	r.Use(middleware.Compress(5))
 	r.Use(recoverer.New(recoverer.Options{
 		Logger: &recoverer.LeveledLoggerWriter{Logger: logger},
@@ -63,14 +65,31 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 
 	registerHTTPRoutes(r)
 
+	// Initialize sessions.
+	session = scs.New()
+	session.ErrorFunc = func(w http.ResponseWriter, r *http.Request, err error) {
+		httpware.HandleError(w, r, http.StatusInternalServerError, err)
+		log.FromContext(r.Context()).WithError(err).Error("session error")
+	}
+	session.Store = svcSessions
+	session.IdleTimeout = 7 * 24 * time.Hour
+	session.Lifetime = 30 * 24 * time.Hour
+	session.Cookie.HttpOnly = true
+	session.Cookie.Path = cli.HTTP.BaseURL.Path
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteStrictMode
+
+	if cli.HTTP.BaseURL.Scheme == "https" {
+		session.Cookie.Secure = true
+	}
+
 	// Setup our http server.
 	srv := &http.Server{
 		Addr:    cli.HTTP.BindAddr,
-		Handler: r,
+		Handler: session.LoadAndSave(r),
 
-		// TODO: lower these at some point.
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	wg.Add(1)

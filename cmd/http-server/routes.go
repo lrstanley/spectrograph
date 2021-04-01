@@ -11,7 +11,7 @@ import (
 
 	rice "github.com/GeertJohan/go.rice"
 	"github.com/go-chi/chi"
-	"github.com/lrstanley/spectrograph/pkg/http/helpers"
+	"github.com/lrstanley/spectrograph/pkg/httpware"
 )
 
 func registerHTTPRoutes(r chi.Router) {
@@ -20,7 +20,6 @@ func registerHTTPRoutes(r chi.Router) {
 	r.NotFound(serveIndex)
 	registerAuthRoutes(r)
 	registerAdminRoutes(r)
-	registerFetchRoutes(r)
 
 	// TODO: similar?
 	//  - https://github.com/eamonnmcevoy/go_rest_api/blob/master/pkg/server/server.go#L17-L25
@@ -37,11 +36,11 @@ func registerHTTPRoutes(r chi.Router) {
 
 func serveIndex(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/api/") {
-		helpers.HTTPError(w, r, http.StatusNotFound, nil)
+		httpware.HandleError(w, r, http.StatusNotFound, nil)
 		return
 	}
 	if r.Method != http.MethodGet {
-		helpers.HTTPError(w, r, http.StatusMethodNotAllowed, errors.New(http.StatusText(http.StatusMethodNotAllowed)))
+		httpware.HandleError(w, r, http.StatusMethodNotAllowed, errors.New(http.StatusText(http.StatusMethodNotAllowed)))
 		return
 	}
 	w.Write(rice.MustFindBox("public/dist").MustBytes("index.html"))

@@ -6,6 +6,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/lrstanley/spectrograph/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -41,6 +42,7 @@ func (s *userService) Upsert(ctx context.Context, user *models.User) (err error)
 		user.ID = res.ID
 	} else if err == mongo.ErrNoDocuments {
 		user.ID = primitive.NewObjectID()
+		user.AccountCreated = time.Now()
 	} else {
 		return err
 	}
