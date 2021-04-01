@@ -1,7 +1,4 @@
 [
-    { "drop": "providers" },
-    { "drop": "projects" },
-    { "drop": "scan_requests" },
     { "drop": "users" },
     { "drop": "sessions" }
 ]
