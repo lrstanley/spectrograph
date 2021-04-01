@@ -9,6 +9,11 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/discard"
+	"github.com/apex/log/handlers/json"
+	"github.com/apex/log/handlers/logfmt"
+	"github.com/apex/log/handlers/text"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -21,6 +26,34 @@ type LoggerConfig struct {
 	Level  string `env:"LEVEL"  long:"level"  default:"info" choice:"debug" choice:"info" choice:"warn" choice:"error" choice:"fatal"  description:"logging level"`
 	JSON   bool   `env:"JSON"   long:"json"   description:"output logs in JSON format"`
 	Pretty bool   `env:"PRETTY" long:"pretty" description:"output logs in a pretty colored format (cannot be easily parsed)"`
+}
+
+// ParseLoggerConfig parses LoggerConfig and adjusts the structured logger as
+// necessary.
+func (c LoggerConfig) Parse(debug bool) *log.Logger {
+	logger := &log.Logger{}
+
+	if debug {
+		logger.Level = log.DebugLevel
+	} else {
+		logger.Level = log.MustParseLevel(c.Level)
+	}
+
+	if c.Quiet {
+		logger.Handler = discard.New()
+	} else if c.JSON {
+		logger.Handler = json.New(os.Stdout)
+	} else if c.Pretty {
+		logger.Handler = text.New(os.Stdout)
+	} else {
+		logger.Handler = logfmt.New(os.Stdout)
+	}
+
+	// Set global options as well, just in case.
+	log.SetLevel(logger.Level)
+	log.SetHandler(logger.Handler)
+
+	return logger
 }
 
 // FlagsHTTPServer are flags specifically utilized by the HTTP service.
