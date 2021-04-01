@@ -26,12 +26,6 @@ func registerHTTPRoutes(r chi.Router) {
 	//  - https://github.com/eamonnmcevoy/go_rest_api/blob/master/pkg/server/user_router.go
 	//
 	// TODO: ^ the above links for some reason have the http prefix stripped?
-
-	// TODO: dynamically allow specifying backends, the auth method, etc?
-	//  - https://github.com/markbates/goth
-	//  - https://github.com/volatiletech/authboss
-	//  - https://github.com/golang/oauth2
-	//  - https://github.com/ory/kratos
 }
 
 func serveIndex(w http.ResponseWriter, r *http.Request) {

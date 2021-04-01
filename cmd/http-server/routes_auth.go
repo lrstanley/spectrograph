@@ -174,9 +174,7 @@ func authCallback(w http.ResponseWriter, r *http.Request) {
 	user.Discord.ExpiresAt = token.Expiry
 
 	if err := svcUsers.Upsert(r.Context(), user); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		pt.JSON(w, r, pt.M{"error": "Error writing user to database"})
-		logger.WithError(err).Error("error writing user to database")
+		httpware.HandleError(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -184,7 +182,7 @@ func authCallback(w http.ResponseWriter, r *http.Request) {
 	session.Put(r.Context(), "user_id", user.ID.Hex())
 
 	w.WriteHeader(http.StatusOK)
-	pt.JSON(w, r, pt.M{"authenticated": true, "user": user})
+	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public()})
 }
 
 func authSelf(w http.ResponseWriter, r *http.Request) {
