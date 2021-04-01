@@ -2,9 +2,16 @@
 // of this source code is governed by the MIT license that can be found in
 // the LICENSE file.
 
-package helpers
+package util
 
-import "math/rand"
+import (
+	"math/rand"
+	"time"
+)
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
