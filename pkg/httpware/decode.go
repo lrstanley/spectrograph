@@ -2,7 +2,7 @@
 // of this source code is governed by the MIT license that can be found in
 // the LICENSE file.
 
-package helpers
+package httpware
 
 import (
 	"encoding/json"
@@ -39,7 +39,7 @@ func DecodeData(w http.ResponseWriter, r *http.Request, v interface{}) (ok bool)
 	}
 
 	if err != nil {
-		_ = HTTPError(w, r, http.StatusBadRequest, rerr)
+		_ = HandleError(w, r, http.StatusBadRequest, rerr)
 	}
 
 	return err == nil
