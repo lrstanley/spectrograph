@@ -42,7 +42,7 @@ services:
             - ../:/build/ # root of repository
     mongo:
         image: mongo:latest
-        container_name: mongo
+        # container_name: mongo
         ports: [27017:27017]
         command: --quiet
         logging: { driver: none }
