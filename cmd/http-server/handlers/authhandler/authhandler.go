@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/apex/log"
 	"github.com/go-chi/chi/v5"
 	"github.com/lrstanley/pt"
 	"github.com/lrstanley/spectrograph/pkg/httpware"
@@ -94,19 +93,19 @@ func (h *Handler) getRedirect(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/", http.StatusFound)
+		httpware.HandleError(w, r, http.StatusBadRequest, errors.New("already authenticated"))
 		return
 	}
 
 redirect:
 	state := util.GenRandString(15)
 	h.session.Put(r.Context(), "state", state)
-	http.Redirect(w, r, h.config.AuthCodeURL(
+	pt.JSON(w, r, pt.M{"auth_redirect": h.config.AuthCodeURL(
 		state,
 		// Provide AuthCodeOptions.
 		oauth2.AccessTypeOffline,
 		oauth2.SetAuthURLParam("prompt", "none"),
-	), http.StatusFound)
+	)})
 }
 
 func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
@@ -183,9 +182,9 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getSelf(w http.ResponseWriter, r *http.Request) {
-	if httpware.IsDebug(r) {
-		log.FromContext(r.Context()).Info("THIS IS A TEST THIS IS A TEST")
-	}
+	// w.WriteHeader(http.StatusOK)
+	// pt.JSON(w, r, pt.M{"authenticated": true, "error": "this is an example error"})
+	// return
 
 	id := h.session.GetString(r.Context(), "user_id")
 	if id == "" {
