@@ -30,16 +30,16 @@ services:
             - go_cache:/root/.cache/go-build
             - go_path:/go
             - ../:/build/ # root of repository
-    worker:
-        depends_on: []
-        build:
-            context: ../
-            dockerfile: ./cmd/worker/Dockerfile.dev
-        working_dir: /build/cmd/worker
-        volumes:
-            - go_cache:/root/.cache/go-build
-            - go_path:/go
-            - ../:/build/ # root of repository
+    # worker:
+    #     depends_on: []
+    #     build:
+    #         context: ../
+    #         dockerfile: ./cmd/worker/Dockerfile.dev
+    #     working_dir: /build/cmd/worker
+    #     volumes:
+    #         - go_cache:/root/.cache/go-build
+    #         - go_path:/go
+    #         - ../:/build/ # root of repository
     mongo:
         image: mongo:latest
         # container_name: mongo
