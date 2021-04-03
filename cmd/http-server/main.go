@@ -61,7 +61,7 @@ func main() {
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
 			TokenURL: "https://discord.com/api/oauth2/token",
 		},
-		RedirectURL: cli.HTTP.BaseURL.String() + "/api/auth/callback",
+		RedirectURL: cli.HTTP.BaseURL.String() + "/auth/callback",
 		Scopes: []string{
 			"identify", "email", "guilds",
 		},

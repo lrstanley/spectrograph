@@ -17,13 +17,16 @@ clean-cache: ## Cleans up generated cache (speeds up during dev time).
 build: fetch clean clean-cache ## Builds the frontend.
 	./node_modules/parcel-bundler/bin/cli.js build \
 		--no-autoinstall \
+		--no-source-maps \
 		--log-level 4 \
+		--target browser \
 		--public-url '/static/dist' \
-		index.html
+		src/index.html
 
 debug: fetch clean ## Runs the frontend in debug mode
 	./node_modules/parcel-bundler/bin/cli.js watch \
 		--hmr-port 8081 \
 		--log-level 4 \
+		--target browser \
 		--public-url '/static/dist' \
-		index.html
+		src/index.html

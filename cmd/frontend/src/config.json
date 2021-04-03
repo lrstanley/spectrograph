@@ -1,0 +1,13 @@
+{
+    "target": "@DEPLOY-ENV@",
+    "application": "Spectrograph",
+    "api_baseurl": "/api",
+    "envs": {
+        "local": {
+            "debug": true
+        },
+        "production": {
+            "debug": false
+        }
+    }
+}

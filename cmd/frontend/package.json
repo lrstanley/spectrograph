@@ -7,24 +7,42 @@
   "author": "",
   "license": "MIT",
   "prettier": {
-    "printWidth": 140,
-    "tabWidth": 2,
+    "printWidth": 160,
+    "tabWidth": 4,
     "trailingComma": "es5",
-    "arrowParens": "always"
+    "arrowParens": "always",
+    "quoteProps": "as-needed",
+    "singleQuote": false,
+    "useTabs": false
+  },
+  "alias": {
+    "vue": "./node_modules/vue/dist/vue.common.js"
   },
   "dependencies": {
-    "@vue/component-compiler-utils": "^3.0.0",
-    "axios": "^0.18.0",
-    "components": "^0.1.0",
-    "parcel-bundler": "^1.12.3",
-    "snackbarstack": "^1.0.18",
-    "vue": "^2.6.10",
-    "vue-axios": "^2.1.4",
-    "vue-hot-reload-api": "^2.3.3",
+    "@mdi/font": "^5.9.55",
+    "@vue/component-compiler-utils": "^3.2.0",
+    "axios": "^0.19.2",
+    "babel-polyfill": "^6.26.0",
+    "caniuse-lite": "^1.0.30001198",
+    "date-fns": "^2.19.0",
+    "parcel-bundler": "1.12.3",
+    "postcss-modules": "^1.5.0",
+    "sass": "^1.32.8",
+    "vue": "^2.6.12",
+    "vue-hot-reload-api": "^2.3.4",
     "vue-progressbar": "^0.7.5",
-    "vue-router": "^3.0.3",
-    "vue-template-compiler": "^2.6.10",
-    "vuetify": "^1.5.11",
-    "vuex": "^3.1.0"
+    "vue-router": "^3.5.1",
+    "vue-template-compiler": "^2.6.12",
+    "vuetify": "^2.4.5",
+    "vuex": "^3.6.2"
+  },
+  "browserslist": [
+    "> 1% in US",
+    "last 2 versions",
+    "not dead"
+  ],
+  "resolutions": {
+    "browserslist": "4.14.2",
+    "caniuse-lite": "1.0.30001129"
   }
 }
