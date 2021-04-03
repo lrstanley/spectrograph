@@ -21,6 +21,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/recoverer"
+	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/adminhandler"
 	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/authhandler"
 	"github.com/lrstanley/spectrograph/pkg/httpware"
 )
@@ -91,7 +92,7 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	r.Get("/", serveIndex)
 	r.NotFound(serveIndex)
 	r.Route("/api/auth", authhandler.New(svcUsers, oauthConfig, session).Route)
-	registerAdminRoutes(r)
+	r.Route("/api/admin", adminhandler.New(svcUsers, session).Route)
 
 	// Setup our http server.
 	srv := &http.Server{

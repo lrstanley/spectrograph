@@ -15,8 +15,6 @@ const (
 	ctxKeyDebug ctxKey = "debug"
 )
 
-// TODO: test.
-
 // Debug injects if "debugging" is enabled.
 func Debug(debug bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
