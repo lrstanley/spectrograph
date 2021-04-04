@@ -13,7 +13,9 @@
     "arrowParens": "always",
     "quoteProps": "as-needed",
     "singleQuote": false,
-    "useTabs": false
+    "useTabs": false,
+    "semi": false,
+    "bracketSpacing": true
   },
   "alias": {
     "vue": "./node_modules/vue/dist/vue.common.js"

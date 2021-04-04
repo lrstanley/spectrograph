@@ -22,11 +22,19 @@ const routes = [
                 component: Index,
                 meta: { auth: true }
             },
-            // {
-            //     path: '/admin/settings',
-            //     name: 'admin-settings',
-            //     component: AdminSettings,
-            // }
+            {
+                path: '/user',
+                redirect: '/user/details',
+                component: LayoutUser,
+                meta: { auth: true },
+                children: [
+                    {
+                        path: '/user/details',
+                        name: Index.name,
+                        component: Index
+                    }
+                ]
+            }
         ]
     },
     { path: '/auth/:method', name: Auth.name, component: Auth, props: true },
@@ -58,9 +66,17 @@ function beforeEach(to, from, next) {
         next(...vars)
     }
 
+    // see if any routes we want to go to require admin or authentication.
+    let wantsAdmin = false
+    let wantsAuth = false
+    for (let route of to.matched) {
+        if (route.meta.admin) { wantsAdmin = true }
+        if (route.meta.auth) { wantsAuth = true }
+    }
+
     // target route has meta fields.
     if (to.meta && Object.keys(to.meta).length > 0) {
-        if (to.meta.admin && isAuthed && !state.getters.admin) {
+        if (wantsAdmin && isAuthed && !state.getters.admin) {
             // page requires admin, but user is not admin.
             // TODO: error page of some kind.
             console.log("[route:perm] denied, not admin")
@@ -94,7 +110,7 @@ function beforeEach(to, from, next) {
         }
         router.app.$Progress.finish()
         return _next()
-    } else if (to.meta.authed) {
+    } else if (wantsAuth) {
         // target route requires authentication, but we're not authed.
         router.app.$Progress.fail()
         return _next({
