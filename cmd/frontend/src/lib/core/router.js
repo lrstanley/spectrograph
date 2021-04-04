@@ -3,7 +3,8 @@ import VueRouter from 'vue-router'
 
 import state from '~/lib/core/state'
 
-import DefaultLayout from '~/components/core/default-layout'
+import LayoutDefault from '~/components/core/layout-default'
+import LayoutUser from '~/components/core/layout-user'
 import Index from '~/pages/index'
 import NotFound from '~/pages/not-found'
 import Auth from '~/pages/auth'
@@ -13,8 +14,7 @@ Vue.use(VueRouter)
 const routes = [
     {
         path: '/',
-        // redirect: '/',
-        component: DefaultLayout,
+        component: LayoutDefault,
         children: [
             {
                 path: '/',
