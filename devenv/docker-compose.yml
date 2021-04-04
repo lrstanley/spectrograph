@@ -27,6 +27,7 @@ services:
         working_dir: /build/cmd/http-server
         volumes:
             - frontend_dist:/build/cmd/http-server/public/dist
+            - ../cmd/frontend/src/static:/build/cmd/http-server/public/static
             - go_cache:/root/.cache/go-build
             - go_path:/go
             - ../:/build/ # root of repository
