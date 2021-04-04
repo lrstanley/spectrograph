@@ -1,32 +1,30 @@
 <template>
-    <v-app>
-        <v-container fill-height fluid>
-            <v-row align="center" justify="center">
-                <v-col cols="12" sm="12" md="8" lg="4" class="text-center">
-                    <div v-if="error">
-                        <span class="d-flex">
-                            <v-btn text color="primary" class="mb-2" @click.up="handleNext()">
-                                <v-icon>mdi-chevron-left</v-icon> go back
-                            </v-btn>
-                            <v-btn text color="primary" class="mb-2 ml-auto" @click.up="$router.push({ name: 'index' })">
-                                <v-icon>mdi-home-outline</v-icon> home
-                            </v-btn>
-                        </span>
-                        <v-alert border="left" colored-border type="error" elevation="2">
-                            <v-row align="center">
-                                <v-col class="grow">{{ error }}</v-col>
-                                <v-col class="shrink">
-                                    <v-btn color="error" @click.up="$router.push({ name: 'auth', params: { method: 'redirect' } })">Try again</v-btn>
-                                </v-col>
-                            </v-row>
-                        </v-alert>
-                    </div>
-                    <v-progress-circular v-else :size="100" color="primary" class="align-self-center ma-10" indeterminate></v-progress-circular>
-                    <div class="grey--text footer"><footer-metadata></footer-metadata></div>
-                </v-col>
-            </v-row>
-        </v-container>
-    </v-app>
+    <v-container fill-height fluid>
+        <v-row align="center" justify="center">
+            <v-col cols="12" sm="12" md="8" lg="4" class="text-center">
+                <div v-if="error">
+                    <span class="d-flex">
+                        <v-btn text color="primary" class="mb-2" @click.up="handleNext()">
+                            <v-icon>mdi-chevron-left</v-icon> go back
+                        </v-btn>
+                        <v-btn text color="primary" class="mb-2 ml-auto" @click.up="$router.push({ name: 'index' })">
+                            <v-icon>mdi-home-outline</v-icon> home
+                        </v-btn>
+                    </span>
+                    <v-alert border="left" colored-border type="error" elevation="2">
+                        <v-row align="center">
+                            <v-col class="grow">{{ error }}</v-col>
+                            <v-col class="shrink">
+                                <v-btn color="error" @click.up="$router.push({ name: 'auth', params: { method: 'redirect' } })">Try again</v-btn>
+                            </v-col>
+                        </v-row>
+                    </v-alert>
+                </div>
+                <v-progress-circular v-else :size="100" color="primary" class="align-self-center ma-10" indeterminate></v-progress-circular>
+                <div class="grey--text footer"><footer-metadata></footer-metadata></div>
+            </v-col>
+        </v-row>
+    </v-container>
 </template>
 
 <script>
@@ -50,8 +48,6 @@ export default {
             let next = window.localStorage.getItem(NEXT_ROUTE)
             window.localStorage.removeItem(NEXT_ROUTE)
 
-            console.log(next)
-            // TODO: test this.
             // if we previously stored a route to go to, but we had to intercept
             // and have the user login, try and redirect back to that route.
             if (!next) {
@@ -60,7 +56,6 @@ export default {
 
             next = JSON.parse(next)
 
-            console.log("using next...")
             return this.$router.push({ path: next.path, query: next.query })
         },
         handle: function() {

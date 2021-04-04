@@ -37,6 +37,8 @@ const routes = [
 const router = new VueRouter({ routes, mode: 'history' })
 
 router.beforeEach((to, from, next) => {
+    router.app.$Progress.start()
+
     // ensure we fetch auth information before we load any pages.
     state.dispatch('get_auth', true).then(() => {
     }).catch((e) => {
@@ -62,6 +64,7 @@ function beforeEach(to, from, next) {
             // page requires admin, but user is not admin.
             // TODO: error page of some kind.
             console.log("[route:perm] denied, not admin")
+            router.app.$Progress.fail()
             return _next({ name: Index.name })
         }
 
@@ -86,11 +89,14 @@ function beforeEach(to, from, next) {
         // If going to auth routes, and we're already logged in... redirect
         // to index (or cancel if already @ index).
         if (to.name == Auth.name && to.params.method != "logout") {
+            router.app.$Progress.fail()
             return from.name != Index.name ? _next({ name: Index.name }) : _next(false)
         }
+        router.app.$Progress.finish()
         return _next()
     } else if (to.meta.authed) {
         // target route requires authentication, but we're not authed.
+        router.app.$Progress.fail()
         return _next({
             name: Auth.name,
             params: {
@@ -99,6 +105,7 @@ function beforeEach(to, from, next) {
             }
         })
     } else {
+        router.app.$Progress.finish()
         return _next()
     }
 }

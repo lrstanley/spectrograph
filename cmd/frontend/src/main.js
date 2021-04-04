@@ -4,7 +4,14 @@ import VueProgressBar from 'vue-progressbar'
 Vue.use(VueProgressBar, {
     color: colors.nitro,
     failedColor: 'red',
-    thickness: '4px'
+    thickness: '3px',
+    location: 'top',
+    transition: {
+        speed: '0.3s',
+        opacity: '0.6s',
+        termination: 300
+    },
+    autoRevert: true
 })
 
 import Vuetify from 'vuetify'
