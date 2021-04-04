@@ -54,6 +54,7 @@ export default new Vuex.Store({
         }
     },
     getters: {
+        user: (state) => { return state.auth ? state.auth.user : null },
         authed: (state) => { return !!state.auth.authenticated },
         admin: (state) => { return !!state.auth.admin },
         loading: (state) => { return state.loading }

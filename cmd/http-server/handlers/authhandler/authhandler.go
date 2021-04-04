@@ -57,6 +57,9 @@ import (
 const (
 	discordUserEndpoint   = "https://discord.com/api/users/@me"
 	discordGuildsEndpoint = "https://discord.com/api/users/@me/guilds"
+
+	discordGIFAvatarPrefix = "a_"
+	discordAvatarEndpoint  = "https://media.discordapp.net/avatars/%s/%s.%s"
 )
 
 type Handler struct {
@@ -168,6 +171,19 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 	user.Discord.AccessToken = token.AccessToken
 	user.Discord.RefreshToken = token.RefreshToken
 	user.Discord.ExpiresAt = token.Expiry
+
+	// Fairly certain this has a bug:
+	//   - https://github.com/markbates/goth/blob/master/providers/discord/discord.go#L169-L176
+	// Properly parse out the discord avatar.
+	if user.Discord.Avatar != "" {
+		extension := "jpg"
+		if len(user.Discord.Avatar) >= len(discordGIFAvatarPrefix) &&
+			user.Discord.Avatar[0:len(discordGIFAvatarPrefix)-1] == discordGIFAvatarPrefix {
+			extension = "gif"
+		}
+
+		user.Discord.AvatarURL = fmt.Sprintf(discordAvatarEndpoint, user.Discord.ID, user.Discord.Avatar, extension)
+	}
 
 	if err := h.users.Upsert(r.Context(), user); err != nil {
 		httpware.HandleError(w, r, http.StatusInternalServerError, err)
