@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueProgressBar from 'vue-progressbar'
 
 Vue.use(VueProgressBar, {
-    color: 'rgb(120, 96, 255)',
+    color: colors.nitro,
     failedColor: 'red',
     thickness: '4px'
 })
@@ -16,6 +16,7 @@ import app from '~/app.vue'
 import router from '~/lib/core/router'
 import state from '~/lib/core/state'
 import '~/lib/utils/global-prototypes'
+import colors from '~/lib/utils/discord-colors'
 
 Vue.config.productionTip = false
 
@@ -29,28 +30,23 @@ export default new Vue({
             default: 'dark',
             themes: {
                 dark: {
-                    primary: '#2196F3',
-                    secondary: '#424242',
-                    accent: '#FF4081',
-                    error: '#FF5252',
-                    info: '#2196F3',
-                    success: '#4CAF50',
-                    warning: '#FB8C00',
-                    // Discord:    #7289DA
-                    // Bravery:    #9B84EE
-                    // Online:     #34B581
-                    // Balance:    #44DDBF
-                    // DND:        #F04747
-                    // Brilliance: #F47B68
-                    // Idle:       #FAA61A
-                    // High:       #F57731
-                    // Nitro:      #FF73FA
-                    // Skin:       #F9C9A9
-                    // White:      #FFFFFF
-                    // Grey:       #99AAB5
-                    // Chat:       #36393F
-                    // Channels:   #2F3136
-                    // Servers:    #2F3136
+                    ...colors,
+                    // primary: '#2196F3',
+                    // secondary: '#424242',
+                    // accent: '#FF4081',
+                    // error: '#FF5252',
+                    // info: '#2196F3',
+                    // success: '#4CAF50',
+                    // warning: '#FB8C00',
+
+                    primary: colors.discord,
+                    secondary: colors.chat,
+                    accent: colors.nitro,
+                    error: colors.dnd,
+                    info: colors.bravery,
+                    success: colors.online,
+                    warning: colors.high,
+                    anchor: '#8c9eff',
                 }
             }
         }
@@ -58,5 +54,5 @@ export default new Vue({
     router,
     store: state,
     el: '#app',
-    render: h=> h(app)
+    render: h => h(app)
 })
