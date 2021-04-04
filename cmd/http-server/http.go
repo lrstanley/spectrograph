@@ -75,12 +75,12 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	// Bind/mount routes here.
 	r.Mount("/static/dist", http.StripPrefix("/static/dist", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Vary", "Accept-Encoding")
-		w.Header().Set("Cache-Control", "public, max-age=7776000")
+		w.Header().Set("Cache-Control", "max-age=7776000")
 		http.FileServer(rice.MustFindBox("public/dist").HTTPBox()).ServeHTTP(w, r)
 	})))
 	r.Mount("/static", http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Vary", "Accept-Encoding")
-		w.Header().Set("Cache-Control", "public, max-age=7776000")
+		w.Header().Set("Cache-Control", "max-age=7776000")
 		http.FileServer(rice.MustFindBox("public/static").HTTPBox()).ServeHTTP(w, r)
 	})))
 
