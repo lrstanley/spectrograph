@@ -19,7 +19,7 @@ Vue.prototype.updateQuery = function (update) {
         // if a GET param is false, just remote it.
         if (!query[key]) { delete query[key] }
     }
-    router.app.$router.push({ query: query }).catch(() => {})
+    router.app.$router.push({ query: query }).catch(() => { })
 }
 
 Vue.prototype.resetComponentData = function () {

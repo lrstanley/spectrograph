@@ -5,9 +5,9 @@ import state from '~/lib/core/state'
 
 import LayoutDefault from '~/components/core/layout-default.vue'
 import LayoutUser from '~/components/core/layout-user.vue'
-import Index from '~/pages/index.vue'
-import NotFound from '~/pages/not-found.vue'
-import Auth from '~/pages/auth.vue'
+import Index from '~/views/index.vue'
+import NotFound from '~/views/not-found.vue'
+import Auth from '~/views/auth.vue'
 
 Vue.use(VueRouter)
 

@@ -8,9 +8,7 @@
                 <v-list-item-title class="title">
                     {{ $store.getters.user.username }}
                 </v-list-item-title>
-                <v-list-item-subtitle class="grey--text text--lighten-1">
-                    #{{ $store.getters.user.discriminator }}
-                </v-list-item-subtitle>
+                <v-list-item-subtitle class="grey--text text--lighten-1"> #{{ $store.getters.user.discriminator }} </v-list-item-subtitle>
             </v-list-item-content>
         </v-list-item>
 
@@ -40,9 +38,13 @@ export default {
     props: ["value"],
     computed: {
         drawer: {
-            get: function() { return this.value },
-            set: function(value) { this.$emit('input', value) }
-        }
-    }
+            get: function () {
+                return this.value
+            },
+            set: function (value) {
+                this.$emit("input", value)
+            },
+        },
+    },
 }
 </script>

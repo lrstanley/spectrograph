@@ -8,12 +8,16 @@
 <script>
 export default {
     name: "footer-metadata",
-    data: function() { return {}},
+    data: function () {
+        return {}
+    },
 }
 </script>
 
 <style scoped>
-a:visited, a:link, a:active {
+a:visited,
+a:link,
+a:active {
     text-decoration: none;
 }
 </style>

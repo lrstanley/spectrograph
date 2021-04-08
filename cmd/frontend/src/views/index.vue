@@ -1,5 +1,5 @@
 <template>
-    <div style="height: 3000px">Hello world</div>
+    <div style="height: 3000px">Hellso world test</div>
 </template>
 
 <script>

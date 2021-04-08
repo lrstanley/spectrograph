@@ -25,10 +25,7 @@
                 <!-- <v-spacer></v-spacer> -->
 
                 <v-responsive max-width="260" class="d-none d-md-block ml-10 mr-5">
-                    <v-text-field
-                        dense flat hide-details rounded
-                        solo prepend-inner-icon="mdi-magnify"
-                        placeholder="Search servers"></v-text-field>
+                    <v-text-field dense flat hide-details rounded solo prepend-inner-icon="mdi-magnify" placeholder="Search servers"></v-text-field>
                 </v-responsive>
                 <!-- <v-avatar class="hidden-sm-and-down" color="grey darken-1 shrink" size="32"></v-avatar> -->
                 <v-btn v-if="!$store.getters.authed" text @click="$router.push({ name: 'auth', params: { method: 'redirect' } })">Login</v-btn>

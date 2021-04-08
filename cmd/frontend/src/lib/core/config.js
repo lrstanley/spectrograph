@@ -7,6 +7,6 @@ if (!config.envs.hasOwnProperty(config.target)) {
 var c = { ...config.envs[config.target], ...config }
 c.target = config.target
 
-c.debugLog = function(...data) { if (c.debug) { console.log(...data) }}
+c.debugLog = function (...data) { if (c.debug) { console.log(...data) } }
 
 export default c
