@@ -1,4 +1,3 @@
 FROM node:15-alpine
-RUN apk add --no-cache make
 
-CMD ["/bin/sh", "-c", "make debug"]
+CMD ["/bin/sh", "-c", "npm run server"]

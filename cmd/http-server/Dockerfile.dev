@@ -1,4 +1,4 @@
 FROM golang:alpine
 RUN apk add --no-cache g++ make entr
 
-CMD ["/bin/sh", "-c", "while true;do { find ../../pkg -type f; find $PWD -path $PWD/public -prune -o -type f; } | entr -r -n -d -s -- 'sleep 2;make debug';done"]
+CMD ["/bin/sh", "-c", "while true;do { find ../../pkg -type f; find $PWD -mindepth 1 -path $PWD/public -prune -o -type f -print; } | entr -r -n -d -s -- 'sleep 2;make debug';done"]

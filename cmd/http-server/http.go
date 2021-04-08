@@ -73,15 +73,10 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	r.Use(middleware.StripSlashes)
 
 	// Bind/mount routes here.
-	r.Mount("/static/dist", http.StripPrefix("/static/dist", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	r.Mount("/dist", http.StripPrefix("/dist", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Vary", "Accept-Encoding")
 		w.Header().Set("Cache-Control", "max-age=7776000")
-		http.FileServer(rice.MustFindBox("public/dist").HTTPBox()).ServeHTTP(w, r)
-	})))
-	r.Mount("/static", http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Vary", "Accept-Encoding")
-		w.Header().Set("Cache-Control", "max-age=7776000")
-		http.FileServer(rice.MustFindBox("public/static").HTTPBox()).ServeHTTP(w, r)
+		http.FileServer(rice.MustFindBox("public").HTTPBox()).ServeHTTP(w, r)
 	})))
 
 	if cli.Debug {
@@ -142,5 +137,5 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		httpware.HandleError(w, r, http.StatusMethodNotAllowed, errors.New(http.StatusText(http.StatusMethodNotAllowed)))
 		return
 	}
-	w.Write(rice.MustFindBox("public/dist").MustBytes("index.html"))
+	w.Write(rice.MustFindBox("public").MustBytes("index.html"))
 }

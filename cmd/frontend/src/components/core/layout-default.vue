@@ -5,7 +5,7 @@
             <v-app-bar-nav-icon v-if="$route.path.startsWith('/user')" class="d-lg-none d-xl-none" @click="drawer = !drawer"></v-app-bar-nav-icon>
             <v-container class="py-0 fill-height">
                 <v-avatar color="servers" size="45" class="mr-5">
-                    <v-img src="/static/img/mic.png" />
+                    <v-img src="/dist/img/mic.png" />
                 </v-avatar>
 
                 <v-btn text :to="{ path: '/' }">Home</v-btn>
@@ -36,7 +36,7 @@
             </v-container>
         </v-app-bar>
 
-        <nav-user-sidebar v-model="drawer" fixed temporary></nav-user-sidebar>
+        <nav-user-sidebar v-if="$store.getters.authed" v-model="drawer" fixed temporary></nav-user-sidebar>
 
         <v-main>
             <v-container>
@@ -52,8 +52,8 @@
 </template>
 
 <script>
-import navUserSidebar from "~/components/core/nav-user-sidebar"
-import footerMetadata from "~/components/core/footer-metadata"
+import navUserSidebar from "~/components/core/nav-user-sidebar.vue"
+import footerMetadata from "~/components/core/footer-metadata.vue"
 
 export default {
     name: "default-layout",

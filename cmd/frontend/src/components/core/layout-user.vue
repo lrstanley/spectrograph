@@ -2,7 +2,7 @@
     <v-row>
         <v-col class="d-none d-lg-block" cols="3" xl="2">
             <v-sheet class="nav-radius">
-                <nav-user-sidebar :value="true" floating :mobile-breakpoint="0" width="100%" color="servers" class="nav-radius"></nav-user-sidebar>
+                <nav-user-sidebar v-if="$store.getters.authed" :value="true" floating :mobile-breakpoint="0" width="100%" color="servers" class="nav-radius"></nav-user-sidebar>
             </v-sheet>
         </v-col>
 
@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import navUserSidebar from "~/components/core/nav-user-sidebar"
+import navUserSidebar from "~/components/core/nav-user-sidebar.vue"
 
 export default {
     name: "default-layout",

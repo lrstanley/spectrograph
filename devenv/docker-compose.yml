@@ -1,6 +1,5 @@
 version: "3"
 volumes:
-    frontend_cache: {}
     frontend_dist: {}
     frontend_modules: {}
     go_cache: {}
@@ -14,7 +13,6 @@ services:
             dockerfile: ./cmd/frontend/Dockerfile.dev
         working_dir: /build/cmd/frontend
         volumes:
-            - frontend_cache:/build/cmd/frontend/.cache
             - frontend_dist:/build/cmd/frontend/dist
             - frontend_modules:/build/cmd/frontend/node_modules
             - ../:/build/ # root of repository
@@ -26,8 +24,7 @@ services:
             dockerfile: ./cmd/http-server/Dockerfile.dev
         working_dir: /build/cmd/http-server
         volumes:
-            - frontend_dist:/build/cmd/http-server/public/dist
-            - ../cmd/frontend/src/static:/build/cmd/http-server/public/static
+            - frontend_dist:/build/cmd/http-server/public
             - go_cache:/root/.cache/go-build
             - go_path:/go
             - ../:/build/ # root of repository

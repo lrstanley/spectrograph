@@ -3,11 +3,11 @@ import VueRouter from 'vue-router'
 
 import state from '~/lib/core/state'
 
-import LayoutDefault from '~/components/core/layout-default'
-import LayoutUser from '~/components/core/layout-user'
-import Index from '~/pages/index'
-import NotFound from '~/pages/not-found'
-import Auth from '~/pages/auth'
+import LayoutDefault from '~/components/core/layout-default.vue'
+import LayoutUser from '~/components/core/layout-user.vue'
+import Index from '~/pages/index.vue'
+import NotFound from '~/pages/not-found.vue'
+import Auth from '~/pages/auth.vue'
 
 Vue.use(VueRouter)
 
@@ -20,7 +20,7 @@ const routes = [
                 path: '/',
                 name: Index.name,
                 component: Index,
-                meta: { auth: true }
+                // meta: { auth: true }
             },
             {
                 path: '/user',

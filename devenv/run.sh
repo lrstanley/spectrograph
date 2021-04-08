@@ -5,8 +5,8 @@ if [ "$(basename $PWD)" != "spectrograph" ];then
     exit 1
 fi
 
-mkdir -vp ./cmd/frontend/{dist,.cache}
-mkdir -vp ./cmd/http-server/{public/dist,bin}
+mkdir -vp ./cmd/frontend/dist
+mkdir -vp ./cmd/http-server/{public,bin}
 mkdir -vp ./cmd/worker/bin
 
 DANGLING=$(docker images -f "dangling=true" -q)

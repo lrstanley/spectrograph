@@ -40,4 +40,4 @@ http.interceptors.response.use((response) => {
     return Promise.reject(utils.formatError(error))
 })
 
-module.exports = http
+export default http

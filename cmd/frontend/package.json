@@ -6,6 +6,11 @@
   "private": true,
   "author": "",
   "license": "MIT",
+  "scripts": {
+    "install": "npm install --no-audit --no-fund --loglevel verbose",
+    "server": "./node_modules/vite/bin/vite.js --mode development --base /",
+    "build": "./node_modules/vite/bin/vite.js build --mode production --base /dist --emptyOutDir"
+  },
   "prettier": {
     "printWidth": 160,
     "tabWidth": 4,
@@ -17,24 +22,20 @@
     "semi": false,
     "bracketSpacing": true
   },
-  "alias": {
-    "vue": "./node_modules/vue/dist/vue.common.js"
-  },
   "dependencies": {
+    "@babel/preset-env": "^7.13.15",
     "@mdi/font": "^5.9.55",
     "@vue/component-compiler-utils": "^3.2.0",
     "axios": "^0.19.2",
-    "babel-polyfill": "^6.26.0",
-    "caniuse-lite": "^1.0.30001198",
     "date-fns": "^2.19.0",
-    "parcel-bundler": "1.12.3",
-    "postcss-modules": "^1.5.0",
+    "q": "^1.5.1",
     "sass": "^1.32.8",
+    "vite": "^2.1.5",
+    "vite-plugin-components": "^0.8.3",
+    "vite-plugin-vue2": "^1.4.3",
     "vue": "^2.6.12",
-    "vue-hot-reload-api": "^2.3.4",
     "vue-progressbar": "^0.7.5",
     "vue-router": "^3.5.1",
-    "vue-template-compiler": "^2.6.12",
     "vuetify": "^2.4.5",
     "vuex": "^3.6.2"
   },
@@ -42,9 +43,5 @@
     "> 1% in US",
     "last 2 versions",
     "not dead"
-  ],
-  "resolutions": {
-    "browserslist": "4.14.2",
-    "caniuse-lite": "1.0.30001129"
-  }
+  ]
 }

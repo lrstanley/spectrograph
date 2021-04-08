@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import footerMetadata from '~/components/core/footer-metadata'
+import footerMetadata from '~/components/core/footer-metadata.vue'
 
 const NEXT_ROUTE = "next-route"
 
