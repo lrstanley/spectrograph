@@ -15,6 +15,7 @@ export default new Vuex.Store({
         loading: true,
         title: "",
         auth: null,
+        auth_last_checked: null,
     },
     mutations: {
         disableLoading: (state) => { state.loading = false },
@@ -23,20 +24,27 @@ export default new Vuex.Store({
             state.title = val ? val.replace(" - ", " · ") : ""
             document.title = state.title != "" ? `${state.title} · ${config.application}` : config.application
         },
-        set_auth(state, auth) { state.auth = auth }
+        set_auth(state, auth) {
+            state.auth = auth
+            state.auth_last_checked = new Date()
+        }
     },
     actions: {
         get_auth: function ({ commit, state }, routeGuard) {
             return new Promise((resolve, reject) => {
                 if (routeGuard && state.auth !== null) {
-                    resolve()
-                    return
+                    // determine if auth-check is older than 5 minutes, and
+                    // we should re-check for auth just in case.
+                    if ((new Date() - state.auth_last_checked) < 5 * 60 * 1000) {
+                        resolve()
+                        return
+                    }
                 }
 
-                api.http.get("/auth/self").then(resp => {
+                api.auth.self().then((resp) => {
                     commit('set_auth', resp.data)
                     resolve()
-                }).catch(err => {
+                }).catch((err) => {
                     commit('set_auth', false)
                     reject(err)
                 })
@@ -44,10 +52,10 @@ export default new Vuex.Store({
         },
         logout: function ({ commit }) {
             new Promise((resolve, reject) => {
-                api.http.get("/auth/logout").then(resp => {
+                api.auth.logout().then((resp) => {
                     commit('set_auth', false)
                     resolve(resp)
-                }).catch(err => {
+                }).catch((err) => {
                     reject(err)
                 })
             })
@@ -55,8 +63,8 @@ export default new Vuex.Store({
     },
     getters: {
         user: (state) => { return state.auth ? state.auth.user : null },
-        authed: (state) => { return !!state.auth.authenticated },
-        admin: (state) => { return !!state.auth.admin },
+        authed: (state) => { return state.auth ? state.auth.authenticated : false },
+        admin: (state) => { return state.auth ? state.auth.admin : false },
         loading: (state) => { return state.loading }
     }
 })
