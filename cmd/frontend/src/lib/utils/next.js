@@ -1,10 +1,8 @@
-import Promise from 'q'
-
 const NEXT_ROUTE = "next-route"
 
-function store(next) {
-    if (!next || !next.path) { return }
-    window.localStorage.setItem(NEXT_ROUTE, JSON.stringify({ path: next.path, query: next.query }))
+function store(route) {
+    if (!route || !route.path) { return }
+    window.localStorage.setItem(NEXT_ROUTE, JSON.stringify(route))
 }
 
 function restore(router, defaultRoute) {
@@ -12,26 +10,20 @@ function restore(router, defaultRoute) {
         throw 'Invalid router object provided'
     }
 
-    return new Promise((resolve, reject) => {
-        let next = window.localStorage.getItem(NEXT_ROUTE)
-        window.localStorage.removeItem(NEXT_ROUTE)
+    let route = window.localStorage.getItem(NEXT_ROUTE)
+    window.localStorage.removeItem(NEXT_ROUTE)
 
-        // if we previously stored a route to go to, but we had to intercept
-        // and have the user login, try and redirect back to that route.
-        if (!next) {
-            if (defaultRoute) {
-                router.push(defaultRoute)
-            }
-
-            reject()
-            return
+    // if we previously stored a route to go to, but we had to intercept
+    // and have the user login, try and redirect back to that route.
+    if (!route) {
+        if (defaultRoute) {
+            return router.push(defaultRoute)
         }
+        return
+    }
 
-        next = JSON.parse(next)
-
-        router.push({ path: next.path, query: next.query })
-        resolve()
-    })
+    route = JSON.parse(route)
+    return router.push({ path: route.path, query: route.query })
 }
 
 export default {

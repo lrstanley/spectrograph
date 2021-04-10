@@ -117,11 +117,17 @@ function beforeEach(to, from, next) {
             name: Auth.name,
             params: {
                 method: "redirect",
+                // after we authenticate, go back to the page they were trying
+                // to go to.
                 next: { path: to.path, query: to.query }
             }
         })
     } else {
         router.app.$Progress.finish()
+        // if logging in, tell auth to redirect back to the page they were on.
+        if (to.name == Auth.name && to.params.method == "redirect" && !to.params.next) {
+            to.params.next = { path: from.path, query: from.query }
+        }
         return _next()
     }
 }
