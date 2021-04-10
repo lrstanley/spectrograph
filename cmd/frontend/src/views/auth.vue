@@ -4,7 +4,7 @@
             <v-col cols="12" sm="12" md="8" lg="4" class="text-center">
                 <div v-if="error">
                     <span class="d-flex">
-                        <v-btn text color="primary" class="mb-2" @click.up="handleNext()">
+                        <v-btn text color="primary" class="mb-2" @click.up="$router.back()">
                             <v-icon>mdi-chevron-left</v-icon> go back
                         </v-btn>
                         <v-btn text color="primary" class="mb-2 ml-auto" @click.up="$router.push({ name: 'index' })">
@@ -29,8 +29,7 @@
 
 <script>
 import footerMetadata from '~/components/core/footer-metadata.vue'
-
-const NEXT_ROUTE = "next-route"
+import next from '~/lib/utils/next'
 
 export default {
     name: "auth",
@@ -44,26 +43,9 @@ export default {
         error: null
     }},
     methods: {
-        handleNext: function() {
-            let next = window.localStorage.getItem(NEXT_ROUTE)
-            window.localStorage.removeItem(NEXT_ROUTE)
-
-            // if we previously stored a route to go to, but we had to intercept
-            // and have the user login, try and redirect back to that route.
-            if (!next) {
-                this.$router.push({ name: 'index' })
-            }
-
-            next = JSON.parse(next)
-
-            return this.$router.push({ path: next.path, query: next.query })
-        },
         handle: function() {
             this.error = this.other_error
-
-            if (this.next) {
-                window.localStorage.setItem(NEXT_ROUTE, JSON.stringify({ path: this.next.path, query: this.next.query }))
-            }
+            next.store(this.next)
 
             if (this.$route.params.method == "redirect") {
                 // TODO: grab from api package, intercept location and redirect
@@ -92,7 +74,7 @@ export default {
                     // if successful, we theoretically should be able to obtain our
                     // user info. if not, return the errors.
                     this.$store.dispatch('get_auth').then(() => {
-                        this.handleNext()
+                        next.restore(this.$router, { name: 'index' })
                     }).catch((err) => {
                         this.error = err.message
                     })
