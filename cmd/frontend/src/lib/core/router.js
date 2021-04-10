@@ -126,4 +126,17 @@ function beforeEach(to, from, next) {
     }
 }
 
+Vue.prototype.updateQuery = function (update) {
+    let query = Object.assign({}, router.app.$route.query, update)
+    for (let key in query) {
+        // if a GET param is false, just remote it.
+        if (!query[key]) { delete query[key] }
+    }
+    router.app.$router.push({ query: query }).catch(() => { })
+}
+
+Vue.prototype.resetComponentData = function () {
+    Object.assign(this.$data, this.$options.data.apply(this))
+}
+
 export default router

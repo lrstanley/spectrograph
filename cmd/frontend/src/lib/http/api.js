@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import http from '~/lib/http/http'
 import auth from '~/lib/http/resources/auth'
 
@@ -29,5 +30,7 @@ const api = {
     http: http,
     auth: auth,
 }
+
+Vue.use(api)
 
 export default api
