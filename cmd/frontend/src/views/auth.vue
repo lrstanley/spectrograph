@@ -4,7 +4,7 @@
             <v-col cols="12" sm="12" md="8" lg="4" class="text-center">
                 <div v-if="error">
                     <span class="d-flex">
-                        <v-btn text color="primary" class="mb-2" @click.up="$router.back()">
+                        <v-btn text color="primary" class="mb-2" @click.up="$router.go(-2)">
                             <v-icon>mdi-chevron-left</v-icon> go back
                         </v-btn>
                         <v-btn text color="primary" class="mb-2 ml-auto" @click.up="$router.push({ name: 'index' })">
@@ -15,7 +15,7 @@
                         <v-row align="center">
                             <v-col class="grow">{{ error }}</v-col>
                             <v-col class="shrink">
-                                <v-btn color="error" @click.up="$router.push({ name: 'auth', params: { method: 'redirect' } })">Try again</v-btn>
+                                <v-btn color="error" @click.up="$router.replace({ name: 'auth', params: { method: 'redirect' } })">Try again</v-btn>
                             </v-col>
                         </v-row>
                     </v-alert>
@@ -36,8 +36,7 @@ export default {
     title: "Login",
     components: { footerMetadata },
     props: {
-        other_error: [String, null],
-        next: [Object, null]
+        other_error: [String, null]
     },
     data: function() { return {
         error: null
@@ -45,43 +44,43 @@ export default {
     methods: {
         handle: function() {
             this.error = this.other_error
-            next.store(this.next)
+            next.store(this.$route.params.next)
 
-            if (this.$route.params.method == "redirect") {
-                // TODO: grab from api package, intercept location and redirect
-                // ourselves, so the users doesn't have the /api endpoint in their
-                // back button.
-                // window.location.replace(`${window.location.protocol}//${window.location.host}${this.$config.api_baseurl}/auth/redirect`)
-                this.$api.auth.redirect().then((resp) => {
-                    window.location.replace(resp.data.auth_redirect)
-                }).catch((error) => {
-                    this.error = error.message
-                })
+            if (this[this.$route.params.method]) {
+                this[this.$route.params.method]()
                 return
             }
 
-            if (this.$route.params.method == "logout") {
-                this.$store.dispatch('logout').then(() => {
-                    this.$router.push({ name: 'index' })
-                }).catch((error) => {
-                    this.error = error.message
-                })
-                return
-            }
-
-            if (this.$route.params.method == "callback") {
-                this.$api.auth.callback(this.$route.query.code, this.$route.query.state).then((resp) => {
-                    // if successful, we theoretically should be able to obtain our
-                    // user info. if not, return the errors.
-                    this.$store.dispatch('get_auth').then(() => {
-                        next.restore(this.$router, { name: 'index' })
-                    }).catch((err) => {
-                        this.error = err.message
-                    })
+            this.$router.push({ name: 'not-found' })
+        },
+        redirect: function() {
+            this.$api.auth.redirect().then((resp) => {
+                window.location.replace(resp.data.auth_redirect)
+            }).catch((error) => {
+                this.error = error.message
+            })
+            return
+        },
+        callback: function() {
+            this.$api.auth.callback(this.$route.query.code, this.$route.query.state).then((resp) => {
+                // if successful, we theoretically should be able to obtain our
+                // user info. if not, return the errors.
+                this.$store.dispatch('get_auth').then(() => {
+                    next.restore(this.$router, { name: 'index' })
                 }).catch((err) => {
                     this.error = err.message
                 })
-            }
+            }).catch((err) => {
+                this.error = err.message
+            })
+        },
+        logout: function() {
+            this.$store.dispatch('logout').then(() => {
+                this.$router.push({ name: 'index' })
+            }).catch((error) => {
+                this.error = error.message
+            })
+            return
         }
     },
     beforeRouteUpdate: function(to, from, next) {
