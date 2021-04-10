@@ -15,19 +15,21 @@ Vue.use(VueProgressBar, {
 })
 
 import Vuetify from 'vuetify/lib'
-// import 'vuetify/dist/vuetify.min.css'
 import '@mdi/font/css/materialdesignicons.css'
 Vue.use(Vuetify)
+
+import api from '~/lib/http/api'
+Vue.use(api)
 
 import app from '~/app.vue'
 import router from '~/lib/core/router'
 import state from '~/lib/core/state'
-import '~/lib/utils/global-prototypes'
 import colors from '~/lib/utils/discord-colors'
+import '~/lib/utils/global-prototypes'
 
 Vue.config.productionTip = false
 
-export default new Vue({
+const vapp = new Vue({
     vuetify: new Vuetify({
         icons: {
             iconfont: 'mdi'
@@ -63,3 +65,5 @@ export default new Vue({
     el: '#app',
     render: h => h(app)
 })
+
+export default vapp

@@ -23,11 +23,18 @@ export default defineConfig({
         port: 8081,
         strictPort: true,
         proxy: {
+            // '^/dist/.*': {
+            //     target: 'http://127.0.0.1:8081',
+            //     toProxy: true,
+            //     xfwd: true,
+            //     rewrite: (path) => path.replace(/\/dist/, '')
+            // },
             '^/api/.*': {
                 target: 'http://http-server:8080',
                 xfwd: true,
             }
-        }
+        },
+        force: true
     },
     sourcemap: true
 });

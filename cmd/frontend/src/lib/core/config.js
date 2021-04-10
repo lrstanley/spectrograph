@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import config from '~/config.json'
 
 if (!config.envs.hasOwnProperty(config.target)) {
@@ -8,5 +9,9 @@ var c = { ...config.envs[config.target], ...config }
 c.target = config.target
 
 c.debugLog = function (...data) { if (c.debug) { console.log(...data) } }
+
+// register global prototypes.
+Vue.prototype.$config = c
+Vue.prototype.debug = c.debugLog
 
 export default c

@@ -1,17 +1,7 @@
 import Vue from 'vue'
-import axios from 'axios'
 import formatDistance from 'date-fns/formatDistance'
 
-import config from '~/lib/core/config'
 import router from '~/lib/core/router'
-import api from '~/lib/http/api'
-
-Vue.prototype.$api = api
-Vue.prototype.$http = axios
-Vue.prototype.$config = config
-Vue.prototype.debug = config.debugLog
-
-window.api = api
 
 Vue.prototype.updateQuery = function (update) {
     let query = Object.assign({}, router.app.$route.query, update)
