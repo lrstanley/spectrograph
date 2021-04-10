@@ -1,26 +1,18 @@
 import { Promise } from 'q'
 import http from '~/lib/http/http'
 
-const self = {
-    get: (options) => { return http.get('/auth/self', options) }
+function self(options) { return http.get('/auth/self', options) }
+
+function callback(code, state, options) {
+    return http.get('/auth/callback', { ...options, params: {
+        code: code,
+        state: state,
+    }})
 }
 
-const callback = {
-    get: (code, state, options) => {
-        return http.get('/auth/callback', { ...options, params: {
-            code: code,
-            state: state,
-        }})
-    }
-}
+function redirect(options) { return http.get('/auth/redirect', options) }
 
-const redirect = {
-    get: (options) => { return http.get('/auth/redirect', options) }
-}
-
-const logout = {
-    get: (options) => { return http.get('/auth/logout', options) }
-}
+function logout(options) { return http.get('/auth/logout', options) }
 
 export default {
     self,

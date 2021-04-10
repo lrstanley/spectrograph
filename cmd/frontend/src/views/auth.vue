@@ -70,7 +70,7 @@ export default {
                 // ourselves, so the users doesn't have the /api endpoint in their
                 // back button.
                 // window.location.replace(`${window.location.protocol}//${window.location.host}${this.$config.api_baseurl}/auth/redirect`)
-                this.$api.auth.redirect.get().then((resp) => {
+                this.$api.auth.redirect().then((resp) => {
                     window.location.replace(resp.data.auth_redirect)
                 }).catch((error) => {
                     this.error = error.message
@@ -79,8 +79,7 @@ export default {
             }
 
             if (this.$route.params.method == "logout") {
-                this.$api.auth.logout.get().then((resp) => {
-                    this.$store.commit('set_auth', false)
+                this.$store.dispatch('logout').then(() => {
                     this.$router.push({ name: 'index' })
                 }).catch((error) => {
                     this.error = error.message
@@ -89,7 +88,7 @@ export default {
             }
 
             if (this.$route.params.method == "callback") {
-                this.$api.auth.callback.get(this.$route.query.code, this.$route.query.state).then((resp) => {
+                this.$api.auth.callback(this.$route.query.code, this.$route.query.state).then((resp) => {
                     // if successful, we theoretically should be able to obtain our
                     // user info. if not, return the errors.
                     this.$store.dispatch('get_auth').then(() => {
@@ -105,7 +104,6 @@ export default {
     },
     beforeRouteUpdate: function(to, from, next) {
         // if this.$route.params.method changes.
-        console.log(this)
         next()
         this.handle()
     },
