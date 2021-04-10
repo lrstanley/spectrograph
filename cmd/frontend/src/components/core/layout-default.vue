@@ -1,11 +1,11 @@
 <template>
-    <v-container>
+    <div>
         <v-app-bar app color="primary" flat>
             <!-- TODO: handle side navigation via route metadata field? -->
             <v-app-bar-nav-icon v-if="$route.path.startsWith('/user')" class="d-lg-none d-xl-none" @click="drawer = !drawer"></v-app-bar-nav-icon>
             <v-container class="py-0 fill-height">
                 <v-avatar color="servers" size="45" class="mr-5">
-                    <v-img src="/dist/img/mic.png" />
+                    <v-img src="/src/static/img/mic.png" />
                 </v-avatar>
 
                 <v-btn text :to="{ path: '/' }">Home</v-btn>
@@ -36,16 +36,14 @@
         <nav-user-sidebar v-if="$store.getters.authed" v-model="drawer" fixed temporary></nav-user-sidebar>
 
         <v-main>
-            <v-container>
-                <router-view></router-view>
-            </v-container>
+            <router-view></router-view>
         </v-main>
 
         <v-footer app padless inset>
             <div class="flex-grow-1"></div>
-            <div><footer-metadata></footer-metadata></div>
+            <footer-metadata></footer-metadata>
         </v-footer>
-    </v-container>
+    </div>
 </template>
 
 <script>
