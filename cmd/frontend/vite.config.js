@@ -1,6 +1,7 @@
-import { defineConfig } from 'vite';
-import { createVuePlugin } from 'vite-plugin-vue2';
-import ViteComponents, { VuetifyResolver } from 'vite-plugin-components';
+import { defineConfig } from 'vite'
+import { createVuePlugin } from 'vite-plugin-vue2'
+import ViteComponents, { VuetifyResolver } from 'vite-plugin-components'
+import path from 'path'
 
 export default defineConfig({
     plugins: [
@@ -12,7 +13,9 @@ export default defineConfig({
     publicDir: "src/static",
     resolve: {
         alias: {
-            '~': __dirname + '/src/',
+            // see also: jsconfig.json
+            '~': path.resolve(__dirname, './src'),
+            '@': path.resolve(__dirname, './src')
         },
     },
     build: {
