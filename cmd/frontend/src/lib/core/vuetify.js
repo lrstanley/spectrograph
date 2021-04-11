@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
 import '@mdi/font/css/materialdesignicons.css'
-
 import colors from '~/lib/utils/discord-colors'
 
 Vue.use(Vuetify)
@@ -13,6 +12,12 @@ export default new Vuetify({
     theme: {
         dark: true,
         default: 'dark',
+        options: {
+            themeCache: {
+                get: (key) => localStorage.getItem(key),
+                set: (key, value) => localStorage.setItem(key, value),
+            },
+        },
         themes: {
             dark: {
                 ...colors,

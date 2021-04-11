@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import config from '~/config.json'
 
-if (!config.envs.hasOwnProperty(config.target)) {
+if (!Object.prototype.hasOwnProperty.call(config.envs, config.target)) {
     console.warn(`[${config.application}] unknown environment target, defaulting to local:`, config.target)
     config.target = "local"
 }
