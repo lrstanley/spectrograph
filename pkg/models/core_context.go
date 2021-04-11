@@ -11,4 +11,5 @@ type ContextKey string
 
 const (
 	ContextDebug ContextKey = "debug"
+	ContextUser  ContextKey = "user"
 )

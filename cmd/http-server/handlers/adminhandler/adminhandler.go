@@ -7,6 +7,7 @@ package adminhandler
 import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
+	"github.com/lrstanley/spectrograph/pkg/httpware"
 	"github.com/lrstanley/spectrograph/pkg/models"
 )
 
@@ -23,6 +24,8 @@ func New(users models.UserService, session *scs.SessionManager) *Handler {
 }
 
 func (h *Handler) Route(r chi.Router) {
+	r.Use(httpware.AdminRequired(h.session))
+
 	// r.Get("/redirect", h.getRedirect)
 	// r.Get("/callback", h.getCallback)
 	// r.Get("/self", h.getSelf)

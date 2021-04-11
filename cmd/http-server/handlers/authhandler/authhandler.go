@@ -91,23 +91,11 @@ func (h *Handler) getAuthorizeBot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getRedirect(w http.ResponseWriter, r *http.Request) {
-	if id := h.session.GetString(r.Context(), models.SessionUserIDKey); id != "" {
-		_, err := h.users.Get(r.Context(), id)
-		if err != nil {
-			if models.IsNotFound(err) {
-				h.session.Remove(r.Context(), models.SessionUserIDKey)
-				goto redirect
-			}
-
-			httpware.HandleError(w, r, http.StatusServiceUnavailable, errors.New("unable to query user"))
-			return
-		}
-
+	if httpware.IsAuthed(h.session, r) {
 		httpware.HandleError(w, r, http.StatusBadRequest, errors.New("already authenticated"))
 		return
 	}
 
-redirect:
 	state := util.GenRandString(15)
 	h.session.Put(r.Context(), "state", state)
 	pt.JSON(w, r, pt.M{"auth_redirect": h.config.AuthCodeURL(
@@ -123,14 +111,14 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 		// Only check CSRF tokens if we're out of debug mode.
 		state := h.session.GetString(r.Context(), "state")
 		if state == "" {
-			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? Please try again"))
+			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? please try again"))
 			return
 		}
 
 		h.session.Remove(r.Context(), "state")
 
 		if state != r.FormValue("state") {
-			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? Please try again"))
+			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? please try again"))
 			return
 		}
 	}
@@ -203,24 +191,10 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getSelf(w http.ResponseWriter, r *http.Request) {
-	// w.WriteHeader(http.StatusOK)
-	// pt.JSON(w, r, pt.M{"authenticated": true, "error": "this is an example error"})
-	// return
+	user := httpware.GetUser(r)
 
-	id := h.session.GetString(r.Context(), models.SessionUserIDKey)
-	if id == "" {
+	if user == nil {
 		httpware.HandleError(w, r, http.StatusUnauthorized, errors.New("not logged in"))
-		return
-	}
-
-	user, err := h.users.Get(r.Context(), id)
-	if err != nil {
-		if models.IsNotFound(err) {
-			h.session.Remove(r.Context(), models.SessionUserIDKey)
-			httpware.HandleError(w, r, http.StatusUnauthorized, err)
-			return
-		}
-		httpware.HandleError(w, r, http.StatusInternalServerError, err)
 		return
 	}
 

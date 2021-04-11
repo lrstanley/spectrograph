@@ -86,8 +86,11 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	// Because it's Vue, serve the index.html when possible.
 	r.Get("/", serveIndex)
 	r.NotFound(serveIndex)
-	r.Route("/api/auth", authhandler.New(svcUsers, oauthConfig, session).Route)
-	r.Route("/api/admin", adminhandler.New(svcUsers, session).Route)
+
+	contextUser := httpware.ContextUser(session, svcUsers)
+
+	r.With(contextUser).Route("/api/auth", authhandler.New(svcUsers, oauthConfig, session).Route)
+	r.With(contextUser).Route("/api/admin", adminhandler.New(svcUsers, session).Route)
 
 	// Setup our http server.
 	srv := &http.Server{
