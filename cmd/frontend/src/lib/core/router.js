@@ -42,7 +42,14 @@ const routes = [
     { path: '*', name: 'catchall', redirect: '/404' }
 ]
 
-const router = new VueRouter({ routes, mode: 'history' })
+const router = new VueRouter({
+    routes,
+    mode: 'history',
+    scrollBehavior(to, from, savedPosition) {
+        if (savedPosition) { return savedPosition }
+        return { x: 0, y: 0 }
+    }
+})
 
 router.beforeEach((to, from, next) => {
     router.app.$Progress.start()
