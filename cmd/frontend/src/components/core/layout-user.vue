@@ -2,25 +2,17 @@
     <v-container>
         <v-row>
             <v-col class="d-none d-lg-block" cols="3" xl="2">
-                <v-sheet class="nav-radius">
-                    <nav-user-sidebar
-                        v-if="$store.getters.authed"
-                        :value="true"
-                        floating
-                        :mobile-breakpoint="0"
-                        width="100%"
-                        color="servers"
-                        class="nav-radius"
-                    />
+                <v-sheet class="rounded-lg">
+                    <nav-sidebar v-if="authed" :value="true" user-nav floating :mobile-breakpoint="0" width="100%" color="servers" class="rounded-lg" />
                 </v-sheet>
             </v-col>
 
             <v-col>
                 <v-sheet min-height="70vh" rounded="lg" class="d-flex flex-column align-stretch justify-start pa-4">
-                    <v-overlay :value="$store.getters.loading" absolute>
+                    <v-overlay :value="loading" absolute>
                         <v-progress-circular indeterminate size="64" />
                     </v-overlay>
-                    <router-view v-show="!$store.getters.loading" />
+                    <router-view v-show="!loading" />
                 </v-sheet>
             </v-col>
         </v-row>
@@ -28,19 +20,15 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex"
 import navSidebar from "@/components/core/nav-sidebar.vue"
 
 export default {
     name: "default-layout",
-    components: { navUserSidebar },
+    components: { navSidebar },
     data: function () {
         return {}
     },
+    computed: { ...mapGetters(["authed", "loading"]) },
 }
 </script>
-
-<style scoped>
-.nav-radius {
-    border-radius: 8px;
-}
-</style>
