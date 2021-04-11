@@ -140,12 +140,20 @@ function beforeEach(to, from, next) {
 }
 
 Vue.prototype.updateQuery = function (update) {
-    let query = Object.assign({}, router.app.$route.query, update)
+    // TODO: router.app.$route
+    // router.app.$router
+    let query = Object.assign({}, this.$route.query, update)
     for (let key in query) {
         // if a GET param is false, just remote it.
         if (!query[key]) { delete query[key] }
     }
-    router.app.$router.push({ query: query }).catch(() => { })
+    this.$router.push({ query: query }).catch(() => { })
+}
+
+Vue.prototype.anchor = function (refName) {
+    const element = this.$refs[refName]
+    if (!element) { return }
+    element.scrollIntoView()
 }
 
 Vue.prototype.resetComponentData = function () {

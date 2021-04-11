@@ -8,7 +8,7 @@
                     <v-img src="/src/static/img/mic.png" />
                 </v-avatar>
 
-                <v-btn text :to="{ path: '/' }">Home</v-btn>
+                <v-btn text exact :to="{ name: 'index' }">Home</v-btn>
                 <v-btn text :to="{ path: '/user/details' }">Manage Servers</v-btn>
                 <v-spacer />
                 <v-btn text>Documentation</v-btn>
