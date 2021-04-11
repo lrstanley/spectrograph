@@ -14,3 +14,8 @@ type Session struct {
 	Data    []byte    `bson:"data"`
 	Expires time.Time `bson:"expires"`
 }
+
+const (
+	SessionUserIDKey = "user_id"
+	SessionAdminKey  = "isadmin"
+)

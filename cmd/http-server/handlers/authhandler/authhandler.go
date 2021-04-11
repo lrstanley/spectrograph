@@ -91,11 +91,11 @@ func (h *Handler) getAuthorizeBot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getRedirect(w http.ResponseWriter, r *http.Request) {
-	if id := h.session.GetString(r.Context(), "user_id"); id != "" {
+	if id := h.session.GetString(r.Context(), models.SessionUserIDKey); id != "" {
 		_, err := h.users.Get(r.Context(), id)
 		if err != nil {
 			if models.IsNotFound(err) {
-				h.session.Remove(r.Context(), "user_id")
+				h.session.Remove(r.Context(), models.SessionUserIDKey)
 				goto redirect
 			}
 
@@ -196,7 +196,7 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: prevent session fixation: https://github.com/alexedwards/scs#preventing-session-fixation
-	h.session.Put(r.Context(), "user_id", user.ID.Hex())
+	h.session.Put(r.Context(), models.SessionUserIDKey, user.ID.Hex())
 
 	w.WriteHeader(http.StatusOK)
 	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public()})
@@ -207,7 +207,7 @@ func (h *Handler) getSelf(w http.ResponseWriter, r *http.Request) {
 	// pt.JSON(w, r, pt.M{"authenticated": true, "error": "this is an example error"})
 	// return
 
-	id := h.session.GetString(r.Context(), "user_id")
+	id := h.session.GetString(r.Context(), models.SessionUserIDKey)
 	if id == "" {
 		httpware.HandleError(w, r, http.StatusUnauthorized, errors.New("not logged in"))
 		return
@@ -216,7 +216,7 @@ func (h *Handler) getSelf(w http.ResponseWriter, r *http.Request) {
 	user, err := h.users.Get(r.Context(), id)
 	if err != nil {
 		if models.IsNotFound(err) {
-			h.session.Remove(r.Context(), "user_id")
+			h.session.Remove(r.Context(), models.SessionUserIDKey)
 			httpware.HandleError(w, r, http.StatusUnauthorized, err)
 			return
 		}
@@ -228,7 +228,7 @@ func (h *Handler) getSelf(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getLogout(w http.ResponseWriter, r *http.Request) {
-	h.session.Remove(r.Context(), "user_id")
+	h.session.Remove(r.Context(), models.SessionUserIDKey)
 
 	// TODO: https://discord.com/api/oauth2/token/revoke ? only do if removing
 	// the account?

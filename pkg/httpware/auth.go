@@ -9,16 +9,17 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/lrstanley/pt"
+	"github.com/lrstanley/spectrograph/pkg/models"
 )
 
 func AdminRequired(session *scs.SessionManager) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			admin := session.GetBool(r.Context(), "isadmin") // TODO: should not be in session?
+			admin := session.GetBool(r.Context(), models.SessionAdminKey) // TODO: should not be in session?
 
 			if !admin {
 				w.WriteHeader(http.StatusForbidden)
-				pt.JSON(w, r, pt.M{"error": "Administrators only."})
+				pt.JSON(w, r, pt.M{"error": "administrators only"})
 				return
 			}
 
@@ -30,11 +31,11 @@ func AdminRequired(session *scs.SessionManager) func(next http.Handler) http.Han
 func AuthRequired(session *scs.SessionManager) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			auth := session.GetBool(r.Context(), "isauth")
+			auth := session.GetBool(r.Context(), models.SessionUserIDKey)
 
 			if !auth {
 				w.WriteHeader(http.StatusUnauthorized)
-				pt.JSON(w, r, pt.M{"error": "Authentication required."})
+				pt.JSON(w, r, pt.M{"error": "authentication required"})
 				return
 			}
 

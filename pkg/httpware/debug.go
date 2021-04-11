@@ -7,19 +7,15 @@ package httpware
 import (
 	"context"
 	"net/http"
-)
 
-type ctxKey string
-
-const (
-	ctxKeyDebug ctxKey = "debug"
+	"github.com/lrstanley/spectrograph/pkg/models"
 )
 
 // Debug injects if "debugging" is enabled.
 func Debug(debug bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKeyDebug, debug)))
+			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), models.ContextDebug, debug)))
 		})
 	}
 }
@@ -27,6 +23,6 @@ func Debug(debug bool) func(next http.Handler) http.Handler {
 // IsDebug returns true if debugging for the server is enabled.
 func IsDebug(r *http.Request) bool {
 	// If it's not there, return false anyway.
-	debug, _ := r.Context().Value(ctxKeyDebug).(bool)
+	debug, _ := r.Context().Value(models.ContextDebug).(bool)
 	return debug
 }
