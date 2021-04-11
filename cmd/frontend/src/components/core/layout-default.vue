@@ -47,8 +47,7 @@
 </template>
 
 <script>
-import navUserSidebar from "~/components/core/nav-user-sidebar.vue"
-import footerMetadata from "~/components/core/footer-metadata.vue"
+import footerMetadata from "@/components/core/footer-metadata.vue"
 
 export default {
     name: "default-layout",

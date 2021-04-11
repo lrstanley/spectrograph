@@ -28,8 +28,8 @@
 </template>
 
 <script>
-import footerMetadata from "~/components/core/footer-metadata.vue"
-import next from "~/lib/utils/next"
+import footerMetadata from "@/components/core/footer-metadata.vue"
+import next from "@/lib/utils/next"
 
 export default {
     name: "auth",

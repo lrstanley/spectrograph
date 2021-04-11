@@ -1,4 +1,4 @@
-import http from '~/lib/http/http'
+import http from '@/lib/http/http'
 
 function self(options) { return http.get('/auth/self', options) }
 function redirect(options) { return http.get('/auth/redirect', options) }

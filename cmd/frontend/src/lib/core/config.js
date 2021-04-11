@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import config from '~/config.json'
+import config from '@/config.json'
 
 if (!Object.prototype.hasOwnProperty.call(config.envs, config.target)) {
     console.warn(`[${config.application}] unknown environment target, defaulting to local:`, config.target)

@@ -1,6 +1,6 @@
 import axios from 'axios'
-import config from '~/lib/core/config'
-import utils from '~/lib/http/utils'
+import config from '@/lib/core/config'
+import utils from '@/lib/http/utils'
 
 var http = axios.create({
     baseURL: config.api_baseurl,

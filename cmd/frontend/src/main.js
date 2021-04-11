@@ -1,13 +1,13 @@
 import Vue from 'vue'
 
-import app from '~/app.vue'
-import router from '~/lib/core/router'
-import state from '~/lib/core/state'
-import vuetify from '~/lib/core/vuetify'
+import app from '@/app.vue'
+import router from '@/lib/core/router'
+import state from '@/lib/core/state'
+import vuetify from '@/lib/core/vuetify'
 
-import '~/lib/core/progressbar'
-import '~/lib/http/api'
-import '~/lib/utils/global-prototypes'
+import '@/lib/core/progressbar'
+import '@/lib/http/api'
+import '@/lib/utils/global-prototypes'
 
 Vue.config.productionTip = false
 

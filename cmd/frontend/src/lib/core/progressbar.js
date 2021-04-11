@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueProgressBar from 'vue-progressbar'
 
-import colors from '~/lib/utils/discord-colors'
+import colors from '@/lib/utils/discord-colors'
 
 Vue.use(VueProgressBar, {
     color: colors.nitro,

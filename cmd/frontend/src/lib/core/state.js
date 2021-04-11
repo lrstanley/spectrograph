@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import config from '~/lib/core/config'
-import api from '~/lib/http/api'
+import config from '@/lib/core/config'
+import api from '@/lib/http/api'
 
 // import createPersistedState from 'vuex-persistedstate'
 // import createLogger from 'vuex/dist/logger

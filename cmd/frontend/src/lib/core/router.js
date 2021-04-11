@@ -1,7 +1,12 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import state from '@/lib/core/state'
 
-import state from '~/lib/core/state'
+import LayoutDefault from '@/components/core/layout-default.vue'
+import LayoutUser from '@/components/core/layout-user.vue'
+import Index from '@/views/index.vue'
+import NotFound from '@/views/not-found.vue'
+import Auth from '@/views/auth.vue'
 
 import LayoutDefault from '~/components/core/layout-default.vue'
 import LayoutUser from '~/components/core/layout-user.vue'

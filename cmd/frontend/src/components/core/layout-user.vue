@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import navUserSidebar from "~/components/core/nav-user-sidebar.vue"
+import navSidebar from "@/components/core/nav-sidebar.vue"
 
 export default {
     name: "default-layout",

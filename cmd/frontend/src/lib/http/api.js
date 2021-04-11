@@ -1,6 +1,6 @@
 import Vue from 'vue'
-import http from '~/lib/http/http'
-import auth from '~/lib/http/resources/auth'
+import http from '@/lib/http/http'
+import auth from '@/lib/http/resources/auth'
 
 function install(Vue, options) {
     http.interceptors.request.use((config) => {
