@@ -16,7 +16,7 @@
             <!-- <div style="height: 3000px">Hello world test</div> -->
             <v-row justify="center">
                 <v-col cols="12" md="2" class="d-flex justify-center">
-                    <v-img contain max-height="400" src="/src/static/img/example-bad.png" />
+                    <v-img contain max-height="400" class="rounded-lg mx-3" src="/src/static/img/example-bad.png" />
                 </v-col>
                 <v-col cols="12" md="6" class="d-flex flex-column justify-lg-center">
                     <h1>Out with the old.</h1>
@@ -64,7 +64,7 @@
                     </p>
                 </v-col>
                 <v-col cols="12" md="2" class="d-flex justify-center">
-                    <v-img contain max-height="400" src="/src/static/img/example-new.png" />
+                    <v-img contain max-height="400" class="rounded-lg" src="/src/static/img/example-new.png" />
                 </v-col>
             </v-row>
         </v-container>
@@ -114,11 +114,25 @@ export default {
 }
 
 #more-info {
-    padding-top: 100px;
-    margin-bottom: 100px;
+    padding-top: 0;
+    margin-bottom: 25px;
 }
 
 #more-info > .row {
-    margin-bottom: 50px;
+    margin-bottom: 0;
+}
+
+@media only screen and (min-width: 768px) {
+    #more-info {
+        padding-top: 100px;
+        margin-bottom: 100px;
+    }
+    #more-info > .row {
+        margin-bottom: 50px;
+    }
+}
+
+div >>> .v-image__image--contain {
+    background-size: cover !important;
 }
 </style>
