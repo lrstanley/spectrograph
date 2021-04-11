@@ -79,6 +79,7 @@ func New(users models.UserService, config *oauth2.Config, session *scs.SessionMa
 
 func (h *Handler) Route(r chi.Router) {
 	r.Get("/bot-authorize", h.getAuthorizeBot)
+	// TODO: embed user into request context.
 	r.Get("/redirect", h.getRedirect)
 	r.Get("/callback", h.getCallback)
 	r.Get("/self", h.getSelf)
@@ -178,13 +179,11 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 	user.Discord.RefreshToken = token.RefreshToken
 	user.Discord.ExpiresAt = token.Expiry
 
-	// Fairly certain this has a bug:
-	//   - https://github.com/markbates/goth/blob/master/providers/discord/discord.go#L169-L176
 	// Properly parse out the discord avatar.
 	if user.Discord.Avatar != "" {
 		extension := "jpg"
 		if len(user.Discord.Avatar) >= len(discordGIFAvatarPrefix) &&
-			user.Discord.Avatar[0:len(discordGIFAvatarPrefix)-1] == discordGIFAvatarPrefix {
+			user.Discord.Avatar[0:len(discordGIFAvatarPrefix)] == discordGIFAvatarPrefix {
 			extension = "gif"
 		}
 
