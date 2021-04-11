@@ -1,15 +1,72 @@
 <template>
     <div>
         <div class="header text-center">
-            <h1>It's time to use Spectrograph in your server.</h1>
-            <p class="subtitle">
-                Spectrograph is a Discord bot that manages creating/removing <br/>voice channels depending on occupancy, so you don't have to.
+            <h1>It's time to use <span class="bravery--text">Spectrograph</span> in your server.</h1>
+            <p class="text-subtitle-1">
+                Spectrograph is a Discord bot that manages creating/destroying
+                <br> voice channels depending on occupancy, so you don't have to.
             </p>
-            <v-btn color="primary">Documentation</v-btn>
+            <v-btn color="primary" href="#more-info">More info</v-btn>
             <v-btn color="success">Add to server</v-btn>
         </div>
-        <v-container>
-            <div style="height: 3000px">Hello world test</div>
+        <span class="chevron-down d-flex justify-center">
+            <v-icon size="75">mdi-chevron-down</v-icon>
+        </span>
+        <v-container id="more-info">
+            <!-- <div style="height: 3000px">Hello world test</div> -->
+            <v-row justify="center">
+                <v-col cols="12" md="2" class="d-flex justify-center">
+                    <v-img contain max-height="400" src="/src/static/img/example-bad.png" />
+                </v-col>
+                <v-col cols="12" md="6" class="d-flex flex-column justify-lg-center">
+                    <h1>Out with the old.</h1>
+                    <p class="text-subtitle-1">
+                        Often times, larger (and some smaller) servers have these types of
+                        channels setup. This can get annoying -- so many channels that are empty.
+                        And what about smaller servers that don't have this kind of setup, that
+                        run out of space? Why not be more efficient, without requiring mods/admins
+                        to step in and create spare channels?
+
+                        <br>
+                        <br>
+                        <strong>Spectrograph does just that</strong>. The idea is to always have
+                        one empty channel for a given voice channel "group". If there are 2, or
+                        500 voice channels, there is always an available one to join, ensuring
+                        there is always an adequate amount. No less, no more.
+                    </p>
+                </v-col>
+            </v-row>
+            <v-row justify="center">
+                <v-col cols="12" md="6" class="d-flex flex-column justify-lg-center">
+                    <h1>In with the new (and simple).</h1>
+                    <p class="text-subtitle-1">
+                        Spectrograph monitors voice channel member activity, as well as the
+                        creation/deletion/editing of channels.
+                        <ul>
+                            <li>
+                                Any time there are more than 1 empty channels for a given voice
+                                channel group, Spectrograph will remove the extra channels,
+                                ensuring the empty channel is always at the bottom.
+                            </li>
+                            <li>
+                                Any time there are no empty channels (e.g. user just joined the
+                                last empty channel), Spectrograph will create a new channel at
+                                the bottom of the voice channel group, copying the configuration
+                                from the other channels in the group.
+                            </li>
+                            <li>
+                                When the first voice channel in the given group is changed
+                                (bitrate, user limit, permissions, etc), Spectrograph will
+                                persist these changes across all other channels of the voice
+                                channel group.
+                            </li>
+                        </ul>
+                    </p>
+                </v-col>
+                <v-col cols="12" md="2" class="d-flex justify-center">
+                    <v-img contain max-height="400" src="/src/static/img/example-new.png" />
+                </v-col>
+            </v-row>
         </v-container>
     </div>
 </template>
@@ -26,10 +83,12 @@ export default {
 
 <style scoped>
 .header {
-    padding-top: 200px;
-    min-height: 100vh;
+    /* padding-top: 200px; */
+    padding: 200px 30px 0;
+    height: 130vh;
+    margin-bottom: -300px;
     width: 100vw;
-    color: #FFFFFF;
+    color: #ffffff;
     background-image: url(/src/static/img/bg.svg);
     background-position: center;
     background-size: 200%;
@@ -43,32 +102,23 @@ export default {
 
 @media only screen and (min-width: 1200px) {
     .header {
-        padding-top: 200px;
+        /* padding-top: 200px; */
         background-position: center; /* top; */
         background-size: 100%;
     }
 }
 
-
-
-
-/* .content:before {
-    background-size: cover;
+.chevron-down {
+    position: relative;
+    top: -15vh;
 }
-.content:after, .content:before {
-    -webkit-clip-path: polygon(100% 0,0 0,0 77.5%,1% 77.4%,2% 77.1%,3% 76.6%,4% 75.9%,5% 75.05%,6% 74.05%,7% 72.95%,8% 71.75%,9% 70.55%,10% 69.3%,11% 68.05%,12% 66.9%,13% 65.8%,14% 64.8%,15% 64%,16% 63.35%,17% 62.85%,18% 62.6%,19% 62.5%,20% 62.65%,21% 63%,22% 63.5%,23% 64.2%,24% 65.1%,25% 66.1%,26% 67.2%,27% 68.4%,28% 69.65%,29% 70.9%,30% 72.15%,31% 73.3%,32% 74.35%,33% 75.3%,34% 76.1%,35% 76.75%,36% 77.2%,37% 77.45%,38% 77.5%,39% 77.3%,40% 76.95%,41% 76.4%,42% 75.65%,43% 74.75%,44% 73.75%,45% 72.6%,46% 71.4%,47% 70.15%,48% 68.9%,49% 67.7%,50% 66.55%,51% 65.5%,52% 64.55%,53% 63.75%,54% 63.15%,55% 62.75%,56% 62.55%,57% 62.5%,58% 62.7%,59% 63.1%,60% 63.7%,61% 64.45%,62% 65.4%,63% 66.45%,64% 67.6%,65% 68.8%,66% 70.05%,67% 71.3%,68% 72.5%,69% 73.6%,70% 74.65%,71% 75.55%,72% 76.35%,73% 76.9%,74% 77.3%,75% 77.5%,76% 77.45%,77% 77.25%,78% 76.8%,79% 76.2%,80% 75.4%,81% 74.45%,82% 73.4%,83% 72.25%,84% 71.05%,85% 69.8%,86% 68.55%,87% 67.35%,88% 66.2%,89% 65.2%,90% 64.3%,91% 63.55%,92% 63%,93% 62.65%,94% 62.5%,95% 62.55%,96% 62.8%,97% 63.3%,98% 63.9%,99% 64.75%,100% 65.7%);
-    clip-path: polygon(100% 0,0 0,0 77.5%,1% 77.4%,2% 77.1%,3% 76.6%,4% 75.9%,5% 75.05%,6% 74.05%,7% 72.95%,8% 71.75%,9% 70.55%,10% 69.3%,11% 68.05%,12% 66.9%,13% 65.8%,14% 64.8%,15% 64%,16% 63.35%,17% 62.85%,18% 62.6%,19% 62.5%,20% 62.65%,21% 63%,22% 63.5%,23% 64.2%,24% 65.1%,25% 66.1%,26% 67.2%,27% 68.4%,28% 69.65%,29% 70.9%,30% 72.15%,31% 73.3%,32% 74.35%,33% 75.3%,34% 76.1%,35% 76.75%,36% 77.2%,37% 77.45%,38% 77.5%,39% 77.3%,40% 76.95%,41% 76.4%,42% 75.65%,43% 74.75%,44% 73.75%,45% 72.6%,46% 71.4%,47% 70.15%,48% 68.9%,49% 67.7%,50% 66.55%,51% 65.5%,52% 64.55%,53% 63.75%,54% 63.15%,55% 62.75%,56% 62.55%,57% 62.5%,58% 62.7%,59% 63.1%,60% 63.7%,61% 64.45%,62% 65.4%,63% 66.45%,64% 67.6%,65% 68.8%,66% 70.05%,67% 71.3%,68% 72.5%,69% 73.6%,70% 74.65%,71% 75.55%,72% 76.35%,73% 76.9%,74% 77.3%,75% 77.5%,76% 77.45%,77% 77.25%,78% 76.8%,79% 76.2%,80% 75.4%,81% 74.45%,82% 73.4%,83% 72.25%,84% 71.05%,85% 69.8%,86% 68.55%,87% 67.35%,88% 66.2%,89% 65.2%,90% 64.3%,91% 63.55%,92% 63%,93% 62.65%,94% 62.5%,95% 62.55%,96% 62.8%,97% 63.3%,98% 63.9%,99% 64.75%,100% 65.7%);
+
+#more-info {
+    padding-top: 100px;
+    margin-bottom: 100px;
 }
-.content:after, .content:before {
-    display: block;
-    height: 900px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+
+#more-info > .row {
+    margin-bottom: 50px;
 }
-.content:after {
-    content: "";
-    background: linear-gradient(130deg, #ff7a18,#af002d 41.07%,#319197 76.05%);
-} */
 </style>

@@ -11,16 +11,16 @@
                         width="100%"
                         color="servers"
                         class="nav-radius"
-                    ></nav-user-sidebar>
+                    />
                 </v-sheet>
             </v-col>
 
             <v-col>
                 <v-sheet min-height="70vh" rounded="lg" class="d-flex flex-column align-stretch justify-start pa-4">
                     <v-overlay :value="$store.getters.loading" absolute>
-                        <v-progress-circular indeterminate size="64"></v-progress-circular>
+                        <v-progress-circular indeterminate size="64" />
                     </v-overlay>
-                    <router-view v-show="!$store.getters.loading"></router-view>
+                    <router-view v-show="!$store.getters.loading" />
                 </v-sheet>
             </v-col>
         </v-row>

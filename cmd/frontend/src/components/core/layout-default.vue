@@ -2,7 +2,7 @@
     <div>
         <v-app-bar app color="primary" flat>
             <!-- TODO: handle side navigation via route metadata field? -->
-            <v-app-bar-nav-icon v-if="$route.path.startsWith('/user')" class="d-lg-none d-xl-none" @click="drawer = !drawer"></v-app-bar-nav-icon>
+            <v-app-bar-nav-icon v-if="$route.path.startsWith('/user')" class="d-lg-none d-xl-none" @click="drawer = !drawer" />
             <v-container class="py-0 fill-height">
                 <v-avatar color="servers" size="45" class="mr-5">
                     <v-img src="/src/static/img/mic.png" />
@@ -10,10 +10,10 @@
 
                 <v-btn text :to="{ path: '/' }">Home</v-btn>
                 <v-btn text :to="{ path: '/user/details' }">Manage Servers</v-btn>
-                <v-spacer></v-spacer>
+                <v-spacer />
                 <v-btn text>Documentation</v-btn>
                 <v-badge color="accent" icon="mdi-discord" overlap>
-                    <v-btn color="channels">Support</v-btn>
+                    <v-btn color="channels" href="https://liam.sh/chat" target="_blank">Support</v-btn>
                 </v-badge>
                 <!-- <v-btn color="accent">
                     <v-icon class="mr-1">mdi-help-circle</v-icon> Support
@@ -25,7 +25,7 @@
                 <!-- <v-spacer></v-spacer> -->
 
                 <v-responsive max-width="260" class="d-none d-md-block ml-10 mr-5">
-                    <v-text-field dense flat hide-details rounded solo prepend-inner-icon="mdi-magnify" placeholder="Search servers"></v-text-field>
+                    <v-text-field dense flat hide-details rounded solo prepend-inner-icon="mdi-magnify" placeholder="Search servers" />
                 </v-responsive>
                 <!-- <v-avatar class="hidden-sm-and-down" color="grey darken-1 shrink" size="32"></v-avatar> -->
                 <v-btn v-if="!$store.getters.authed" text @click="$router.push({ name: 'auth', params: { method: 'redirect' } })">Login</v-btn>
@@ -33,15 +33,15 @@
             </v-container>
         </v-app-bar>
 
-        <nav-user-sidebar v-if="$store.getters.authed" v-model="drawer" fixed temporary></nav-user-sidebar>
+        <nav-user-sidebar v-if="$store.getters.authed" v-model="drawer" fixed temporary />
 
         <v-main>
-            <router-view></router-view>
+            <router-view />
         </v-main>
 
         <v-footer app padless inset>
-            <div class="flex-grow-1"></div>
-            <footer-metadata></footer-metadata>
+            <div class="flex-grow-1" />
+            <footer-metadata />
         </v-footer>
     </div>
 </template>
