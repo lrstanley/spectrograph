@@ -7,8 +7,9 @@ if (!Object.prototype.hasOwnProperty.call(config.envs, config.target)) {
 }
 var c = { ...config.envs[config.target], ...config }
 c.target = config.target
-
 c.debugLog = function (...data) { if (c.debug) { console.warn(`[${config.application}:debug]`, ...data) } }
+
+c.bot_auth_url = `${c.api_baseurl}/auth/bot-authorize`
 
 // register global prototypes.
 Vue.prototype.$config = c

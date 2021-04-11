@@ -55,8 +55,9 @@ import (
 // }
 
 const (
-	discordUserEndpoint   = "https://discord.com/api/users/@me"
-	discordGuildsEndpoint = "https://discord.com/api/users/@me/guilds"
+	discordUserEndpoint    = "https://discord.com/api/users/@me"
+	discordGuildsEndpoint  = "https://discord.com/api/users/@me/guilds"
+	discordBotAuthEndpoint = "https://discord.com/oauth2/authorize?client_id=%s&scope=bot&permissions=1049616"
 
 	discordGIFAvatarPrefix = "a_"
 	discordAvatarEndpoint  = "https://media.discordapp.net/avatars/%s/%s.%s"
@@ -77,10 +78,15 @@ func New(users models.UserService, config *oauth2.Config, session *scs.SessionMa
 }
 
 func (h *Handler) Route(r chi.Router) {
+	r.Get("/bot-authorize", h.getAuthorizeBot)
 	r.Get("/redirect", h.getRedirect)
 	r.Get("/callback", h.getCallback)
 	r.Get("/self", h.getSelf)
 	r.Get("/logout", h.getLogout)
+}
+
+func (h *Handler) getAuthorizeBot(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, fmt.Sprintf(discordBotAuthEndpoint, h.config.ClientID), http.StatusTemporaryRedirect)
 }
 
 func (h *Handler) getRedirect(w http.ResponseWriter, r *http.Request) {

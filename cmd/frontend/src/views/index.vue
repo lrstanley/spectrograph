@@ -7,13 +7,12 @@
                 <br> voice channels depending on occupancy, so you don't have to.
             </p>
             <v-btn color="primary" @click.up="anchor('more-info')">More info</v-btn>
-            <v-btn color="success">Add to server</v-btn>
+            <v-btn color="success" :href="$config.bot_auth_url" target="_blank">Add to server</v-btn>
         </div>
         <span class="chevron-down d-flex justify-center">
             <v-icon size="75">mdi-chevron-down</v-icon>
         </span>
         <v-container id="more-info" ref="more-info" class="px-7 px-md-0">
-            <!-- <div style="height: 3000px">Hello world test</div> -->
             <v-row justify="center">
                 <v-col cols="12" md="2" class="d-flex justify-center">
                     <v-img contain max-height="400" class="rounded-lg mx-3" src="/src/static/img/example-bad.png" />

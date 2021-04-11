@@ -5,10 +5,12 @@ function redirect(options) { return http.get('/auth/redirect', options) }
 function logout(options) { return http.get('/auth/logout', options) }
 
 function callback(code, state, options) {
-    return http.get('/auth/callback', { ...options, params: {
-        code: code,
-        state: state,
-    }})
+    return http.get('/auth/callback', {
+        ...options, params: {
+            code: code,
+            state: state,
+        }
+    })
 }
 
 export default {
