@@ -8,11 +8,7 @@ import Index from '@/views/index.vue'
 import NotFound from '@/views/not-found.vue'
 import Auth from '@/views/auth.vue'
 
-import LayoutDefault from '~/components/core/layout-default.vue'
-import LayoutUser from '~/components/core/layout-user.vue'
-import Index from '~/views/index.vue'
-import NotFound from '~/views/not-found.vue'
-import Auth from '~/views/auth.vue'
+import UserDetails from '@/views/user/user-details.vue'
 
 Vue.use(VueRouter)
 
@@ -24,8 +20,7 @@ const routes = [
             {
                 path: '/',
                 name: Index.name,
-                component: Index,
-                // meta: { auth: true }
+                component: Index
             },
             {
                 path: '/user',
@@ -35,8 +30,8 @@ const routes = [
                 children: [
                     {
                         path: '/user/details',
-                        name: Index.name,
-                        component: Index
+                        name: UserDetails.name,
+                        component: UserDetails
                     }
                 ]
             }
