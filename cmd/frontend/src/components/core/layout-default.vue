@@ -1,10 +1,10 @@
 <template>
     <div>
-        <v-app-bar app color="primary" flat>
+        <v-app-bar app color="secondary" flat>
             <!-- TODO: handle side navigation via route metadata field? -->
             <v-app-bar-nav-icon v-if="$route.path.startsWith('/user')" class="d-lg-none d-xl-none" @click="drawer = !drawer" />
             <v-container class="py-0 fill-height">
-                <v-avatar color="servers" size="45" class="mr-5">
+                <v-avatar size="45" class="mr-5">
                     <v-img src="/src/static/img/mic.png" />
                 </v-avatar>
 
@@ -13,7 +13,7 @@
                 <v-spacer />
                 <v-btn text>Documentation</v-btn>
                 <v-badge color="accent" icon="mdi-discord" overlap>
-                    <v-btn color="channels" href="https://liam.sh/chat" target="_blank">Support</v-btn>
+                    <v-btn color="discord" href="https://liam.sh/chat" target="_blank">Support</v-btn>
                 </v-badge>
                 <!-- <v-btn color="accent">
                     <v-icon class="mr-1">mdi-help-circle</v-icon> Support
