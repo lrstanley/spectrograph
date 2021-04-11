@@ -6,10 +6,12 @@ package httpware
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/apex/log"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/lrstanley/pt"
 	"github.com/lrstanley/spectrograph/pkg/models"
 )
@@ -42,9 +44,19 @@ func HandleError(w http.ResponseWriter, r *http.Request, statusCode int, err err
 	statusText := http.StatusText(statusCode)
 
 	if strings.HasPrefix(r.URL.Path, "/api/") {
-		pt.JSON(w, r, pt.M{"error": err.Error(), "type": statusText, "code": statusCode})
+		pt.JSON(w, r, pt.M{
+			"error":      err.Error(),
+			"type":       statusText,
+			"code":       statusCode,
+			"request_id": middleware.GetReqID(r.Context()),
+		})
 	} else {
-		http.Error(w, statusText+": "+err.Error(), statusCode)
+		http.Error(w, fmt.Sprintf(
+			"%s: %s (id: %s)",
+			statusText,
+			err.Error(),
+			middleware.GetReqID(r.Context()),
+		), statusCode)
 	}
 
 	if statusCode >= 500 {
