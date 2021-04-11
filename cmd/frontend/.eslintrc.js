@@ -12,6 +12,7 @@ module.exports = {
         'vue/html-indent': 'off',
         'vue/max-attributes-per-line': 'off',
         'vue/singleline-html-element-content-newline': 'off',
+        'vue/component-definition-name-casing': 'off',
         'newline-per-chained-call': 'off'
     }
 }
