@@ -23,7 +23,8 @@ type User struct {
 	AccountCreated time.Time          `bson:"account_created" json:"account_created"`
 	AccountUpdated time.Time          `bson:"account_updated" json:"account_updated"`
 
-	Discord UserAuthDiscord `bson:"discord" json:"discord"`
+	Discord        UserAuthDiscord     `bson:"discord"         json:"discord"`
+	DiscordServers []UserDiscordServer `bson:"discord_servers" json:"discord_servers"`
 }
 
 type UserPublic struct {
@@ -35,6 +36,8 @@ type UserPublic struct {
 	Discriminator string `json:"discriminator"`
 	Avatar        string `json:"avatar"`
 	AvatarURL     string `json:"avatar_url"`
+
+	Servers []UserDiscordServer `json:"servers"`
 }
 
 func (u *User) Public() *UserPublic {
@@ -47,6 +50,8 @@ func (u *User) Public() *UserPublic {
 		Discriminator: u.Discord.Discriminator,
 		Avatar:        u.Discord.Avatar,
 		AvatarURL:     u.Discord.AvatarURL,
+
+		Servers: u.DiscordServers,
 	}
 }
 
@@ -59,6 +64,28 @@ func (r *User) Validate() error {
 		return err
 	}
 	return nil
+}
+
+// {
+//     "features": [
+//         "WELCOME_SCREEN_ENABLED", "NEWS", "COMMUNITY"
+//     ],
+//     "icon":"3a0892e2c181bd2fe877e6c4341d163e",
+//     "id":"679506910449500196",
+//     "name":"bytecord",
+//     "owner":true,
+//     "permissions":2.147483647e+09,
+//     "permissions_new":"8589934591"
+// }
+// https://discord.com/developers/docs/resources/guild#guild-object
+type UserDiscordServer struct {
+	ID          string   `bson:"id"              json:"id"`       // guild id.
+	Name        string   `bson:"name"            json:"name"`     // guild name (2-100 chars, excl. trailing/leading spaces).
+	Owner       bool     `bson:"owner"           json:"owner"`    // true if the user is the owner of the guild
+	Features    []string `bson:"features"        json:"features"` // enabled guild features.
+	Icon        string   `bson:"icon"            json:"icon"`     // icon hash.
+	IconURL     string   `bson:"icon_url"        json:"icon_url"`
+	Permissions string   `bson:"permissions_new" json:"permissions_new"` // permissions for the user (excludes overrides).
 }
 
 // See also: https://discord.com/developers/docs/resources/user#user-object
