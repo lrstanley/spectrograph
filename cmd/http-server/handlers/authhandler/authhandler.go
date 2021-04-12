@@ -14,53 +14,15 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/lrstanley/pt"
+	"github.com/lrstanley/spectrograph/pkg/discordapi"
 	"github.com/lrstanley/spectrograph/pkg/httpware"
 	"github.com/lrstanley/spectrograph/pkg/models"
 	"github.com/lrstanley/spectrograph/pkg/util"
 	"golang.org/x/oauth2"
 )
 
-// {
-//     "authenticated":true,
-//     "user":{
-//         "RawData":{
-//             "avatar":"TRUNCATED",
-//             "discriminator":"0001",
-//             "email":"me@liamstanley.io",
-//             "flags":0,
-//             "id":"212002249445081090",
-//             "locale":"en-US",
-//             "mfa_enabled":false,
-//             "premium_type":1,
-//             "public_flags":0,
-//             "username":"/home/liam",
-//             "verified":true
-//         },
-//         "Provider":"discord",
-//         "Email":"TRUNCATED",
-//         "Name":"/home/liam",
-//         "FirstName":"",
-//         "LastName":"",
-//         "NickName":"",
-//         "Description":"",
-//         "UserID":"212002249445081090",
-//         "AvatarURL":"TRUNCATED",
-//         "Location":"",
-//         "AccessToken":"TRUNCATED",
-//         "AccessTokenSecret":"",
-//         "RefreshToken":"TRUNCATED",
-//         "ExpiresAt":"2021-04-04T06:17:10.4241762Z",
-//         "IDToken":""
-//     }
-// }
-
 const (
-	discordUserEndpoint    = "https://discord.com/api/users/@me"
-	discordGuildsEndpoint  = "https://discord.com/api/users/@me/guilds"
 	discordBotAuthEndpoint = "https://discord.com/oauth2/authorize?client_id=%s&scope=bot&permissions=1049616"
-
-	discordGIFAvatarPrefix = "a_"
-	discordAvatarEndpoint  = "https://media.discordapp.net/avatars/%s/%s.%s"
 )
 
 type Handler struct {
@@ -129,24 +91,19 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 		httpware.HandleError(w, r, http.StatusBadRequest, fmt.Errorf("error getting token: %w", err))
 		return
 	}
-
 	client := h.config.Client(r.Context(), token)
 
-	req, err := http.NewRequest("GET", discordUserEndpoint, nil)
+	user, err := discordapi.FetchUser(client, token)
 	if err != nil {
-		httpware.HandleError(w, r, http.StatusInternalServerError, err)
+		// TODO: return statusCode so we can do unauthorized or similar?
+		httpware.HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("discord: %w", err))
 		return
 	}
 
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
-
-	resp, err := client.Do(req)
-	if err != nil {
+	if err := h.users.Upsert(r.Context(), user); err != nil {
 		httpware.HandleError(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		httpware.HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("discord responded with %d when trying to fetch user information", resp.StatusCode))
