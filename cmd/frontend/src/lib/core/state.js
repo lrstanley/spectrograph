@@ -30,28 +30,26 @@ export default new Vuex.Store({
         }
     },
     actions: {
-        get_auth: function ({ commit, state }, routeGuard) {
-            return new Promise((resolve, reject) => {
-                if (routeGuard && state.auth !== null) {
-                    // determine if auth-check is older than 5 minutes, and
-                    // we should re-check for auth just in case.
-                    if ((new Date() - state.auth_last_checked) < 5 * 60 * 1000) {
-                        resolve()
-                        return
-                    }
+        get_auth: async function ({ commit, state }, routeGuard) {
+            if (routeGuard && state.auth !== null) {
+                // determine if auth-check is older than 5 minutes, and
+                // we should re-check for auth just in case.
+                if ((new Date() - state.auth_last_checked) < 5 * 60 * 1000) {
+                    return
                 }
+            }
 
-                api.auth.self().then((resp) => {
-                    commit('set_auth', resp.data)
-                    resolve()
-                }).catch((err) => {
-                    commit('set_auth', false)
-                    reject(err)
-                })
-            })
+            try {
+                let resp = await api.auth.self()
+                commit('set_auth', resp.data)
+                return resp.data
+            } catch (err) {
+                commit('set_auth', false)
+                throw err
+            }
         },
         logout: function ({ commit }) {
-            new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 api.auth.logout().then((resp) => {
                     commit('set_auth', false)
                     resolve(resp)
@@ -62,9 +60,9 @@ export default new Vuex.Store({
         }
     },
     getters: {
-        user: (state) => { return state.auth ? state.auth.user : null },
-        authed: (state) => { return state.auth ? state.auth.authenticated : false },
-        admin: (state) => { return state.auth ? state.auth.admin : false },
+        user: (state) => { return state.auth?.user },
+        authed: (state) => { return state.auth?.authenticated },
+        admin: (state) => { return state.auth?.admin },
         loading: (state) => { return state.loading }
     }
 })
