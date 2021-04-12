@@ -5,11 +5,9 @@
 package authhandler
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
@@ -88,7 +86,7 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.config.Exchange(r.Context(), r.FormValue("code"))
 	if err != nil {
-		httpware.HandleError(w, r, http.StatusBadRequest, fmt.Errorf("error getting token: %w", err))
+		httpware.HandleError(w, r, http.StatusUnauthorized, fmt.Errorf("error getting token: %w", err))
 		return
 	}
 	client := h.config.Client(r.Context(), token)
@@ -105,42 +103,12 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		httpware.HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("discord responded with %d when trying to fetch user information", resp.StatusCode))
-		return
-	}
-
-	user := &models.User{
-		AccountUpdated: time.Now(),
-	}
-	err = json.NewDecoder(resp.Body).Decode(&user.Discord)
-	if err != nil {
-		httpware.HandleError(w, r, http.StatusInternalServerError, errors.New("received an invalid response from Discord"))
-		return
-	}
-
-	user.Discord.LastLogin = time.Now()
-	user.Discord.AccessToken = token.AccessToken
-	user.Discord.RefreshToken = token.RefreshToken
-	user.Discord.ExpiresAt = token.Expiry
-
-	// Properly parse out the discord avatar.
-	if user.Discord.Avatar != "" {
-		extension := "jpg"
-		if len(user.Discord.Avatar) >= len(discordGIFAvatarPrefix) &&
-			user.Discord.Avatar[0:len(discordGIFAvatarPrefix)] == discordGIFAvatarPrefix {
-			extension = "gif"
-		}
-
-		user.Discord.AvatarURL = fmt.Sprintf(discordAvatarEndpoint, user.Discord.ID, user.Discord.Avatar, extension)
-	}
-
-	if err := h.users.Upsert(r.Context(), user); err != nil {
+	// Prevent session fixation (and change in auth, or privilege, make a new
+	// session token).
+	if err = h.session.RenewToken(r.Context()); err != nil {
 		httpware.HandleError(w, r, http.StatusInternalServerError, err)
 		return
 	}
-
-	// TODO: prevent session fixation: https://github.com/alexedwards/scs#preventing-session-fixation
 	h.session.Put(r.Context(), models.SessionUserIDKey, user.ID.Hex())
 
 	w.WriteHeader(http.StatusOK)
