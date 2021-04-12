@@ -88,7 +88,7 @@ export default {
     margin-bottom: -300px;
     width: 100vw;
     color: #ffffff;
-    background-image: url(/src/static/img/bg.svg);
+    background-image: url(/src/static/img/bg.min.svg);
     background-position: center;
     background-size: 200%;
     background-repeat: no-repeat;
