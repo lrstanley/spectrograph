@@ -97,7 +97,7 @@ type UserAuthDiscord struct {
 	Username      string `bson:"username"      json:"username"      validate:"required"` // the users username, not unique across the platform
 	Discriminator string `bson:"discriminator" json:"discriminator" validate:"required"` // the users 4-digit discord-tag
 	Email         string `bson:"email"         json:"email"         validate:"required"` // the users email
-	Avatar        string `bson:"avatar"        json:"avatar"        validate:"required"` // the users avatar url
+	Avatar        string `bson:"avatar"        json:"avatar"`                            // the users avatar url
 	AvatarURL     string `bson:"avatar_url"    json:"avatar_url"    validate:"required"` // the users avatar hash
 
 	// Additional parameters provided by the API.
