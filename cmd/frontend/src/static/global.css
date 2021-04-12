@@ -1,0 +1,89 @@
+.clickable {
+    cursor: pointer;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 6px;
+}
+::-webkit-scrollbar-track-piece {
+    background-color: #2f3136;
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #7289da;
+    background-clip: padding-box;
+    border: 3px solid #36393f;
+    border-radius: 7px;
+}
+::-webkit-scrollbar-thumb:window-inactive {
+    background-color: #99aab5;
+}
+
+/*
+    generated from: https://google-webfonts-helper.herokuapp.com/fonts/roboto?subsets=latin
+    styles: 100, 300, regular, 500, 700, 900
+    charset: latin
+    prefix: /src/static/fonts/
+*/
+
+/* roboto-100 - latin */
+@font-face {
+    font-family: "Roboto";
+    font-style: normal;
+    font-weight: 100;
+    src: url(/src/static/fonts/roboto-v27-latin-100.eot);
+    src: local(""), url(/src/static/fonts/roboto-v27-latin-100.eot?#iefix) format("embedded-opentype"),
+        url(/src/static/fonts/roboto-v27-latin-100.woff2) format("woff2"), url(/src/static/fonts/roboto-v27-latin-100.woff) format("woff"),
+        url(/src/static/fonts/roboto-v27-latin-100.ttf) format("truetype"), url(/src/static/fonts/roboto-v27-latin-100.svg#Roboto) format("svg");
+}
+/* roboto-300 - latin */
+@font-face {
+    font-family: "Roboto";
+    font-style: normal;
+    font-weight: 300;
+    src: url(/src/static/fonts/roboto-v27-latin-300.eot);
+    src: local(""), url(/src/static/fonts/roboto-v27-latin-300.eot?#iefix) format("embedded-opentype"),
+        url(/src/static/fonts/roboto-v27-latin-300.woff2) format("woff2"), url(/src/static/fonts/roboto-v27-latin-300.woff) format("woff"),
+        url(/src/static/fonts/roboto-v27-latin-300.ttf) format("truetype"), url(/src/static/fonts/roboto-v27-latin-300.svg#Roboto) format("svg");
+}
+/* roboto-regular - latin */
+@font-face {
+    font-family: "Roboto";
+    font-style: normal;
+    font-weight: 400;
+    src: url(/src/static/fonts/roboto-v27-latin-regular.eot);
+    src: local(""), url(/src/static/fonts/roboto-v27-latin-regular.eot?#iefix) format("embedded-opentype"),
+        url(/src/static/fonts/roboto-v27-latin-regular.woff2) format("woff2"), url(/src/static/fonts/roboto-v27-latin-regular.woff) format("woff"),
+        url(/src/static/fonts/roboto-v27-latin-regular.ttf) format("truetype"), url(/src/static/fonts/roboto-v27-latin-regular.svg#Roboto) format("svg");
+}
+/* roboto-500 - latin */
+@font-face {
+    font-family: "Roboto";
+    font-style: normal;
+    font-weight: 500;
+    src: url(/src/static/fonts/roboto-v27-latin-500.eot);
+    src: local(""), url(/src/static/fonts/roboto-v27-latin-500.eot?#iefix) format("embedded-opentype"),
+        url(/src/static/fonts/roboto-v27-latin-500.woff2) format("woff2"), url(/src/static/fonts/roboto-v27-latin-500.woff) format("woff"),
+        url(/src/static/fonts/roboto-v27-latin-500.ttf) format("truetype"), url(/src/static/fonts/roboto-v27-latin-500.svg#Roboto) format("svg");
+}
+/* roboto-700 - latin */
+@font-face {
+    font-family: "Roboto";
+    font-style: normal;
+    font-weight: 700;
+    src: url(/src/static/fonts/roboto-v27-latin-700.eot);
+    src: local(""), url(/src/static/fonts/roboto-v27-latin-700.eot?#iefix) format("embedded-opentype"),
+        url(/src/static/fonts/roboto-v27-latin-700.woff2) format("woff2"), url(/src/static/fonts/roboto-v27-latin-700.woff) format("woff"),
+        url(/src/static/fonts/roboto-v27-latin-700.ttf) format("truetype"), url(/src/static/fonts/roboto-v27-latin-700.svg#Roboto) format("svg");
+}
+/* roboto-900 - latin */
+@font-face {
+    font-family: "Roboto";
+    font-style: normal;
+    font-weight: 900;
+    src: url(/src/static/fonts/roboto-v27-latin-900.eot);
+    src: local(""), url(/src/static/fonts/roboto-v27-latin-900.eot?#iefix) format("embedded-opentype"),
+        url(/src/static/fonts/roboto-v27-latin-900.woff2) format("woff2"), url(/src/static/fonts/roboto-v27-latin-900.woff) format("woff"),
+        url(/src/static/fonts/roboto-v27-latin-900.ttf) format("truetype"), url(/src/static/fonts/roboto-v27-latin-900.svg#Roboto) format("svg");
+}
