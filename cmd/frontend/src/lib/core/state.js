@@ -48,15 +48,10 @@ export default new Vuex.Store({
                 throw err
             }
         },
-        logout: function ({ commit }) {
-            return new Promise((resolve, reject) => {
-                api.auth.logout().then((resp) => {
-                    commit('set_auth', false)
-                    resolve(resp)
-                }).catch((err) => {
-                    reject(err)
-                })
-            })
+        logout: async function ({ commit }) {
+            let resp = api.auth.logout()
+            commit('set_auth', false)
+            return resp.data
         }
     },
     getters: {
