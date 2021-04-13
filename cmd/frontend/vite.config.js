@@ -7,6 +7,10 @@ export default defineConfig({
     plugins: [
         createVuePlugin(),
         ViteComponents({
+            // https://github.com/antfu/vite-plugin-components#configuration
+            dirs: ['./src/components'],
+            extensions: ['vue'],
+            deep: true,
             customComponentResolvers: [VuetifyResolver()]
         })
     ],
@@ -14,7 +18,6 @@ export default defineConfig({
     resolve: {
         alias: {
             // see also: jsconfig.json
-            '~': path.resolve(__dirname, './src'),
             '@': path.resolve(__dirname, './src')
         },
     },
