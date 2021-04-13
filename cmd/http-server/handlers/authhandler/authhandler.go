@@ -39,7 +39,6 @@ func New(users models.UserService, config *oauth2.Config, session *scs.SessionMa
 
 func (h *Handler) Route(r chi.Router) {
 	r.Get("/bot-authorize", h.getAuthorizeBot)
-	// TODO: embed user into request context.
 	r.Get("/redirect", h.getRedirect)
 	r.Get("/callback", h.getCallback)
 	r.Get("/self", h.getSelf)
