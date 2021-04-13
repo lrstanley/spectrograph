@@ -5,7 +5,7 @@ if [ "$(basename $PWD)" != "spectrograph" ];then
     exit 1
 fi
 
-mkdir -vp ./cmd/frontend/dist
+mkdir -vp ./cmd/frontend/dist ./cmd/frontend/node_modules/.vite
 mkdir -vp ./cmd/http-server/{public,bin}
 mkdir -vp ./cmd/worker/bin
 

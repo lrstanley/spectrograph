@@ -1,7 +1,6 @@
 version: "3"
 volumes:
     frontend_dist: {}
-    frontend_modules: {}
     go_cache: {}
     go_path: {}
 services:
@@ -14,7 +13,6 @@ services:
         working_dir: /build/cmd/frontend
         volumes:
             - frontend_dist:/build/cmd/frontend/dist
-            - frontend_modules:/build/cmd/frontend/node_modules
             - ../:/build/ # root of repository
     http-server:
         depends_on: ["mongo"]
