@@ -1,3 +1,12 @@
+/*
+    temporary fix for what I believe is a bug
+    https://codepen.io/lrstanley/pen/ExZLYBK
+*/
+.v-badge__badge .v-icon__svg {
+    height: 12px;
+    width: 12px;
+}
+
 .clickable {
     cursor: pointer;
 }

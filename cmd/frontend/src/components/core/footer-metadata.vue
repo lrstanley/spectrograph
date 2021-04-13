@@ -1,15 +1,19 @@
 <template>
     <span>
-        Made with <v-icon color="error" small>mdi-heart</v-icon> by
+        Made with <v-icon color="error" small>{{ mdiHeart }}</v-icon> by
         <a href="https://liam.sh/" target="_blank">Liam Stanley</a>
     </span>
 </template>
 
 <script>
+import { mdiHeart } from "@mdi/js"
+
 export default {
     name: "footer-metadata",
     data: function () {
-        return {}
+        return {
+            mdiHeart,
+        }
     },
 }
 </script>

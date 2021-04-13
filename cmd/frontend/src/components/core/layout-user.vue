@@ -21,11 +21,9 @@
 
 <script>
 import { mapGetters } from "vuex"
-import navSidebar from "@/components/core/nav-sidebar.vue"
 
 export default {
     name: "default-layout",
-    components: { navSidebar },
     data: function () {
         return {}
     },

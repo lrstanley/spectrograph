@@ -4,9 +4,11 @@
             <v-col cols="12" sm="12" md="8" lg="4" class="text-center">
                 <div v-if="error">
                     <span class="d-flex">
-                        <v-btn text color="primary" class="mb-2" @click.up="$router.go(-2)"> <v-icon>mdi-chevron-left</v-icon> go back </v-btn>
+                        <v-btn text color="primary" class="mb-2" @click.up="$router.go(-2)">
+                            <v-icon>{{ mdiChevronLeft }}</v-icon> go back
+                        </v-btn>
                         <v-btn text color="primary" class="mb-2 ml-auto" @click.up="$router.push({ name: 'index' })">
-                            <v-icon>mdi-home-outline</v-icon> home
+                            <v-icon>{{ mdiHomeOutline }}</v-icon> home
                         </v-btn>
                     </span>
                     <v-alert border="left" colored-border type="error" elevation="2">
@@ -28,13 +30,12 @@
 </template>
 
 <script>
-import footerMetadata from "@/components/core/footer-metadata.vue"
+import { mdiHomeOutline, mdiChevronLeft } from "@mdi/js"
 import next from "@/lib/utils/next"
 
 export default {
     name: "auth",
     title: "Login",
-    components: { footerMetadata },
     beforeRouteUpdate: function (to, from, next) {
         // if this.$route.params.method changes.
         next()
@@ -45,6 +46,8 @@ export default {
     },
     data: function () {
         return {
+            mdiHomeOutline,
+            mdiChevronLeft,
             error: null,
         }
     },

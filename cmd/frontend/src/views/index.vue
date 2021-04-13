@@ -10,7 +10,7 @@
             <v-btn color="success" :href="$config.bot_auth_url" target="_blank">Add to server</v-btn>
         </div>
         <span class="chevron-down d-flex justify-center">
-            <v-icon size="75">mdi-chevron-down</v-icon>
+            <v-icon size="75">{{ mdiChevronDown }}</v-icon>
         </span>
         <v-container id="more-info" ref="more-info" class="px-7 px-md-0">
             <v-row justify="center">
@@ -71,11 +71,14 @@
 </template>
 
 <script>
+import { mdiChevronDown } from "@mdi/js"
 export default {
     name: "index",
     title: "Index",
     data: function () {
-        return {}
+        return {
+            mdiChevronDown,
+        }
     },
 }
 </script>

@@ -15,15 +15,21 @@
 
         <v-list v-if="!userNav" color="transparent" dense nav>
             <v-list-item exact :to="{ name: 'index' }">
-                <v-list-item-icon><v-icon>mdi-home</v-icon></v-list-item-icon>
+                <v-list-item-icon>
+                    <v-icon>{{ mdiHome }}</v-icon>
+                </v-list-item-icon>
                 <v-list-item-title>Home</v-list-item-title>
             </v-list-item>
             <v-list-item exact :to="{ name: 'user-details' }">
-                <v-list-item-icon><v-icon>mdi-server</v-icon></v-list-item-icon>
+                <v-list-item-icon>
+                    <v-icon>{{ mdiServer }}</v-icon>
+                </v-list-item-icon>
                 <v-list-item-title>Manage Servers</v-list-item-title>
             </v-list-item>
             <v-list-item exact link>
-                <v-list-item-icon><v-icon>mdi-file-document-edit</v-icon></v-list-item-icon>
+                <v-list-item-icon>
+                    <v-icon>{{ mdiFileDocumentEdit }}</v-icon>
+                </v-list-item-icon>
                 <v-list-item-title>Documentation</v-list-item-title>
             </v-list-item>
 
@@ -39,7 +45,7 @@
 
         <template v-slot:append>
             <!-- <v-list-item exact :to="{ name: 'auth', params: { method: 'logout' } }">
-                    <v-list-item-icon><v-icon>mdi-lock-remove</v-icon></v-list-item-icon>
+                    <v-list-item-icon><v-icon>{{ mdiLockRemove }}</v-icon></v-list-item-icon>
                     <v-list-item-title>Logout</v-list-item-title>
                 </v-list-item> -->
             <div class="pa-2">
@@ -54,6 +60,7 @@
 </template>
 
 <script>
+import { mdiHome, mdiServer, mdiFileDocumentEdit } from "@mdi/js"
 import { mapGetters } from "vuex"
 
 export default {
@@ -68,6 +75,13 @@ export default {
             type: Boolean,
             default: false,
         },
+    },
+    data: function () {
+        return {
+            mdiHome,
+            mdiServer,
+            mdiFileDocumentEdit,
+        }
     },
     computed: {
         ...mapGetters(["authed", "user"]),

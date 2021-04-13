@@ -17,8 +17,8 @@
                     <v-spacer />
                 </template>
                 <!-- <v-avatar class="hidden-sm-and-down" color="grey darken-1 shrink" size="32"></v-avatar> -->
-                <v-btn v-if="!authed" text exact :to="{ name: 'auth', params: { method: 'redirect' } }" class="pr-0">Login</v-btn>
-                <v-btn v-if="authed" text exact :to="{ name: 'auth', params: { method: 'logout' } }" class="pr-0">Logout</v-btn>
+                <v-btn v-if="!authed" text exact :to="{ name: 'auth', params: { method: 'redirect' } }" class="pr-xs-0">Login</v-btn>
+                <v-btn v-if="authed" text exact :to="{ name: 'auth', params: { method: 'logout' } }" class="pr-xs-0">Logout</v-btn>
             </v-container>
         </v-app-bar>
 
@@ -37,13 +37,9 @@
 
 <script>
 import { mapGetters } from "vuex"
-import navAppbar from "@/components/core/nav-appbar.vue"
-import navSidebar from "@/components/core/nav-sidebar.vue"
-import footerMetadata from "@/components/core/footer-metadata.vue"
 
 export default {
     name: "default-layout",
-    components: { navAppbar, navSidebar, footerMetadata },
     data: function () {
         return {
             drawer: false,
