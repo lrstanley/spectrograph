@@ -7,7 +7,9 @@ package discordapi
 import (
 	"fmt"
 	"net/http"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/lrstanley/spectrograph/internal/models"
@@ -72,22 +74,28 @@ func FetchUser(client *http.Client, token *oauth2.Token) (user *models.User, err
 			continue
 		}
 
-		extension = "png"
+		if servers[i].Icon != "" {
+			extension = "png"
 
-		if len(servers[i].Icon) >= len(GIFAvatarPrefix) &&
-			servers[i].Icon[0:len(GIFAvatarPrefix)] == GIFAvatarPrefix {
-			extension = "gif"
+			if len(servers[i].Icon) >= len(GIFAvatarPrefix) &&
+				servers[i].Icon[0:len(GIFAvatarPrefix)] == GIFAvatarPrefix {
+				extension = "gif"
+			}
+
+			servers[i].IconURL = fmt.Sprintf(
+				ServerIconEndpoint,
+				servers[i].ID,
+				servers[i].Icon,
+				extension,
+			)
 		}
-
-		servers[i].IconURL = fmt.Sprintf(
-			ServerIconEndpoint,
-			servers[i].ID,
-			servers[i].Icon,
-			extension,
-		)
 
 		user.DiscordServers = append(user.DiscordServers, servers[i])
 	}
+
+	sort.SliceStable(user.DiscordServers, func(i, j int) bool {
+		return strings.ToLower(user.DiscordServers[i].Name) < strings.ToLower(user.DiscordServers[j].Name)
+	})
 
 	return user, nil
 }
