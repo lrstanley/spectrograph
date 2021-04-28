@@ -56,8 +56,7 @@ router.beforeEach(async (to, from, next) => {
 
     // ensure we fetch auth information before we load any pages.
     try {
-        let resp = await state.dispatch('get_auth', true)
-        console.log(resp)
+        await state.dispatch('get_auth', true)
     } catch (e) {
         console.log("unable to fetch user details:", e) // TODO: error page?
     }

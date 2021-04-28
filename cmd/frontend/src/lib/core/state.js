@@ -42,7 +42,7 @@ export default new Vuex.Store({
             try {
                 let resp = await api.auth.self()
                 commit('set_auth', resp.data)
-                return resp.data
+                return await resp.data
             } catch (err) {
                 commit('set_auth', false)
                 throw err
