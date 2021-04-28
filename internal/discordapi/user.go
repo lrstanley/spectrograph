@@ -56,27 +56,37 @@ func FetchUser(client *http.Client, token *oauth2.Token) (user *models.User, err
 	}
 
 	// Fetch guild details.
-	_, err = handleRequest(client, token, "GET", GuildsEndpoint, nil, &user.DiscordServers)
+	servers := []models.UserDiscordServer{}
+	_, err = handleRequest(client, token, "GET", GuildsEndpoint, nil, &servers)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching guild info: %w", err)
 	}
 
-	// TODO: filter servers for only ones they're an admin/owner on.
 	var extension string
-	for i := range user.DiscordServers {
+	for i := range servers {
+		// Check if they have the admin permission bit.
+		servers[i].Admin = servers[i].Permissions.Contains(models.DiscordPermAdministrator)
+
+		if !servers[i].Owner && !servers[i].Admin {
+			// Ignore servers that they're not an owner of.
+			continue
+		}
+
 		extension = "png"
 
-		if len(user.DiscordServers[i].Icon) >= len(GIFAvatarPrefix) &&
-			user.DiscordServers[i].Icon[0:len(GIFAvatarPrefix)] == GIFAvatarPrefix {
+		if len(servers[i].Icon) >= len(GIFAvatarPrefix) &&
+			servers[i].Icon[0:len(GIFAvatarPrefix)] == GIFAvatarPrefix {
 			extension = "gif"
 		}
 
-		user.DiscordServers[i].IconURL = fmt.Sprintf(
+		servers[i].IconURL = fmt.Sprintf(
 			ServerIconEndpoint,
-			user.DiscordServers[i].ID,
-			user.DiscordServers[i].Icon,
+			servers[i].ID,
+			servers[i].Icon,
 			extension,
 		)
+
+		user.DiscordServers = append(user.DiscordServers, servers[i])
 	}
 
 	return user, nil
