@@ -15,12 +15,14 @@ import (
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 
-var (
-	// For use with goreleaser, it will auto-inject version/commit/date/etc.
+// Should be auto-injected by build tooling.
+const (
 	version = "master"
 	commit  = "latest"
 	date    = "-"
+)
 
+var (
 	cli models.FlagsWorkerServer
 
 	logger *log.Logger

@@ -50,7 +50,7 @@ func (h *Handler) getAuthorizeBot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getRedirect(w http.ResponseWriter, r *http.Request) {
-	if httpware.IsAuthed(h.session, r) {
+	if authed, _ := httpware.IsAuthed(h.session, r); authed {
 		httpware.HandleError(w, r, http.StatusBadRequest, errors.New("already authenticated"))
 		return
 	}

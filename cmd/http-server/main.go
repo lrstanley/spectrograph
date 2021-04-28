@@ -25,13 +25,14 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var (
-	// For use with goreleaser, it will auto-inject version/commit/date/etc.
-	// TODO: could these be constants?
+// Should be auto-injected by build tooling.
+const (
 	version = "master"
 	commit  = "latest"
 	date    = "-"
+)
 
+var (
 	cli    models.FlagsHTTPServer
 	logger *log.Logger
 

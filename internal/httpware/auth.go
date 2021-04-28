@@ -33,7 +33,7 @@ func AdminRequired(session *scs.SessionManager) func(next http.Handler) http.Han
 func AuthRequired(session *scs.SessionManager) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if !IsAuthed(session, r) {
+			if authed, _ := IsAuthed(session, r); !authed {
 				w.WriteHeader(http.StatusUnauthorized)
 				pt.JSON(w, r, pt.M{"error": "authentication required"})
 				return
@@ -87,8 +87,8 @@ func GetUser(r *http.Request) (user *models.User) {
 	return user
 }
 
-func IsAuthed(session *scs.SessionManager, r *http.Request) bool {
+func IsAuthed(session *scs.SessionManager, r *http.Request) (bool, string) {
 	user_id := session.GetString(r.Context(), models.SessionUserIDKey)
 
-	return user_id != ""
+	return user_id != "", user_id
 }

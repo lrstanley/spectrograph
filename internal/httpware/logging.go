@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/apex/log"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -15,7 +16,7 @@ import (
 // StructuredLogger wraps each request and writes a log entry with
 // extra info. StructuredLogger also injects a logger into the request
 // context that can be used by children middleware business logic.
-func StructuredLogger(logger *log.Logger, private bool) func(next http.Handler) http.Handler {
+func StructuredLogger(logger *log.Logger, session *scs.SessionManager, private bool, version, commit, date string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			logEntry := log.NewEntry(logger)
@@ -36,7 +37,16 @@ func StructuredLogger(logger *log.Logger, private bool) func(next http.Handler) 
 					logEntry = logEntry.WithField("remote_ip", r.RemoteAddr)
 				}
 
+				authed, userId := IsAuthed(session, r)
+				if authed {
+					logEntry = logEntry.WithField("user_id", userId)
+				}
+
 				logEntry.WithFields(log.Fields{
+					"build_version": version,
+					"build_commit":  commit,
+					"build_date":    date,
+
 					"host":        r.Host,
 					"proto":       r.Proto,
 					"method":      r.Method,
@@ -46,6 +56,8 @@ func StructuredLogger(logger *log.Logger, private bool) func(next http.Handler) 
 					"duration_ms": float64(finish.Sub(start).Nanoseconds()) / 1000000.0,
 					"bytes_in":    r.Header.Get("Content-Length"),
 					"bytes_out":   wrappedWriter.BytesWritten(),
+
+					"authed": authed,
 				}).Info("handled request")
 			}()
 

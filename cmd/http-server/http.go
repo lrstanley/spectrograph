@@ -55,7 +55,7 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
-	r.Use(httpware.StructuredLogger(logger, !cli.Debug))
+	r.Use(httpware.StructuredLogger(logger, session, !cli.Debug, version, commit, date))
 	r.Use(httpware.Debug(cli.Debug))
 
 	if cli.HTTP.Proxy {
