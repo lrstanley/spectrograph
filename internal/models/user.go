@@ -79,13 +79,15 @@ func (r *User) Validate() error {
 // }
 // https://discord.com/developers/docs/resources/guild#guild-object
 type UserDiscordServer struct {
-	ID          string   `bson:"id"              json:"id"`       // guild id.
-	Name        string   `bson:"name"            json:"name"`     // guild name (2-100 chars, excl. trailing/leading spaces).
-	Owner       bool     `bson:"owner"           json:"owner"`    // true if the user is the owner of the guild
-	Features    []string `bson:"features"        json:"features"` // enabled guild features.
-	Icon        string   `bson:"icon"            json:"icon"`     // icon hash.
-	IconURL     string   `bson:"icon_url"        json:"icon_url"`
-	Permissions string   `bson:"permissions_new" json:"permissions_new"` // permissions for the user (excludes overrides).
+	ID          string             `bson:"id"              json:"id"`       // Guild id.
+	Name        string             `bson:"name"            json:"name"`     // Guild name (2-100 chars, excl. trailing/leading spaces).
+	Owner       bool               `bson:"owner"           json:"owner"`    // True if the user is the owner of the guild
+	Features    []string           `bson:"features"        json:"features"` // Enabled guild features.
+	Icon        string             `bson:"icon"            json:"icon"`     // Icon hash.
+	IconURL     string             `bson:"icon_url"        json:"icon_url"`
+	Permissions DiscordPermissions `bson:"permissions_new" json:"permissions_new"` // Permissions for the user (excludes overrides).
+
+	Admin bool `bson:"admin" json:"admin"` // Pulled from permissions.
 }
 
 // See also: https://discord.com/developers/docs/resources/user#user-object
@@ -93,22 +95,22 @@ type UserAuthDiscord struct {
 	LastLogin time.Time `bson:"last_login" json:"last_login"`
 
 	// Required dependencies.
-	ID            string `bson:"id"            json:"id"            validate:"required"` // the users id
-	Username      string `bson:"username"      json:"username"      validate:"required"` // the users username, not unique across the platform
-	Discriminator string `bson:"discriminator" json:"discriminator" validate:"required"` // the users 4-digit discord-tag
-	Email         string `bson:"email"         json:"email"         validate:"required"` // the users email
-	Avatar        string `bson:"avatar"        json:"avatar"`                            // the users avatar url
-	AvatarURL     string `bson:"avatar_url"    json:"avatar_url"    validate:"required"` // the users avatar hash
+	ID            string `bson:"id"            json:"id"            validate:"required"` // The users id.
+	Username      string `bson:"username"      json:"username"      validate:"required"` // The users username, not unique across the platform.
+	Discriminator string `bson:"discriminator" json:"discriminator" validate:"required"` // The users 4-digit discord-tag.
+	Email         string `bson:"email"         json:"email"         validate:"required"` // The users email.
+	Avatar        string `bson:"avatar"        json:"avatar"`                            // The users avatar url.
+	AvatarURL     string `bson:"avatar_url"    json:"avatar_url"    validate:"required"` // The users avatar hash.
 
 	// Additional parameters provided by the API.
-	Locale      string `bson:"locale"       json:"locale"`       // the users chosen language option
-	Bot         bool   `bson:"bot"          json:"bot"`          // whether the user belongs to an OAuth2 application
-	System      bool   `bson:"system"       json:"system"`       // whether the user is an Official Discord System user (part of the urgent message system)
-	MFAEnabled  bool   `bson:"mfa_enabled"  json:"mfa_enabled"`  // whether the user has two factor enabled on their account
-	Verified    bool   `bson:"verified"     json:"verified"`     // whether the email on this account has been verified
-	Flags       int    `bson:"flags"        json:"flags"`        // the flags on a users account
-	PremiumType int    `bson:"premium_type" json:"premium_type"` // the type of Nitro subscription on a users account
-	PublicFlags int    `bson:"public_flags" json:"public_flags"` // the public flags on a users account
+	Locale      string `bson:"locale"       json:"locale"`       // The users chosen language option.
+	Bot         bool   `bson:"bot"          json:"bot"`          // Whether the user belongs to an OAuth2 application.
+	System      bool   `bson:"system"       json:"system"`       // Whether the user is an Official Discord System user (part of the urgent message system).
+	MFAEnabled  bool   `bson:"mfa_enabled"  json:"mfa_enabled"`  // Whether the user has two factor enabled on their account.
+	Verified    bool   `bson:"verified"     json:"verified"`     // Whether the email on this account has been verified.
+	Flags       int    `bson:"flags"        json:"flags"`        // The flags on a users account.
+	PremiumType int    `bson:"premium_type" json:"premium_type"` // The type of Nitro subscription on a users account.
+	PublicFlags int    `bson:"public_flags" json:"public_flags"` // The public flags on a users account.
 
 	AccessToken  string    `bson:"access_token"  json:"-" validate:"required"`
 	RefreshToken string    `bson:"refresh_token" json:"-" validate:"required"`
