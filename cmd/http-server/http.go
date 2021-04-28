@@ -23,7 +23,7 @@ import (
 	"github.com/lrstanley/recoverer"
 	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/adminhandler"
 	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/authhandler"
-	"github.com/lrstanley/spectrograph/pkg/httpware"
+	"github.com/lrstanley/spectrograph/internal/httpware"
 )
 
 func init() {

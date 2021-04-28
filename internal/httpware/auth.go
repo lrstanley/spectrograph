@@ -11,7 +11,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/apex/log"
 	"github.com/lrstanley/pt"
-	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/internal/models"
 )
 
 func AdminRequired(session *scs.SessionManager) func(next http.Handler) http.Handler {

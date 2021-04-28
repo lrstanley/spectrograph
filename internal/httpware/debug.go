@@ -8,7 +8,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/internal/models"
 )
 
 // Debug injects if "debugging" is enabled.

@@ -16,7 +16,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	mongomigrate "github.com/golang-migrate/migrate/v4/database/mongodb"
 	bindata "github.com/golang-migrate/migrate/v4/source/go_bindata"
-	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

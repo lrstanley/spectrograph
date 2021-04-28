@@ -12,7 +12,7 @@ import (
 	"github.com/apex/log"
 	"github.com/jessevdk/go-flags"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/internal/models"
 )
 
 var (

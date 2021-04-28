@@ -10,7 +10,7 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/apex/log"
-	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/internal/models"
 	"golang.org/x/oauth2"
 )
 

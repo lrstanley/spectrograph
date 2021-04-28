@@ -13,7 +13,7 @@ import (
 	"github.com/apex/log"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/lrstanley/pt"
-	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/internal/models"
 )
 
 // HandleError handles the error (if any). Handler WILL respond to the request

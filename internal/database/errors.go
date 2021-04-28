@@ -7,7 +7,7 @@ package database
 import (
 	"errors"
 
-	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/internal/models"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

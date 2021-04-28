@@ -7,8 +7,8 @@ package adminhandler
 import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
-	"github.com/lrstanley/spectrograph/pkg/httpware"
-	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/internal/httpware"
+	"github.com/lrstanley/spectrograph/internal/models"
 )
 
 type Handler struct {

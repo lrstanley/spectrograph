@@ -20,8 +20,8 @@ import (
 	"github.com/apex/log"
 	"github.com/golang-migrate/migrate"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/lrstanley/spectrograph/pkg/database"
-	"github.com/lrstanley/spectrograph/pkg/models"
+	"github.com/lrstanley/spectrograph/internal/database"
+	"github.com/lrstanley/spectrograph/internal/models"
 	"golang.org/x/oauth2"
 )
 
