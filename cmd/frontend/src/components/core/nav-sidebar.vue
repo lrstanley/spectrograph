@@ -36,10 +36,17 @@
             <v-divider class="my-4" />
         </v-list>
         <v-list v-if="authed" color="transparent" dense nav>
-            <v-list-item v-for="n in 5" :key="n" link>
+            <v-list-item v-for="server in user.servers" :key="server.id" link>
+                <v-list-item-avatar>
+                    <v-img v-if="server.icon_url" :src="server.icon_url" alt="server icon" />
+                    <v-avatar v-else color="#1E1E1E">
+                        <span class="white--text headline">{{ serverInitials(server.name) }}</span>
+                    </v-avatar>
+                </v-list-item-avatar>
                 <v-list-item-content>
-                    <v-list-item-title>List Item {{ n }}</v-list-item-title>
+                    <v-list-item-title>{{ server.name }}</v-list-item-title>
                 </v-list-item-content>
+                <v-icon :color="true ? 'success' : 'error'">{{ true ? mdiCheck : mdiCloseCircleOutline }}</v-icon>
             </v-list-item>
         </v-list>
 
@@ -60,7 +67,7 @@
 </template>
 
 <script>
-import { mdiHome, mdiServer, mdiFileDocumentEdit } from "@mdi/js"
+import { mdiHome, mdiServer, mdiFileDocumentEdit, mdiCheck, mdiCloseCircleOutline } from "@mdi/js"
 import { mapGetters } from "vuex"
 
 export default {
@@ -81,6 +88,8 @@ export default {
             mdiHome,
             mdiServer,
             mdiFileDocumentEdit,
+            mdiCheck,
+            mdiCloseCircleOutline,
         }
     },
     computed: {
@@ -92,6 +101,16 @@ export default {
             set: function (value) {
                 this.$emit("input", value)
             },
+        },
+    },
+    methods: {
+        serverInitials: (name) => {
+            if (!name || name.length < 1) return "?"
+            let letter = name.match(/([a-zA-Z0-9])/g)
+            if (letter !== null) {
+                return letter[0]
+            }
+            return name[0]
         },
     },
 }
