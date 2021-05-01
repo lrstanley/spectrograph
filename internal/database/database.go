@@ -150,6 +150,12 @@ func (s *mongoStore) Migrate(flags *models.FlagsHTTPServer) error {
 	destination, err := mongomigrate.WithInstance(s.client, &mongomigrate.Config{
 		DatabaseName:    flags.Mongo.DBName,
 		TransactionMode: replicaSet,
+		Locking: mongomigrate.Locking{
+			Enabled:        true,
+			CollectionName: "migrate_advisory_lock",
+			Timeout:        30,
+			Interval:       10,
+		},
 	})
 	if err != nil {
 		return err
