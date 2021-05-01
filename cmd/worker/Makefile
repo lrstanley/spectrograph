@@ -25,7 +25,7 @@ clean: ## Cleans up generated files/folders from the build.
 	/bin/rm -rfv "rice-box.go" "${BINARY}"
 
 compile:
-	go build -ldflags '-s -w' -tags netgo -installsuffix netgo -v -o "${BINARY}"
+	go build -mod=readonly -ldflags '-s -w' -tags netgo -installsuffix netgo -v -o "${BINARY}"
 
 build: fetch compile ## Builds the application
 	echo

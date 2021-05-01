@@ -32,7 +32,7 @@ generate: ## Generate go bundled files from frontend
 	$(BIN)/rice -v embed-go
 
 compile:
-	go build -ldflags '-s -w' -tags netgo -installsuffix netgo -v -o "${BINARY}"
+	go build -mod=readonly -ldflags '-s -w' -tags netgo -installsuffix netgo -v -o "${BINARY}"
 
 build: fetch clean generate compile ## Builds the application (with generate).
 	echo

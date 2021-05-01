@@ -74,6 +74,7 @@ func FetchUser(client *http.Client, token *oauth2.Token) (user *models.User, err
 			continue
 		}
 
+		// TODO: default server icon?
 		if servers[i].Icon != "" {
 			extension = "png"
 
