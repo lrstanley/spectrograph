@@ -25,7 +25,7 @@ const (
 var (
 	cli models.FlagsWorkerServer
 
-	logger *log.Logger
+	logger log.Interface
 )
 
 func main() {

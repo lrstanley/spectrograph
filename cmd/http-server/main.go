@@ -34,7 +34,7 @@ const (
 
 var (
 	cli    models.FlagsHTTPServer
-	logger *log.Logger
+	logger log.Interface
 
 	svcUsers    models.UserService
 	svcSessions scs.Store

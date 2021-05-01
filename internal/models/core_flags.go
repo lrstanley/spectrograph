@@ -30,7 +30,7 @@ type LoggerConfig struct {
 
 // ParseLoggerConfig parses LoggerConfig and adjusts the structured logger as
 // necessary.
-func (c LoggerConfig) Parse(debug bool) *log.Logger {
+func (c LoggerConfig) Parse(debug bool) log.Interface {
 	logger := &log.Logger{}
 
 	if debug {

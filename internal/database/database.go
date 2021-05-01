@@ -31,7 +31,7 @@ const (
 )
 
 // New returns a mongo Store implementation.
-func New(logger *log.Logger) *mongoStore {
+func New(logger log.Interface) *mongoStore {
 	return &mongoStore{
 		log: logger.WithFields(log.Fields{
 			"source":   "database",
