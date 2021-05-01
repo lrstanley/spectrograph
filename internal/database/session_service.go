@@ -24,6 +24,9 @@ type sessionService struct {
 	ctx     context.Context
 }
 
+// Ensure struct matches necessary interface.
+var _ scs.Store = (*sessionService)(nil)
+
 // NewSessionService returns a new sessionService that satisfies the scs.Store
 // interface. This method also spins up a goroutine that (at a given interval) removes
 // old/expired sessions from the database.

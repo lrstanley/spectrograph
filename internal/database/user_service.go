@@ -20,6 +20,9 @@ type userService struct {
 	store *mongoStore
 }
 
+// Ensure struct matches necessary interface.
+var _ models.UserService = (*userService)(nil)
+
 // NewUserService returns a new userService that satisfies the models.UserService interface.
 func (s *mongoStore) NewUserService() models.UserService {
 	return &userService{store: s}
