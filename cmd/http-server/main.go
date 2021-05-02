@@ -43,7 +43,9 @@ var (
 
 func main() {
 	_ = models.FlagParse(&cli)
-	logger = cli.Logger.Parse(cli.Debug)
+	logger = cli.Logger.Parse(cli.Debug).WithFields(log.Fields{
+		"build_version": fmt.Sprintf("%s/%s (%s)", version, commit, date),
+	})
 
 	var err error
 

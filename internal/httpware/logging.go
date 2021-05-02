@@ -16,7 +16,7 @@ import (
 // StructuredLogger wraps each request and writes a log entry with
 // extra info. StructuredLogger also injects a logger into the request
 // context that can be used by children middleware business logic.
-func StructuredLogger(logger log.Interface, session *scs.SessionManager, private bool, version, commit, date string) func(next http.Handler) http.Handler {
+func StructuredLogger(logger log.Interface, session *scs.SessionManager, private bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			logEntry := logger.WithField("src", "httphandler")
@@ -43,10 +43,6 @@ func StructuredLogger(logger log.Interface, session *scs.SessionManager, private
 				}
 
 				logEntry.WithFields(log.Fields{
-					"build_version": version,
-					"build_commit":  commit,
-					"build_date":    date,
-
 					"host":        r.Host,
 					"proto":       r.Proto,
 					"method":      r.Method,
