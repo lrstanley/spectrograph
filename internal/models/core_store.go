@@ -16,13 +16,13 @@ import (
 // Store provides a generic interface to multiple potential databases/services.
 type Store interface {
 	// Setup initializes the given Store (e.g. database connections).
-	Setup(flags *FlagsHTTPServer) (err error)
+	Setup(flags *MongoConfig) (err error)
 
 	// Close garbage collects the database connections.
 	Close() (err error)
 
 	// Migrate initializes go-migrate on the database (if available).
-	Migrate(flags *FlagsHTTPServer) (err error)
+	Migrate(mongoFlags *MongoConfig, migrateFlags *MigrateConfig) (err error)
 
 	NewUserService() UserService
 	NewSessionService(ctx context.Context, cleanup time.Duration) scs.Store

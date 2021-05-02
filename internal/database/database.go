@@ -50,7 +50,10 @@ type mongoStore struct {
 	session *mongo.Collection
 }
 
-func (s *mongoStore) Setup(flags *models.FlagsHTTPServer) (err error) {
+// Ensure struct matches necessary interface.
+var _ models.Store = (*mongoStore)(nil)
+
+func (s *mongoStore) Setup(flags *models.MongoConfig) (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -65,7 +68,7 @@ func (s *mongoStore) Setup(flags *models.FlagsHTTPServer) (err error) {
 	opts.SetMinPoolSize(5)
 	opts.SetRetryReads(true)
 	opts.SetRetryWrites(true)
-	opts.ApplyURI(flags.Mongo.URI)
+	opts.ApplyURI(flags.URI)
 
 	if *opts.MaxPoolSize < *opts.MinPoolSize {
 		opts.SetMaxPoolSize(defaultMaxPoolSize)
@@ -85,7 +88,7 @@ func (s *mongoStore) Setup(flags *models.FlagsHTTPServer) (err error) {
 	// wcMajority := writeconcern.New(writeconcern.WMajority(), writeconcern.WTimeout(10*time.Second))
 	// wcMajorityCollectionOpts := options.Collection().SetWriteConcern(wcMajority)
 
-	s.db = s.client.Database(flags.Mongo.DBName)
+	s.db = s.client.Database(flags.DBName)
 	s.user = s.db.Collection("users")
 	s.session = s.db.Collection("sessions")
 
@@ -104,7 +107,7 @@ func (s *mongoStore) Close() error {
 	return nil
 }
 
-func (s *mongoStore) Migrate(flags *models.FlagsHTTPServer) error {
+func (s *mongoStore) Migrate(mongoFlags *models.MongoConfig, migrateFlags *models.MigrateConfig) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 	// Access ricebox bundled migrations.
@@ -148,7 +151,7 @@ func (s *mongoStore) Migrate(flags *models.FlagsHTTPServer) error {
 	}
 
 	destination, err := mongomigrate.WithInstance(s.client, &mongomigrate.Config{
-		DatabaseName:    flags.Mongo.DBName,
+		DatabaseName:    mongoFlags.DBName,
 		TransactionMode: replicaSet,
 		Locking: mongomigrate.Locking{
 			Enabled:        true,
@@ -161,14 +164,14 @@ func (s *mongoStore) Migrate(flags *models.FlagsHTTPServer) error {
 		return err
 	}
 
-	m, err := migrate.NewWithInstance("bindata", source, flags.Mongo.DBName, destination)
+	m, err := migrate.NewWithInstance("bindata", source, mongoFlags.DBName, destination)
 	if err == nil {
 		// TODO: this logic can be moved to the main package because everything after
 		// this point has potentially duplicated logic.
 		m.Log = &models.MigrateLogger{Logger: s.log}
 
 		// Do they want to purge data during startup?
-		if flags.Migration.Purge {
+		if migrateFlags.Purge {
 			s.log.Info("migration: purge requested, dropping")
 			err = m.Drop()
 			if err != nil {
@@ -181,12 +184,12 @@ func (s *mongoStore) Migrate(flags *models.FlagsHTTPServer) error {
 
 		// Obey user-provided migration. Since this is likely related to a corruption or
 		// downgrade, don't allow the app to continue the startup, and make sure to quit.
-		if flags.Migration.Version != 0 {
-			s.log.WithField("version", flags.Migration.Version).Info("database migration to specific version requested")
-			if flags.Migration.Force {
-				err = m.Force(int(flags.Migration.Version))
+		if migrateFlags.Version != 0 {
+			s.log.WithField("version", migrateFlags.Version).Info("database migration to specific version requested")
+			if migrateFlags.Force {
+				err = m.Force(int(migrateFlags.Version))
 			} else {
-				err = m.Migrate(flags.Migration.Version)
+				err = m.Migrate(migrateFlags.Version)
 			}
 
 			if err == nil {

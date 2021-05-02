@@ -56,6 +56,18 @@ func (c LoggerConfig) Parse(debug bool) log.Interface {
 	return logger
 }
 
+type MongoConfig struct {
+	DBName string `env:"DB_NAME" long:"db-name" default:"spectrograph" description:"database name to use"`
+	URI    string `env:"URI"     long:"uri"     default:"mongodb://localhost:27017/?maxPoolSize=64" description:"mongodb connection string (see: https://docs.mongodb.com/manual/reference/connection-string/)"`
+}
+
+type MigrateConfig struct {
+	Disabled bool `env:"DISABLED" long:"disabled" description:"disable database migrations"`
+	Purge    bool `env:"PURGE"    long:"purge"    hidden:"true" description:"PURGES ALL DATA ON STARTUP, BE WARNED"`
+	Force    bool `env:"FORCE"    long:"force"    description:"force update to version in database (must also specify version)"`
+	Version  uint `env:"VERSION"  long:"version"  description:"optional version to migrate the database to"`
+}
+
 // FlagsHTTPServer are flags specifically utilized by the HTTP service.
 type FlagsHTTPServer struct {
 	Debug bool `env:"DEBUG" long:"debug" description:"enable debugging (pprof endpoints), CSRF protection, as well as disable caching of templates"`
@@ -93,17 +105,8 @@ type FlagsHTTPServer struct {
 	} `group:"Authentication Options" namespace:"auth" env-namespace:"AUTH"`
 
 	// Databases.
-	Migration struct {
-		Disabled bool `env:"DISABLED" long:"disabled" description:"disable database migrations"`
-		Purge    bool `env:"PURGE"    long:"purge"    hidden:"true" description:"PURGES ALL DATA ON STARTUP, BE WARNED"`
-		Force    bool `env:"FORCE"    long:"force"    description:"force update to version in database (must also specify version)"`
-		Version  uint `env:"VERSION"  long:"version"  description:"optional version to migrate the database to"`
-	} `group:"Database Migration Options (CAUTION!)" namespace:"migration" env-namespace:"MIGRATION"`
-
-	Mongo struct {
-		DBName string `env:"DB_NAME" long:"db-name" default:"spectrograph" description:"database name to use"`
-		URI    string `env:"URI"     long:"uri"     default:"mongodb://localhost:27017/?maxPoolSize=64" description:"mongodb connection string (see: https://docs.mongodb.com/manual/reference/connection-string/)"`
-	} `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
+	Migration MigrateConfig `group:"Database Migration Options (CAUTION!)" namespace:"migration" env-namespace:"MIGRATION"`
+	Mongo     MongoConfig   `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
 }
 
 // FlagsWorkerServer are flags used by the worker service.

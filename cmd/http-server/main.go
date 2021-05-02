@@ -77,7 +77,7 @@ func main() {
 	store = database.New(logger)
 
 	logger.Info("initializing connections to database")
-	if err = store.Setup(&cli); err != nil {
+	if err = store.Setup(&cli.Mongo); err != nil {
 		logger.WithError(err).Fatal("error initializing database")
 	}
 	defer store.Close()
@@ -96,7 +96,7 @@ func main() {
 	// Initialize migrations.
 	if !cli.Migration.Disabled {
 		logger.Info("running database migrations")
-		if err = store.Migrate(&cli); err != nil {
+		if err = store.Migrate(&cli.Mongo, &cli.Migration); err != nil {
 			if errors.As(err, &migrate.ErrNoChange) {
 				logger.Info("database migration: no changes found")
 			} else if errors.As(err, &migrate.ErrNilVersion) {
