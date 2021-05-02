@@ -116,15 +116,15 @@ func main() {
 	// Initialize the http/https server.
 	httpServer(ctx, wg, errorChan)
 
-	logger.Info("listening for signal. CTRL+C to quit.")
+	logger.Info("listening for signals")
 
 	go func() {
 		for {
 			select {
 			case <-signals:
-				fmt.Println("\nsignal received, shutting down")
+				logger.Info("signal received, closing connections")
 			case <-errorChan:
-				logger.WithError(err).Error("error received")
+				logger.WithError(err).Error("error received, closing connections")
 			}
 
 			// Signal to exit.

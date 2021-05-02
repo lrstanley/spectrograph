@@ -113,23 +113,19 @@ type FlagsHTTPServer struct {
 type FlagsWorkerServer struct {
 	Debug bool `env:"DEBUG" long:"debug" description:"enable debugging"`
 
-	// Authentication.
-	Auth struct {
-		Discord struct {
-			ID     string `env:"ID"     long:"ID"     required:"true" description:"Discord oauth2 ID"`
-			Secret string `env:"SECRET" long:"secret" required:"true" description:"Discord oauth2 secret"`
-		} `group:"Discord Options" namespace:"discord" env-namespace:"DISCORD"`
-	} `group:"Authentication Options" namespace:"auth" env-namespace:"AUTH"`
+	// Logging.
+	Logger LoggerConfig `group:"Logging Options" namespace:"log" env-namespace:"LOG"`
 
 	Discord struct {
 		// https://discord.com/developers/docs/topics/gateway#sharding
 		// Note: Shard ID 0 will be the only one to receive DMs.
-		ShardID   int `env:"SHARD_ID" description:"shard ID of this specific worker (from 0)"`
-		NumShards int `env:"NUM_SHARDS" description:"number of total shards"`
+		ShardID   int `env:"SHARD_ID" long:"shard-id" required:"true" description:"shard ID of this specific worker (from 0)"`
+		NumShards int `env:"NUM_SHARDS" long:"num-shards" required:"true" description:"number of total shards"`
+
+		BotToken string `env:"BOT_TOKEN" long:"bot-token" required:"true" description:"Discord bot token"`
 	} `group:"Discord Options" namespace:"discord" env-namespace:"DISCORD"`
 
-	// Logging.
-	Logger LoggerConfig `group:"Logging Options" namespace:"log" env-namespace:"LOG"`
+	Mongo MongoConfig `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
 }
 
 func FlagParse(data interface{}) (args []string) {

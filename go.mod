@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/GeertJohan/go.rice v1.0.2
 	github.com/alexedwards/scs/v2 v2.4.0
+	github.com/andersfylling/disgord v0.26.11-0.20210407161457-321a0ed32063
 	github.com/apex/log v1.9.0
 	github.com/aws/aws-sdk-go v1.38.30 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.0 // indirect
@@ -13,7 +14,6 @@ require (
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-playground/form v3.1.4+incompatible
-	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -25,6 +25,8 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lrstanley/pt v0.0.0-20180304040151-203b3db5ff8f
 	github.com/lrstanley/recoverer v0.0.0-20201006185043-0e0d2b46e675
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.mongodb.org/mongo-driver v1.5.1
