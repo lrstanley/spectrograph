@@ -22,7 +22,7 @@ type Store interface {
 	Close() (err error)
 
 	// Migrate initializes go-migrate on the database (if available).
-	Migrate(mongoFlags *MongoConfig, migrateFlags *MigrateConfig) (err error)
+	Migrate(ctx context.Context, mongoFlags *MongoConfig, migrateFlags *MigrateConfig) (err error)
 
 	NewUserService() UserService
 	NewSessionService(ctx context.Context, cleanup time.Duration) scs.Store

@@ -18,8 +18,6 @@ import (
 )
 
 func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
-	// TODO: add delay interval for sharding connections?
-
 	client := disgord.New(disgord.Config{
 		BotToken:    cli.Discord.BotToken,
 		ProjectName: "spectrograph (https://github.com/lrstanley, https://liam.sh)",
@@ -33,6 +31,7 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 		},
 		Logger: &LoggerApex{logger: logger},
 		RejectEvents: []string{
+			// TODO: disgord.AllEventsExcept(..)
 			disgord.EvtTypingStart,
 			disgord.EvtPresenceUpdate,
 			disgord.EvtGuildMemberAdd,
@@ -53,6 +52,10 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 			disgord.EvtMessageReactionRemoveAll,
 			disgord.EvtMessageReactionRemoveEmoji,
 			disgord.EvtMessageUpdate,
+		},
+		ShardConfig: disgord.ShardConfig{
+			ShardIDs:   []uint{},
+			ShardCount: 0,
 		},
 	})
 	gw := client.Gateway().WithContext(ctx)
@@ -128,6 +131,8 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 		// }
 		// pretty.Println(guild)
 	})
+
+	// gw.BotReady()
 
 	wg.Add(1)
 	go func() {

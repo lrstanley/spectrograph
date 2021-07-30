@@ -22,4 +22,5 @@ docker-compose \
         --abort-on-container-exit \
         --remove-orphans \
         --build \
-        --timeout 0
+        --timeout 0 \
+        --scale http-server=2

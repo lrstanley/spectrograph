@@ -45,4 +45,5 @@ debug: ## Runs the application in debug mode
 		--log.level debug \
 		--mongo.db-name spectrograph-dev \
 		--mongo.uri "mongodb://mongo:27017/?maxPoolSize=200" \
-		--migration.purge
+		--migration.purge \
+		--etcd.endpoints "etcd:2379"

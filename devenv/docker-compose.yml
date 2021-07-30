@@ -3,6 +3,7 @@ volumes:
     frontend_dist: {}
     go_cache: {}
     go_path: {}
+    etcd: {}
 services:
     frontend:
         depends_on: []
@@ -16,7 +17,7 @@ services:
             - ../:/build/ # root of repository
     http-server:
         depends_on: ["mongo"]
-        ports: [8080:8080]
+        ports: [8080]
         build:
             context: ../
             dockerfile: ./cmd/http-server/Dockerfile.dev
@@ -26,22 +27,35 @@ services:
             - go_cache:/root/.cache/go-build
             - go_path:/go
             - ../:/build/ # root of repository
-    worker:
-        depends_on: ["mongo"]
-        build:
-            context: ../
-            dockerfile: ./cmd/worker/Dockerfile.dev
-        working_dir: /build/cmd/worker
-        volumes:
-            - go_cache:/root/.cache/go-build
-            - go_path:/go
-            - ../:/build/ # root of repository
+    # worker:
+    #     depends_on: ["mongo"]
+    #     build:
+    #         context: ../
+    #         dockerfile: ./cmd/worker/Dockerfile.dev
+    #     working_dir: /build/cmd/worker
+    #     volumes:
+    #         - go_cache:/root/.cache/go-build
+    #         - go_path:/go
+    #         - ../:/build/ # root of repository
     mongo:
         image: mongo:latest
-        # container_name: mongo
         ports: [27017:27017]
         command: --quiet
         logging: { driver: none }
+    etcd:
+        image: quay.io/coreos/etcd:v3.4.15
+        ports: ["2379:2379", "2380:2380"]
+        volumes:
+            - etcd:/etcd-data
+        command: |
+            /usr/local/bin/etcd
+                --name etcd
+                --data-dir /etcd-data
+                --initial-advertise-peer-urls http://etcd:2380
+                --listen-peer-urls http://0.0.0.0:2380
+                --advertise-client-urls http://etcd:2379
+                --listen-client-urls http://0.0.0.0:2379
+                --initial-cluster etcd=http://etcd:2380
     # nats-1:
     #     image: nats:latest
     #     ports: [4222:4222, 8222:8222, 6222]

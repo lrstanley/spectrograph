@@ -16,6 +16,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	mongomigrate "github.com/golang-migrate/migrate/v4/database/mongodb"
 	bindata "github.com/golang-migrate/migrate/v4/source/go_bindata"
+	"github.com/kr/pretty"
 	"github.com/lrstanley/spectrograph/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -107,7 +108,10 @@ func (s *mongoStore) Close() error {
 	return nil
 }
 
-func (s *mongoStore) Migrate(mongoFlags *models.MongoConfig, migrateFlags *models.MigrateConfig) error {
+// TODO: split so we can tell when we connect, if we're the same version...?
+func (s *mongoStore) Migrate(ctx context.Context, mongoFlags *models.MongoConfig, migrateFlags *models.MigrateConfig) error {
+	// TODO: this should make another session with majority write concern.
+	// https://pkg.go.dev/go.mongodb.org/mongo-driver@v1.5.1/mongo#Client.UseSessionWithOptions
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 	// Access ricebox bundled migrations.
@@ -134,6 +138,7 @@ func (s *mongoStore) Migrate(mongoFlags *models.MongoConfig, migrateFlags *model
 	if err != nil {
 		return err
 	}
+	defer source.Close()
 
 	// Check if one of the nodes we connected to is in a replicaset.
 	replicaSet := true
@@ -169,6 +174,8 @@ func (s *mongoStore) Migrate(mongoFlags *models.MongoConfig, migrateFlags *model
 		// TODO: this logic can be moved to the main package because everything after
 		// this point has potentially duplicated logic.
 		m.Log = &models.MigrateLogger{Logger: s.log}
+
+		pretty.Println(migrateFlags)
 
 		// Do they want to purge data during startup?
 		if migrateFlags.Purge {
