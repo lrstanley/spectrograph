@@ -16,8 +16,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/lrstanley/spectrograph/internal/reactive"
-
 	"github.com/alexedwards/scs/v2"
 	"github.com/apex/log"
 	"github.com/golang-migrate/migrate"
@@ -72,20 +70,6 @@ func main() {
 		},
 	}
 
-	// Setup methods to allow signaling to all children methods that we're stopping.
-	ctx, closer := context.WithCancel(context.Background())
-	errorChan := make(chan error)
-	wg := &sync.WaitGroup{}
-
-	campaign := reactive.NewElection(logger, cli.Etcd, true, version)
-	defer campaign.Close()
-	campaign.Run(ctx, wg)
-
-	// Wait for leader ourselves, or a leader that is compatible with us.
-	// This is most critical during initial startup to ensure we're doing
-	// db migrations only on the leader.
-	leader := campaign.WaitForLeader(ctx, 30*time.Second, 3*time.Second)
-
 	// Initialize storer/database.
 	var store models.Store
 	logger.WithFields(log.Fields{
@@ -106,13 +90,16 @@ func main() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, os.Interrupt)
 
-	// Initialize migrations only if we're the leader.
-	if !cli.Migration.Disabled && leader.Leader() {
+	// Setup methods to allow signaling to all children methods that we're stopping.
+	ctx, closer := context.WithCancel(context.Background())
+	errorChan := make(chan error)
+	wg := &sync.WaitGroup{}
+
+	// Initialize migrations.
+	if !cli.Migration.Disabled {
 		logger.Info("running database migrations")
-		if err = store.Migrate(ctx, &cli.Mongo, &cli.Migration); err != nil {
-			if errors.As(err, &migrate.ErrLocked) || errors.As(err, &migrate.ErrLockTimeout) {
-				logger.WithError(err).Fatal("error during migration")
-			} else if errors.As(err, &migrate.ErrNoChange) {
+		if err = store.Migrate(&cli.Mongo, &cli.Migration); err != nil {
+			if errors.As(err, &migrate.ErrNoChange) {
 				logger.Info("database migration: no changes found")
 			} else if errors.As(err, &migrate.ErrNilVersion) {
 				logger.Info("database migration: no version information in the database")
@@ -134,23 +121,14 @@ func main() {
 	go func() {
 		for {
 			select {
-			case leader := <-campaign.LeaderUpdates:
-				if !leader.Leader() && !leader.IsCompatibleVersion() {
-					logger.WithError(reactive.ErrIncompatibleVersion).Error("exiting to prevent data loss")
-				} else {
-					continue
-				}
 			case <-signals:
 				logger.Info("signal received, closing connections")
 			case <-errorChan:
 				logger.WithError(err).Error("error received, closing connections")
-			case <-ctx.Done():
-				logger.Info("context closed, closing connections")
 			}
 
 			// Signal to exit.
 			closer()
-			break
 		}
 	}()
 

@@ -35,5 +35,4 @@ debug: fetch ## Runs the application in debug mode
 		--mongo.db-name spectrograph-dev \
 		--mongo.uri "mongodb://mongo:27017/?maxPoolSize=20" \
 		--discord.shard-id 0 \
-		--discord.num-shards 1 \
-		--etcd.endpoints "etcd:2379"
+		--discord.num-shards 1

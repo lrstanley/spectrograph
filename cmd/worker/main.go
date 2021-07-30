@@ -11,14 +11,12 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/apex/log"
 	"github.com/jessevdk/go-flags"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/spectrograph/internal/database"
 	"github.com/lrstanley/spectrograph/internal/models"
-	"github.com/lrstanley/spectrograph/internal/reactive"
 )
 
 // Should be auto-injected by build tooling.
@@ -60,21 +58,6 @@ func main() {
 		cli.Discord.ShardID = 0
 	}
 
-	ctx, closer := context.WithCancel(context.Background())
-	defer closer()
-
-	errorChan := make(chan error)
-	wg := &sync.WaitGroup{}
-
-	campaign := reactive.NewElection(logger, cli.Etcd, false, version)
-	defer campaign.Close()
-	campaign.Run(ctx, wg)
-
-	// Wait for leader ourselves, or a leader that is compatible with us.
-	// This is most critical during initial startup to ensure we're doing
-	// db migrations only on the leader.
-	_ = campaign.WaitForLeader(ctx, 30*time.Second, 3*time.Second)
-
 	// Start listening for signals here.
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, os.Interrupt)
@@ -99,6 +82,12 @@ func main() {
 	}
 	defer store.Close()
 
+	ctx, closer := context.WithCancel(context.Background())
+	defer closer()
+
+	errorChan := make(chan error)
+	wg := &sync.WaitGroup{}
+
 	discordSetup(ctx, wg, errorChan)
 
 	logger.Info("listening for signals")
@@ -106,12 +95,6 @@ func main() {
 	go func() {
 		for {
 			select {
-			case leader := <-campaign.LeaderUpdates:
-				if !leader.Leader() && !leader.IsCompatibleVersion() {
-					logger.WithError(reactive.ErrIncompatibleVersion).Error("exiting to prevent data loss")
-				} else {
-					continue
-				}
 			case <-signals:
 				logger.Error("signal received, closing connections")
 			case err := <-errorChan:

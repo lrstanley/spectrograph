@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"time"
 
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/discard"
@@ -57,13 +56,6 @@ func (c LoggerConfig) Parse(debug bool) log.Interface {
 	return logger
 }
 
-type EtcdConfig struct {
-	Endpoints   []string      `env:"ENDPOINTS" long:"endpoints" required:"true" description:"etcd endpoints to connect to"`
-	DialTimeout time.Duration `env:"TIMEOUT"   long:"timeout"   default:"5s"    description:"timeout used during connection dialing"`
-	Username    string        `env:"USERNAME" long:"username" description:"etcd username"`
-	Password    string        `env:"PASSWORD" long:"password" description:"etcd password"`
-}
-
 type MongoConfig struct {
 	DBName string `env:"DB_NAME" long:"db-name" default:"spectrograph" description:"database name to use"`
 	URI    string `env:"URI"     long:"uri"     default:"mongodb://localhost:27017/?maxPoolSize=64" description:"mongodb connection string (see: https://docs.mongodb.com/manual/reference/connection-string/)"`
@@ -82,9 +74,6 @@ type FlagsHTTPServer struct {
 
 	// Logging.
 	Logger LoggerConfig `group:"Logging Options" namespace:"log" env-namespace:"LOG"`
-
-	// Etcd.
-	Etcd EtcdConfig `group:"Etcd Options" namespace:"etcd" env-namespace:"ETCD"`
 
 	// HTTP.
 	// TODO: if more than one service makes an http service, hoist this out.
@@ -126,9 +115,6 @@ type FlagsWorkerServer struct {
 
 	// Logging.
 	Logger LoggerConfig `group:"Logging Options" namespace:"log" env-namespace:"LOG"`
-
-	// Etcd.
-	Etcd EtcdConfig `group:"Etcd Options" namespace:"etcd" env-namespace:"ETCD"`
 
 	Discord struct {
 		// https://discord.com/developers/docs/topics/gateway#sharding
