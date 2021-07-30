@@ -32,6 +32,7 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 		Logger: &LoggerApex{logger: logger},
 		RejectEvents: []string{
 			// TODO: disgord.AllEventsExcept(..)
+			// See: https://github.com/andersfylling/disgord/issues/360#issuecomment-830918707
 			disgord.EvtTypingStart,
 			disgord.EvtPresenceUpdate,
 			disgord.EvtGuildMemberAdd,
