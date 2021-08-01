@@ -23,8 +23,8 @@ services:
         working_dir: /build/cmd/http-server
         volumes:
             - frontend_dist:/build/cmd/http-server/public
-            - go_cache:/root/.cache/go-build
-            - go_path:/go
+            - go_cache:/root/.cache/go-build:cached
+            - go_path:/go:cached
             - ../:/build/ # root of repository
     worker:
         depends_on: ["mongo"]
@@ -33,8 +33,8 @@ services:
             dockerfile: ./cmd/worker/Dockerfile.dev
         working_dir: /build/cmd/worker
         volumes:
-            - go_cache:/root/.cache/go-build
-            - go_path:/go
+            - go_cache:/root/.cache/go-build:cached
+            - go_path:/go:cached
             - ../:/build/ # root of repository
     mongo:
         image: mongo:latest
