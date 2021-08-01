@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package spectrograph.worker;
+package worker;
 option go_package = "/worker";
 
 service Worker {
