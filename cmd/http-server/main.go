@@ -98,7 +98,7 @@ func main() {
 	// Initialize migrations.
 	if !cli.Migration.Disabled {
 		logger.Info("running database migrations")
-		if err = store.Migrate(&cli.Mongo, &cli.Migration); err != nil {
+		if err = store.Migrate(ctx, &cli.Mongo, &cli.Migration); err != nil {
 			if errors.As(err, &migrate.ErrNoChange) {
 				logger.Info("database migration: no changes found")
 			} else if errors.As(err, &migrate.ErrNilVersion) {
