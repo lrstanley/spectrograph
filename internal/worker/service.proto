@@ -8,8 +8,7 @@ service Worker {
 }
 
 message HealthResp {
-    string version = 1;
-    bool ready   = 2;
+    bool ready   = 1;
 }
 
 message NoArgs {}

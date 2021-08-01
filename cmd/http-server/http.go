@@ -90,7 +90,7 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 
 	contextUser := httpware.ContextUser(session, svcUsers)
 
-	r.Route("/api/rpc/worker", workerhandler.New(cli.RPC.Worker.SecretKey).Route)
+	r.Route("/api/rpc/worker", workerhandler.New(version, cli.RPC.Worker.SecretKey).Route)
 	r.With(contextUser).Route("/api/auth", authhandler.New(svcUsers, oauthConfig, session).Route)
 	r.With(contextUser).Route("/api/admin", adminhandler.New(svcUsers, session).Route)
 
