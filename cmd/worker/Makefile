@@ -33,8 +33,6 @@ build: fetch compile ## Builds the application
 
 debug: fetch ## Runs the application in debug mode
 	go run *.go --debug \
-		--mongo.db-name spectrograph-dev \
-		--mongo.uri "mongodb://mongo:27017/?maxPoolSize=20" \
 		--rpc.uri "http://http-server:8080/api/rpc/worker" \
 		--discord.shard-id 0 \
 		--discord.num-shards 1

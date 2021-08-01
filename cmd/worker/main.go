@@ -15,7 +15,6 @@ import (
 	"github.com/apex/log"
 	"github.com/jessevdk/go-flags"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/lrstanley/spectrograph/internal/database"
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 
@@ -67,20 +66,6 @@ func main() {
 	//     - https://github.com/hashicorp/go-discover
 	//     - I'd assume this would happen on the api server primary?
 	//   - if shard id > max concurrent, sleep for time * <id over limit>?
-
-	// Initialize storer/database.
-	var store models.Store
-	logger.WithFields(log.Fields{
-		"dbname": cli.Mongo.DBName,
-		"uri":    cli.Mongo.URI,
-	}).Info("database params")
-	store = database.New(logger)
-
-	logger.Info("initializing connections to database")
-	if err = store.Setup(&cli.Mongo); err != nil {
-		logger.WithError(err).Fatal("error initializing database")
-	}
-	defer store.Close()
 
 	ctx, closer := context.WithCancel(context.Background())
 	defer closer()

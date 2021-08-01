@@ -137,8 +137,6 @@ type FlagsWorkerServer struct {
 		URI       string `env:"URI" long:"uri" required:"true" description:"rpc server address"`
 		SecretKey string `env:"SECRET_KEY" long:"secret-key" required:"true" description:"Secret key that workers will use to authenticate with the rpc server"`
 	} `group:"RPC Options" namespace:"rpc" env-namespace:"RPC"`
-
-	Mongo MongoConfig `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
 }
 
 func FlagParse(data interface{}) (args []string) {
