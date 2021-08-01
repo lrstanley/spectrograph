@@ -104,6 +104,13 @@ type FlagsHTTPServer struct {
 		} `group:"Discord Options" namespace:"discord" env-namespace:"DISCORD"`
 	} `group:"Authentication Options" namespace:"auth" env-namespace:"AUTH"`
 
+	// RPC.
+	RPC struct {
+		Worker struct {
+			SecretKey string `env:"SECRET_KEY" long:"secret-key" required:"true" description:"Secret key that workers will use to authenticate with the rpc server"`
+		} `group:"Worker RPC Options" namespace:"worker" env-namespace:"WORKER"`
+	} `group:"RPC Options" namespace:"rpc" env-namespace:"RPC"`
+
 	// Databases.
 	Migration MigrateConfig `group:"Database Migration Options (CAUTION!)" namespace:"migration" env-namespace:"MIGRATION"`
 	Mongo     MongoConfig   `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
@@ -124,6 +131,12 @@ type FlagsWorkerServer struct {
 
 		BotToken string `env:"BOT_TOKEN" long:"bot-token" required:"true" description:"Discord bot token"`
 	} `group:"Discord Options" namespace:"discord" env-namespace:"DISCORD"`
+
+	// RPC.
+	RPC struct {
+		URI       string `env:"URI" long:"uri" required:"true" description:"rpc server address"`
+		SecretKey string `env:"SECRET_KEY" long:"secret-key" required:"true" description:"Secret key that workers will use to authenticate with the rpc server"`
+	} `group:"RPC Options" namespace:"rpc" env-namespace:"RPC"`
 
 	Mongo MongoConfig `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
 }

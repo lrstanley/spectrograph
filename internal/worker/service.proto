@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package spectrograph.worker;
+option go_package = "/worker";
+
+service Worker {
+    rpc Health(NoArgs) returns (HealthResp);
+}
+
+message HealthResp {
+    string version = 1;
+    bool ready   = 2;
+}
+
+message NoArgs {}

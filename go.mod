@@ -28,9 +28,8 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lrstanley/pt v0.0.0-20180304040151-203b3db5ff8f
 	github.com/lrstanley/recoverer v0.0.0-20201006185043-0e0d2b46e675
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/twitchtv/twirp v8.1.0+incompatible
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.etcd.io/etcd/client/v3 v3.5.0-alpha.0
 	go.mongodb.org/mongo-driver v1.5.1
@@ -41,6 +40,7 @@ require (
 	golang.org/x/sys v0.0.0-20210426230700-d19ff857e887 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20210429181445-86c259c2b4ab // indirect
+	google.golang.org/protobuf v1.26.0
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect

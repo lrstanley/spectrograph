@@ -1,23 +1,25 @@
 #!/usr/bin/make -f
 
 .DEFAULT_GOAL := build
-MAKEPID:= $(shell echo $$PPID)
+BINARY = http-server
+MAKEPID := $(shell echo $$PPID)
 
-DIRS=bin
-BINARY=http-server
 
-$(info $(shell mkdir -p $(DIRS)))
-BIN=$(CURDIR)/bin
-export GOBIN=$(CURDIR)/bin
+export GOBIN=$(shell dirname $(shell go env GOMOD))/bin
+$(info $(shell mkdir -p $(GOBIN)))
+export PATH=$(shell printenv PATH):$(GOBIN)
 export GOPRIVATE=github.com/lrstanley/spectrograph/*
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 fetch: ## Fetches the necessary dependencies to build.
-	test -f $(BIN)/bin/rice || go get -u -v github.com/GeertJohan/go.rice/rice
+	go install github.com/GeertJohan/go.rice/rice
+	go install github.com/twitchtv/twirp/protoc-gen-twirp
+	go install google.golang.org/protobuf/cmd/protoc-gen-go
 	go mod download
 	go mod tidy
+	go generate github.com/lrstanley/spectrograph/...
 
 upgrade-deps: ## Upgrade all dependencies to the latest version.
 	go get -u ./...
@@ -29,7 +31,7 @@ clean: ## Cleans up generated files/folders from the build.
 	/bin/rm -rfv "tmp" "public/dist/*" "rice-box.go" "${BINARY}"
 
 generate: ## Generate go bundled files from frontend
-	$(BIN)/rice -v embed-go
+	$(GOBIN)/rice -v embed-go
 
 compile:
 	go build -mod=readonly -ldflags '-s -w' -tags netgo -installsuffix netgo -v -o "${BINARY}"
