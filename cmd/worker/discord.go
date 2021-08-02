@@ -17,8 +17,10 @@ import (
 	"github.com/kr/pretty"
 )
 
+var client *disgord.Client
+
 func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
-	client := disgord.New(disgord.Config{
+	client = disgord.New(disgord.Config{
 		BotToken:    cli.Discord.BotToken,
 		ProjectName: "spectrograph (https://github.com/lrstanley, https://liam.sh)",
 		Presence: &disgord.UpdateStatusPayload{
@@ -32,12 +34,14 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 		Logger: &LoggerApex{logger: logger},
 		RejectEvents: disgord.AllEventsExcept(
 			// See: https://github.com/andersfylling/disgord/issues/360#issuecomment-830918707
+			disgord.EvtReady,
+			disgord.EvtResumed,
 			disgord.EvtGuildCreate,
 			disgord.EvtGuildUpdate,
+			disgord.EvtGuildDelete,
 			disgord.EvtGuildRoleCreate,
 			disgord.EvtGuildRoleUpdate,
 			disgord.EvtGuildRoleDelete,
-			disgord.EvtGuildDelete,
 			disgord.EvtChannelCreate,
 			disgord.EvtChannelUpdate,
 			disgord.EvtChannelDelete,
@@ -51,8 +55,13 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 		},
 	})
 	gw := client.Gateway().WithContext(ctx)
-	// TODO: register things here.
 	// TODO: custom logger implementation that contains prefix info?
+
+	// Register hooks here.
+	gw.BotReady(botReady)
+	gw.GuildCreate(guildCreate)
+	gw.GuildUpdate(guildUpdate)
+	gw.GuildDelete(guildDelete)
 
 	// TODO: persist this into the db, and/or monitoring?
 	gwBot, err := gw.GetBot()
@@ -104,28 +113,6 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 		return
 	}
 
-	// TODO: GuildDelete event for when we disconnect from a guild of some kind..?
-	gw.GuildCreate(func(s disgord.Session, h *disgord.GuildCreate) {
-		// time.Sleep(10 * time.Second)
-		// pretty.Println(h)
-		pretty.Println(s.GetPermissions())
-
-		// TODO: why???
-		guilds, err := s.CurrentUser().GetGuilds(&disgord.GetCurrentUserGuildsParams{})
-		if err != nil {
-			panic(err)
-		}
-		pretty.Println(guilds)
-
-		// guild, err := client.Guild(h.Guild.ID).Get()
-		// if err != nil {
-		// 	panic(err)
-		// }
-		// pretty.Println(guild)
-	})
-
-	// gw.BotReady()
-
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -137,4 +124,44 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 			logger.WithError(err).Error("error disconnecting from gateway")
 		}
 	}()
+}
+
+// botReady is called when the bot successfully connects to the websocket.
+func botReady() {
+	guilds, err := client.CurrentUser().GetGuilds(&disgord.GetCurrentUserGuildsParams{})
+	if err != nil {
+		panic(err)
+	}
+	pretty.Println(guilds)
+}
+
+// This event can be sent in three different scenarios:
+//   - When a user is initially connecting, to lazily load and backfill
+//     information for all unavailable guilds sent in the Ready event. Guilds
+//     that are unavailable due to an outage will send a Guild Delete event.
+//   - When a Guild becomes available again to the client.
+//   - When the current user joins a new Guild.
+//   - The inner payload is a guild object, with all the extra fields specified.
+func guildCreate(s disgord.Session, h *disgord.GuildCreate) {
+	// pretty.Println(h.Guild)
+	// guild, err := client.Guild(h.Guild.ID).Get()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// pretty.Println(guild)
+}
+
+// Sent when a guild is updated. The inner payload is a guild object.
+func guildUpdate(s disgord.Session, h *disgord.GuildUpdate) {
+	// pretty.Println(h)
+}
+
+// Sent when a guild becomes or was already unavailable due to an outage, or
+// when the user leaves or is removed from a guild. The inner payload is an
+// unavailable guild object. If the unavailable field is not set, the user
+// was removed from the guild.
+func guildDelete(s disgord.Session, h *disgord.GuildDelete) {
+	if h.UserWasRemoved() {
+		// TODO: clean up from db, maybe have it send a notification?
+	}
 }

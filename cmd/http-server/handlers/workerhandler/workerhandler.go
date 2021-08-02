@@ -60,5 +60,7 @@ func (h *Handler) validate(next http.Handler) http.Handler {
 type Server struct{}
 
 func (s *Server) Health(ctx context.Context, _ *worker.NoArgs) (*worker.HealthResp, error) {
+	// By the time this endpoint is accessible, we should have initiated all
+	// of the necessary background connections/services and be considered healthy.
 	return &worker.HealthResp{Ready: true}, nil
 }
