@@ -11,11 +11,13 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/apex/log"
 	"github.com/jessevdk/go-flags"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/spectrograph/internal/models"
+	"github.com/lrstanley/spectrograph/internal/worker"
 )
 
 // Should be auto-injected by build tooling.
@@ -26,8 +28,8 @@ const (
 )
 
 var (
-	cli models.FlagsWorkerServer
-
+	cli    models.FlagsWorkerServer
+	rpc    worker.Worker
 	logger log.Interface
 )
 
@@ -42,6 +44,7 @@ func main() {
 
 	logger = cli.Logger.Parse(cli.Debug).WithFields(log.Fields{
 		"build_version": fmt.Sprintf("%s/%s (%s)", version, commit, date),
+		"shard_id":      cli.Discord.ShardID,
 	})
 
 	// Validate misc. flags.
@@ -72,6 +75,15 @@ func main() {
 
 	errorChan := make(chan error)
 	wg := &sync.WaitGroup{}
+
+	// Wait for initial health check from the api server before we continue.
+	rpc = worker.NewClient(cli.RPC.URI, cli.RPC.SecretKey, version, cli.Discord.ShardID, 10*time.Second, 5)
+
+	if resp, err := rpc.Health(ctx, &worker.NoArgs{}); err != nil {
+		logger.WithError(err).Fatal("failed while waiting for rpc server to respond")
+	} else {
+		logger.WithField("health", resp.Ready).Info("rpc server is responsive")
+	}
 
 	discordSetup(ctx, wg, errorChan)
 

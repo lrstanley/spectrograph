@@ -33,6 +33,6 @@ build: fetch compile ## Builds the application
 
 debug: fetch ## Runs the application in debug mode
 	go run *.go --debug \
-		--rpc.uri "http://http-server:8080/api/rpc/worker" \
+		--rpc.uri "http://http-server:8080" \
 		--discord.shard-id 0 \
 		--discord.num-shards 1

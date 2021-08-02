@@ -37,6 +37,14 @@ func StructuredLogger(logger log.Interface, session *scs.SessionManager, private
 					logEntry = logEntry.WithField("remote_ip", r.RemoteAddr)
 				}
 
+				if workerShardID := r.Header.Get("X-Shard-Id"); workerShardID != "" {
+					logEntry = logEntry.WithField("shard_id", workerShardID)
+				}
+
+				if workerVersion := r.Header.Get("X-Api-Version"); workerVersion != "" {
+					logEntry = logEntry.WithField("worker_version", workerVersion)
+				}
+
 				authed, userId := IsAuthed(session, r)
 				if authed {
 					logEntry = logEntry.WithField("user_id", userId)
