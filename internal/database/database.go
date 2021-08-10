@@ -162,7 +162,7 @@ func (s *mongoStore) Migrate(ctx context.Context, mongoFlags *models.MongoConfig
 			Enabled:        true,
 			CollectionName: "migrate_advisory_lock",
 			Timeout:        30,
-			Interval:       10,
+			Interval:       1,
 		},
 	})
 	if err != nil {
