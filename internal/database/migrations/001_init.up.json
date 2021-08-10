@@ -6,6 +6,13 @@
             { "name": "users_unique", "unique": true, "key": { "discord.id": 1 } }
         ]
     },
+    { "create": "servers" },
+    {
+        "createIndexes": "servers",
+        "indexes": [
+            { "name": "servers_unique", "unique": true, "key": { "discord.id": 1 } }
+        ]
+    },
     { "create": "sessions" },
     {
         "createIndexes": "sessions",
