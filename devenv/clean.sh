@@ -13,4 +13,5 @@ docker-compose \
     --file ./devenv/docker-compose.yml \
     down --volumes --remove-orphans --rmi local --timeout 1
 
-rm -rf .cache/ .npm/
+echo -e "\n\n  run the following to completely remove all cache and temporary build files"
+echo -e '    $ rm -rf .cache/ .npm/ ./cmd/frontend/dist /cmd/frontend/node_modules'

@@ -5,9 +5,7 @@ if [ "$(basename $PWD)" != "spectrograph" ];then
     exit 1
 fi
 
-mkdir -p .cache/{frontend_dist,node_dotnpm,node_modules,go_cache,go_path}
-mkdir -p .npm/
-# mkdir -vp ./cmd/frontend/dist ./cmd/frontend/node_modules/.vite
+mkdir -vp ./cmd/frontend/dist ./cmd/frontend/node_modules/.vite
 mkdir -p ./cmd/http-server/{public,bin}
 mkdir -p ./cmd/worker/bin
 

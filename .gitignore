@@ -11,6 +11,7 @@
 **/vendor
 **/node_modules
 **/.cache
+**/.npm
 **/dist
 cmd/spectrograph/spectrograph
 cmd/spectrograph-http/spectrograph-http

@@ -17,3 +17,4 @@ vendor
 **/*.md
 **/node_modules
 **/.cache
+**/.npm
