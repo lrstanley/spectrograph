@@ -9,15 +9,17 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
 
 	"github.com/apex/log"
+	"github.com/gojek/heimdall/v7/httpclient"
 	"github.com/jessevdk/go-flags"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/lrstanley/spectrograph/internal/apiclient"
 	"github.com/lrstanley/spectrograph/internal/models"
-	"github.com/lrstanley/spectrograph/internal/rpc"
 )
 
 // Should be auto-injected by build tooling.
@@ -29,7 +31,7 @@ const (
 
 var (
 	cli    models.FlagsWorkerServer
-	api    rpc.Worker
+	api    *httpclient.Client
 	logger log.Interface
 )
 
@@ -77,13 +79,32 @@ func main() {
 	wg := &sync.WaitGroup{}
 
 	// Wait for initial health check from the api server before we continue.
-	api = rpc.NewWorkerClient(cli.RPC.URI, cli.RPC.SecretKey, version, cli.Discord.ShardID, 10*time.Second, 5)
+	api = apiclient.New(cli.API.URI, 10*time.Second, 5, map[string]string{
+		"X-Api-Version": version,
+		"X-Api-Key":     cli.API.Key,
+		"X-Shard-Id":    strconv.Itoa(cli.Discord.ShardID),
+	})
 
-	if resp, err := api.Health(ctx, &rpc.NoArgs{}); err != nil {
-		logger.WithError(err).Fatal("failed while waiting for rpc server to respond")
-	} else {
-		logger.WithField("health", resp.Ready).Info("rpc server is responsive")
+	if !checkAPIHealth() {
+		closer()
+		wg.Wait()
+		os.Exit(1)
 	}
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(150 * time.Second):
+				if !checkAPIHealth() {
+					closer()
+					wg.Wait()
+					os.Exit(1)
+				}
+			}
+		}
+	}()
 
 	discordSetup(ctx, wg, errorChan)
 
@@ -111,4 +132,21 @@ func main() {
 	wg.Wait()
 
 	logger.Info("shutdown complete")
+}
+
+func checkAPIHealth() (healthy bool) {
+	resp, err := api.Get("/api/worker/health", nil)
+	if err != nil {
+		logger.WithError(err).Error("healthcheck: failed while waiting for api server to respond (multiple attempts)")
+		return false
+	}
+	resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		logger.WithField("status", resp.Status).Error("healthcheck: api server returned non-ok status code")
+		return false
+	}
+
+	logger.Info("healthcheck: api server is responsive")
+	return true
 }
