@@ -5,14 +5,19 @@ if [ "$(basename $PWD)" != "spectrograph" ];then
     exit 1
 fi
 
-mkdir -vp ./cmd/frontend/dist ./cmd/frontend/node_modules/.vite
-mkdir -vp ./cmd/http-server/{public,bin}
-mkdir -vp ./cmd/worker/bin
+mkdir -p .cache/{frontend_dist,node_dotnpm,node_modules,go_cache,go_path}
+mkdir -p .npm/
+# mkdir -vp ./cmd/frontend/dist ./cmd/frontend/node_modules/.vite
+mkdir -p ./cmd/http-server/{public,bin}
+mkdir -p ./cmd/worker/bin
 
 DANGLING=$(docker images -f "dangling=true" -q)
 if [ ! -z "$DANGLING" ];then
     docker rmi $DANGLING 2>/dev/null
 fi
+
+export USER=$(id -u)
+export GROUP=$(id -g)
 
 docker-compose \
     --project-name "$(basename $PWD)" \

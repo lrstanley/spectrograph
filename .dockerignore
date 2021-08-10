@@ -16,3 +16,4 @@ vendor
 **/bin
 **/*.md
 **/node_modules
+**/.cache

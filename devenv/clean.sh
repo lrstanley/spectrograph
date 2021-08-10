@@ -11,4 +11,6 @@ set -x
 docker-compose \
     --project-name "$BASE" \
     --file ./devenv/docker-compose.yml \
-    rm --stop -v --force
+    down --volumes --remove-orphans --rmi local --timeout 1
+
+rm -rf .cache/ .npm/

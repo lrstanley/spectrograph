@@ -1,40 +1,57 @@
 version: "3"
-volumes:
-    frontend_dist: {}
-    go_cache: {}
-    go_path: {}
+# volumes:
+#     frontend_dist: {}
+#     go_cache: {}
+#     go_path: {}
 services:
     frontend:
+        user: $USER:$GROUP
         depends_on: []
         ports: [8081:8081]
         build:
             context: ../
             dockerfile: ./cmd/frontend/Dockerfile.dev
         working_dir: /build/cmd/frontend
+        environment:
+            - HOME=/build
         volumes:
-            - frontend_dist:/build/cmd/frontend/dist
+            - /etc/passwd:/etc/passwd:ro
+            - /etc/group:/etc/group:ro
+            - ../.cache/frontend_dist:/build/cmd/frontend/dist
+            - ../.cache/node_modules:/build/cmd/frontend/node_modules
+            - ../.cache/node_dotnpm:/build/.npm
             - ../:/build/ # root of repository
     http-server:
+        user: $USER:$GROUP
         depends_on: ["mongo"]
         ports: [8080:8080]
         build:
             context: ../
             dockerfile: ./cmd/http-server/Dockerfile.dev
         working_dir: /build/cmd/http-server
+        environment:
+            - HOME=/build
         volumes:
-            - frontend_dist:/build/cmd/http-server/public
-            - go_cache:/root/.cache/go-build:cached
-            - go_path:/go:cached
+            - /etc/passwd:/etc/passwd:ro
+            - /etc/group:/etc/group:ro
+            - ../.cache/frontend_dist:/build/cmd/http-server/public
+            - ../.cache/go_cache:/build/.cache/go-build
+            - ../.cache/go_path:/go
             - ../:/build/ # root of repository
     worker:
-        depends_on: ["mongo"]
+        user: $USER:$GROUP
+        depends_on: ["http-server", "mongo"]
         build:
             context: ../
             dockerfile: ./cmd/worker/Dockerfile.dev
         working_dir: /build/cmd/worker
+        environment:
+            - HOME=/build
         volumes:
-            - go_cache:/root/.cache/go-build:cached
-            - go_path:/go:cached
+            - /etc/passwd:/etc/passwd:ro
+            - /etc/group:/etc/group:ro
+            - ../.cache/go_cache:/build/.cache/go-build
+            - ../.cache/go_path:/go
             - ../:/build/ # root of repository
     mongo:
         image: mongo:latest
