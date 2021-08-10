@@ -102,14 +102,8 @@ type FlagsHTTPServer struct {
 			Secret string   `env:"SECRET" long:"secret" required:"true" description:"Discord oauth2 secret"`
 			Admins []string `env:"ADMINS" long:"admins" required:"true" env-delim:"," description:"user id's of the users you want to be admins"`
 		} `group:"Discord Options" namespace:"discord" env-namespace:"DISCORD"`
+		APIKeys []string `env:"API_KEY" long:"api-key" required:"true" description:"API key(s) that internal components will use to authenticate with the api server"`
 	} `group:"Authentication Options" namespace:"auth" env-namespace:"AUTH"`
-
-	// RPC.
-	RPC struct {
-		Worker struct {
-			SecretKey string `env:"SECRET_KEY" long:"secret-key" required:"true" description:"Secret key that workers will use to authenticate with the rpc server"`
-		} `group:"Worker RPC Options" namespace:"worker" env-namespace:"WORKER"`
-	} `group:"RPC Options" namespace:"rpc" env-namespace:"RPC"`
 
 	// Databases.
 	Migration MigrateConfig `group:"Database Migration Options (CAUTION!)" namespace:"migration" env-namespace:"MIGRATION"`
@@ -118,7 +112,7 @@ type FlagsHTTPServer struct {
 
 // FlagsWorkerServer are flags used by the worker service.
 type FlagsWorkerServer struct {
-	Debug bool `env:"DEBUG" long:"debug" description:"enable debugging"`
+	Debug bool `env:"DEBUG"   long:"debug"   description:"enable debugging"`
 
 	// Logging.
 	Logger LoggerConfig `group:"Logging Options" namespace:"log" env-namespace:"LOG"`
@@ -133,10 +127,12 @@ type FlagsWorkerServer struct {
 	} `group:"Discord Options" namespace:"discord" env-namespace:"DISCORD"`
 
 	// RPC.
-	RPC struct {
-		URI       string `env:"URI" long:"uri" required:"true" description:"rpc server address"`
-		SecretKey string `env:"SECRET_KEY" long:"secret-key" required:"true" description:"Secret key that workers will use to authenticate with the rpc server"`
-	} `group:"RPC Options" namespace:"rpc" env-namespace:"RPC"`
+	API struct {
+		// TODO: support tls certs on both server and client, for authentication
+		// and encryption.
+		URI string `env:"URI" long:"uri" required:"true" description:"API server address"`
+		Key string `env:"KEY" long:"key" required:"true" description:"API key that this component will use to authenticate with the api server"`
+	} `group:"API Client Options" namespace:"api" env-namespace:"API"`
 }
 
 func FlagParse(data interface{}) (args []string) {

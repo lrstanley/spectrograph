@@ -5,62 +5,23 @@
 package workerhandler
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/lrstanley/spectrograph/internal/rpc"
-	"github.com/twitchtv/twirp"
 )
 
-type Handler struct {
-	version   string
-	key       string
-	rpcServer rpc.TwirpServer
-}
+type Handler struct{}
 
-func New(serverVersion, secretKey string) *Handler {
-	return &Handler{
-		version:   serverVersion,
-		key:       secretKey,
-		rpcServer: rpc.NewWorkerServer(&Server{}, twirp.WithServerPathPrefix(rpc.PathPrefixWorker)),
-	}
+func New() *Handler {
+	return &Handler{}
 }
 
 func (h *Handler) Route(r chi.Router) {
-	r.With(h.validate).Mount("/", h.rpcServer)
+	r.Get("/health", h.getHealth)
 }
 
-func (h *Handler) validate(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Version checks.
-		clientVersion := r.Header.Get("X-Api-Version")
-		if clientVersion == "" {
-			twerr := twirp.NewError(twirp.FailedPrecondition, "api version not specified")
-			twirp.WriteError(w, twerr)
-			return
-		} else if clientVersion != h.version {
-			twerr := twirp.NewError(twirp.FailedPrecondition, fmt.Sprintf("server (%q) and client (%q) version mismatch", h.version, clientVersion))
-			twirp.WriteError(w, twerr)
-			return
-		}
-
-		// Authentication checks.
-		if r.Header.Get("X-Api-Key") != h.key {
-			twerr := twirp.NewError(twirp.Unauthenticated, "invalid token provided")
-			twirp.WriteError(w, twerr)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-type Server struct{}
-
-func (s *Server) Health(ctx context.Context, _ *rpc.NoArgs) (*rpc.WorkerHealthResp, error) {
+func (h *Handler) getHealth(w http.ResponseWriter, r *http.Request) {
 	// By the time this endpoint is accessible, we should have initiated all
 	// of the necessary background connections/services and be considered healthy.
-	return &rpc.WorkerHealthResp{Ready: true}, nil
+	w.WriteHeader(http.StatusOK)
 }

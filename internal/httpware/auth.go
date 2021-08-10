@@ -6,11 +6,12 @@ package httpware
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/apex/log"
-	"github.com/lrstanley/pt"
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 
@@ -21,7 +22,7 @@ func AdminRequired(session *scs.SessionManager) func(next http.Handler) http.Han
 
 			if !admin {
 				w.WriteHeader(http.StatusForbidden)
-				pt.JSON(w, r, pt.M{"error": "administrators only"})
+				HandleError(w, r, http.StatusForbidden, nil)
 				return
 			}
 
@@ -34,12 +35,37 @@ func AuthRequired(session *scs.SessionManager) func(next http.Handler) http.Hand
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if authed, _ := IsAuthed(session, r); !authed {
-				w.WriteHeader(http.StatusUnauthorized)
-				pt.JSON(w, r, pt.M{"error": "authentication required"})
+				HandleError(w, r, http.StatusUnauthorized, nil)
 				return
 			}
 
 			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func APIKeyRequired(version string, keys []string) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Version checks.
+			clientVersion := r.Header.Get("X-Api-Version")
+			if clientVersion == "" {
+				HandleError(w, r, http.StatusPreconditionFailed, errors.New("api version not specified"))
+				return
+			} else if clientVersion != version {
+				HandleError(w, r, http.StatusPreconditionFailed, fmt.Errorf("server (%q) and client (%q) version mismatch", version, clientVersion))
+				return
+			}
+
+			// Authentication checks.
+			for _, key := range keys {
+				if r.Header.Get("X-Api-Key") == key {
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+
+			HandleError(w, r, http.StatusUnauthorized, errors.New("invalid token provided"))
 		})
 	}
 }
