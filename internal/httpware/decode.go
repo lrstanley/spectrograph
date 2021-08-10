@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-playground/form"
+	"github.com/go-playground/form/v4"
 )
 
 var globalDecoder = form.NewDecoder()

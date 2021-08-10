@@ -13,7 +13,7 @@ require (
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3 // indirect
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
-	github.com/go-playground/form v3.1.4+incompatible
+	github.com/go-playground/form/v4 v4.2.0
 	github.com/gojek/heimdall/v7 v7.0.2
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.14.1
