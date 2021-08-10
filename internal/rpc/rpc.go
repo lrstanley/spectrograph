@@ -2,7 +2,7 @@
 // of this source code is governed by the MIT license that can be found in
 // the LICENSE file.
 
-package worker
+package rpc
 
 import (
 	http "net/http"
@@ -18,12 +18,12 @@ import (
 
 //go:generate protoc --go_out=paths=source_relative:. --twirp_out=paths=source_relative:. service.proto
 
-// PathPrefix is the prefix used for calls to the rpc server. This does not
+// PathPrefixWorker is the prefix used for calls to the rpc server. This does not
 // include any other prefixes that may be needed to mount the server on the
 // http server mux.
-const PathPrefix = "/api/rpc/worker"
+const PathPrefixWorker = "/api/rpc/worker"
 
-func NewClient(baseURL, secretKey, version string, shardID int, timeout time.Duration, maxRetries int) Worker {
+func NewWorkerClient(baseURL, secretKey, version string, shardID int, timeout time.Duration, maxRetries int) Worker {
 	initalTimeout := 1 * time.Second         // Inital timeout
 	maxTimeout := 30 * time.Second           // Max time out
 	exponentFactor := 2.0                    // Multiplier
@@ -42,7 +42,7 @@ func NewClient(baseURL, secretKey, version string, shardID int, timeout time.Dur
 	// https://github.com/gojek/heimdall/blob/master/plugins/request_logger.go
 	client.AddPlugin(plugins.NewRequestLogger(os.Stdout, nil))
 
-	return NewWorkerProtobufClient(baseURL, client, twirp.WithClientPathPrefix(PathPrefix))
+	return NewWorkerProtobufClient(baseURL, client, twirp.WithClientPathPrefix(PathPrefixWorker))
 }
 
 type apiClient struct {

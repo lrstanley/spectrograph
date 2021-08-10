@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package rpc;
+option go_package = "/rpc";
+
+service Worker {
+    rpc Health(NoArgs) returns (WorkerHealthResp);
+}
+
+message WorkerHealthResp {
+    bool ready   = 1;
+}
+
+message NoArgs {}

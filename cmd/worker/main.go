@@ -17,7 +17,7 @@ import (
 	"github.com/jessevdk/go-flags"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/spectrograph/internal/models"
-	"github.com/lrstanley/spectrograph/internal/worker"
+	"github.com/lrstanley/spectrograph/internal/rpc"
 )
 
 // Should be auto-injected by build tooling.
@@ -29,7 +29,7 @@ const (
 
 var (
 	cli    models.FlagsWorkerServer
-	rpc    worker.Worker
+	api    rpc.Worker
 	logger log.Interface
 )
 
@@ -77,9 +77,9 @@ func main() {
 	wg := &sync.WaitGroup{}
 
 	// Wait for initial health check from the api server before we continue.
-	rpc = worker.NewClient(cli.RPC.URI, cli.RPC.SecretKey, version, cli.Discord.ShardID, 10*time.Second, 5)
+	api = rpc.NewWorkerClient(cli.RPC.URI, cli.RPC.SecretKey, version, cli.Discord.ShardID, 10*time.Second, 5)
 
-	if resp, err := rpc.Health(ctx, &worker.NoArgs{}); err != nil {
+	if resp, err := api.Health(ctx, &rpc.NoArgs{}); err != nil {
 		logger.WithError(err).Fatal("failed while waiting for rpc server to respond")
 	} else {
 		logger.WithField("health", resp.Ready).Info("rpc server is responsive")

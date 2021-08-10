@@ -10,26 +10,26 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/lrstanley/spectrograph/internal/worker"
+	"github.com/lrstanley/spectrograph/internal/rpc"
 	"github.com/twitchtv/twirp"
 )
 
 type Handler struct {
-	version string
-	key     string
-	rpc     worker.TwirpServer
+	version   string
+	key       string
+	rpcServer rpc.TwirpServer
 }
 
 func New(serverVersion, secretKey string) *Handler {
 	return &Handler{
-		version: serverVersion,
-		key:     secretKey,
-		rpc:     worker.NewWorkerServer(&Server{}, twirp.WithServerPathPrefix(worker.PathPrefix)),
+		version:   serverVersion,
+		key:       secretKey,
+		rpcServer: rpc.NewWorkerServer(&Server{}, twirp.WithServerPathPrefix(rpc.PathPrefixWorker)),
 	}
 }
 
 func (h *Handler) Route(r chi.Router) {
-	r.With(h.validate).Mount("/", h.rpc)
+	r.With(h.validate).Mount("/", h.rpcServer)
 }
 
 func (h *Handler) validate(next http.Handler) http.Handler {
@@ -59,8 +59,8 @@ func (h *Handler) validate(next http.Handler) http.Handler {
 
 type Server struct{}
 
-func (s *Server) Health(ctx context.Context, _ *worker.NoArgs) (*worker.HealthResp, error) {
+func (s *Server) Health(ctx context.Context, _ *rpc.NoArgs) (*rpc.WorkerHealthResp, error) {
 	// By the time this endpoint is accessible, we should have initiated all
 	// of the necessary background connections/services and be considered healthy.
-	return &worker.HealthResp{Ready: true}, nil
+	return &rpc.WorkerHealthResp{Ready: true}, nil
 }
