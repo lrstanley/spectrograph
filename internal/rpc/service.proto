@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/any.proto";
+
 package rpc;
 option go_package = "/rpc";
 
@@ -9,6 +11,7 @@ service Worker {
 
 message WorkerHealthResp {
     bool ready   = 1;
+    google.protobuf.Any test = 2;
 }
 
 message NoArgs {}

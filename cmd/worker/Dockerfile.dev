@@ -1,4 +1,4 @@
 FROM golang:alpine
-RUN apk add --no-cache g++ make entr protoc
+RUN apk add --no-cache g++ make entr protobuf-dev protoc
 
 CMD ["/bin/sh", "-c", "while true;do { find ../../internal -type f | grep -Ev '\\.(pb|twirp).go'; find $PWD -type f; } | entr -r -n -d -s -- 'sleep 2;make debug';done"]
