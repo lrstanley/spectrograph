@@ -15,11 +15,11 @@ import (
 	"time"
 
 	"github.com/apex/log"
-	"github.com/gojek/heimdall/v7/httpclient"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jessevdk/go-flags"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/lrstanley/spectrograph/internal/apiclient"
 	"github.com/lrstanley/spectrograph/internal/models"
+	"github.com/lrstanley/spectrograph/internal/rpc"
 )
 
 // Should be auto-injected by build tooling.
@@ -30,9 +30,9 @@ const (
 )
 
 var (
-	cli    models.FlagsWorkerServer
-	api    *httpclient.Client
-	logger log.Interface
+	cli       models.FlagsWorkerServer
+	rpcWorker rpc.Worker
+	logger    log.Interface
 )
 
 func main() {
@@ -78,14 +78,13 @@ func main() {
 	errorChan := make(chan error)
 	wg := &sync.WaitGroup{}
 
-	// Wait for initial health check from the api server before we continue.
-	api = apiclient.New(cli.API.URI, 10*time.Second, 5, map[string]string{
+	rpcWorker = rpc.NewWorkerClient(cli.API.URI, rpc.NewHTTPClient(10*time.Second, 5, map[string]string{
 		"X-Api-Version": version,
 		"X-Api-Key":     cli.API.Key,
 		"X-Shard-Id":    strconv.Itoa(cli.Discord.ShardID),
-	})
+	}))
 
-	if !checkAPIHealth() {
+	if !checkAPIHealth(ctx) {
 		closer()
 		wg.Wait()
 		os.Exit(1)
@@ -97,7 +96,7 @@ func main() {
 			case <-ctx.Done():
 				return
 			case <-time.After(150 * time.Second):
-				if !checkAPIHealth() {
+				if !checkAPIHealth(ctx) {
 					closer()
 					wg.Wait()
 					os.Exit(1)
@@ -134,16 +133,14 @@ func main() {
 	logger.Info("shutdown complete")
 }
 
-func checkAPIHealth() (healthy bool) {
-	resp, err := api.Get("/api/worker/health", nil)
+func checkAPIHealth(ctx context.Context) (healthy bool) {
+	resp, err := rpcWorker.Health(ctx, &empty.Empty{})
 	if err != nil {
 		logger.WithError(err).Error("healthcheck: failed while waiting for api server to respond (multiple attempts)")
 		return false
 	}
-	resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		logger.WithField("status", resp.Status).Error("healthcheck: api server returned non-ok status code")
+	if !resp.Ready {
+		logger.Error("healthcheck: api server is not ready yet")
 		return false
 	}
 

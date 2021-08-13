@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go v1.38.30 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.0 // indirect
 	github.com/daaku/go.zipexe v1.0.1 // indirect
+	github.com/favadi/protoc-go-inject-tag v1.2.1-0.20210813025517-2ab519911e46
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3 // indirect
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
@@ -17,6 +18,7 @@ require (
 	github.com/gojek/heimdall/v7 v7.0.2
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.14.1
+	github.com/golang/protobuf v1.5.2
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/jessevdk/go-flags v1.5.0
@@ -40,7 +42,7 @@ require (
 	golang.org/x/sys v0.0.0-20210426230700-d19ff857e887 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20210429181445-86c259c2b4ab // indirect
-	google.golang.org/protobuf v1.26.0
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect

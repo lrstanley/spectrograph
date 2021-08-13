@@ -126,7 +126,7 @@ type FlagsWorkerServer struct {
 		BotToken string `env:"BOT_TOKEN" long:"bot-token" required:"true" description:"Discord bot token"`
 	} `group:"Discord Options" namespace:"discord" env-namespace:"DISCORD"`
 
-	// RPC.
+	// API.
 	API struct {
 		// TODO: support tls certs on both server and client, for authentication
 		// and encryption.

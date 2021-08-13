@@ -16,7 +16,6 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	mongomigrate "github.com/golang-migrate/migrate/v4/database/mongodb"
 	bindata "github.com/golang-migrate/migrate/v4/source/go_bindata"
-	"github.com/kr/pretty"
 	"github.com/lrstanley/spectrograph/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -174,8 +173,6 @@ func (s *mongoStore) Migrate(ctx context.Context, mongoFlags *models.MongoConfig
 		// TODO: this logic can be moved to the main package because everything after
 		// this point has potentially duplicated logic.
 		m.Log = &models.MigrateLogger{Logger: s.log}
-
-		pretty.Println(migrateFlags)
 
 		// Do they want to purge data during startup?
 		if migrateFlags.Purge {

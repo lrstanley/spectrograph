@@ -25,6 +25,7 @@ import (
 	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/authhandler"
 	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/workerhandler"
 	"github.com/lrstanley/spectrograph/internal/httpware"
+	"github.com/lrstanley/spectrograph/internal/rpc"
 )
 
 func init() {
@@ -90,7 +91,11 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 
 	contextUser := httpware.ContextUser(session, svcUsers)
 
-	r.With(httpware.APIKeyRequired(version, cli.Auth.APIKeys)).Route("/api/worker", workerhandler.New().Route)
+	r.With(
+		httpware.APIVersionMatch(version),
+		httpware.APIKeyRequired(cli.Auth.APIKeys),
+	).Route(rpc.PathPrefix, workerhandler.New().Route)
+
 	r.With(contextUser).Route("/api/auth", authhandler.New(svcUsers, oauthConfig, session).Route)
 	r.With(contextUser).Route("/api/admin", adminhandler.New(svcUsers, session).Route)
 

@@ -13,6 +13,7 @@ package tools
 // +build tools
 import (
 	_ "github.com/GeertJohan/go.rice/rice"
+	_ "github.com/favadi/protoc-go-inject-tag"
 	_ "github.com/twitchtv/twirp/protoc-gen-twirp"
 	_ "google.golang.org/protobuf/cmd/protoc-gen-go"
 )
