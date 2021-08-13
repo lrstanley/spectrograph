@@ -73,6 +73,7 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	// TODO: throttle or httprate: https://github.com/go-chi/httprate
 	r.Use(middleware.Timeout(30 * time.Second))
 	r.Use(middleware.StripSlashes)
+	r.Use(middleware.GetHead)
 
 	// Bind/mount routes here.
 	r.Mount("/dist", http.StripPrefix("/dist", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -86,8 +87,16 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	}
 
 	// Because it's Vue, serve the index.html when possible.
-	r.Get("/", serveIndex)
-	r.NotFound(serveIndex)
+	r.Get("/", catchAll)
+	r.NotFound(catchAll)
+
+	r.Get("/{:(?i)robots.txt}", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "User-agent: *\nDisallow: /api\nAllow: /\n")
+	})
+
+	r.Get("/{:(?i)security.txt}", securityTxt)
+	r.Get("/.well-known/{:(?i)security.txt}", securityTxt)
 
 	contextUser := httpware.ContextUser(session, svcUsers)
 
@@ -138,13 +147,29 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	}()
 }
 
-func serveIndex(w http.ResponseWriter, r *http.Request) {
+func securityTxt(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, strings.TrimLeft(`
+Contact: mailto:me@liamstanley.io
+Contact: https://liam.sh/chat
+Contact: https://github.com/lrstanley
+Expires: 2022-06-01T04:00:00.000Z
+Encryption: https://github.com/lrstanley.gpg
+Preferred-Languages: en
+`, "\n"))
+}
+
+func catchAll(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/api/") {
 		httpware.HandleError(w, r, http.StatusNotFound, nil)
 		return
 	}
 	if r.Method != http.MethodGet {
 		httpware.HandleError(w, r, http.StatusMethodNotAllowed, errors.New(http.StatusText(http.StatusMethodNotAllowed)))
+		return
+	}
+	if strings.HasSuffix(r.URL.Path, ".ico") {
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	w.Write(rice.MustFindBox("public").MustBytes("index.html"))
