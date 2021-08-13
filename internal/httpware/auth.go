@@ -6,8 +6,6 @@ package httpware
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
@@ -40,32 +38,6 @@ func AuthRequired(session *scs.SessionManager) func(next http.Handler) http.Hand
 			}
 
 			next.ServeHTTP(w, r)
-		})
-	}
-}
-
-func APIKeyRequired(version string, keys []string) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Version checks.
-			clientVersion := r.Header.Get("X-Api-Version")
-			if clientVersion == "" {
-				HandleError(w, r, http.StatusPreconditionFailed, errors.New("api version not specified"))
-				return
-			} else if clientVersion != version {
-				HandleError(w, r, http.StatusPreconditionFailed, fmt.Errorf("server (%q) and client (%q) version mismatch", version, clientVersion))
-				return
-			}
-
-			// Authentication checks.
-			for _, key := range keys {
-				if r.Header.Get("X-Api-Key") == key {
-					next.ServeHTTP(w, r)
-					return
-				}
-			}
-
-			HandleError(w, r, http.StatusUnauthorized, errors.New("invalid token provided"))
 		})
 	}
 }
