@@ -5,21 +5,24 @@ BINARY = http-server
 MAKEPID := $(shell echo $$PPID)
 
 
-export GOBIN=$(shell dirname $(shell go env GOMOD))/bin
+GO_MOD_ROOT = $(shell dirname $(shell go env GOMOD))
+export GOBIN = ${GO_MOD_ROOT}/bin
+export GOMODCACHE = ${GO_MOD_ROOT}/.gomodcache
 $(info $(shell mkdir -p $(GOBIN)))
-export PATH=$(shell printenv PATH):$(GOBIN)
-export GOPRIVATE=github.com/lrstanley/spectrograph/*
+export PATH = $(shell printenv PATH):$(GOBIN)
+export GOPRIVATE = github.com/lrstanley/spectrograph/*
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 fetch: ## Fetches the necessary dependencies to build.
-	go install github.com/GeertJohan/go.rice/rice
-	go install github.com/twitchtv/twirp/protoc-gen-twirp
 	go install google.golang.org/protobuf/cmd/protoc-gen-go
+	go install github.com/twitchtv/twirp/protoc-gen-twirp
+	go install github.com/favadi/protoc-go-inject-tag
 	go mod download
 	go mod tidy
-	go generate github.com/lrstanley/spectrograph/...
+	go generate -x github.com/lrstanley/spectrograph/...
+	find . -not -path '*/\.*' -type f -name "*.pb.go" -exec protoc-go-inject-tag -input="{}" \;
 
 upgrade-deps: ## Upgrade all dependencies to the latest version.
 	go get -u ./...
@@ -39,7 +42,7 @@ compile:
 build: fetch clean generate compile ## Builds the application (with generate).
 	echo
 
-debug: ## Runs the application in debug mode
+debug: fetch ## Runs the application in debug mode
 	# TODO: add -race, but add options for globally larger http timeouts (or timeouts in general?)
 	go run *.go --debug \
 		--http.bind-addr :8080 \
