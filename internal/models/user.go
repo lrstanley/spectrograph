@@ -18,7 +18,7 @@ type UserService interface {
 }
 
 type User struct {
-	ID             string    `bson:"_id,omitempty"   json:"id"`
+	ID             string    `bson:"_id"   json:"id"`
 	AccountCreated time.Time `bson:"account_created" json:"account_created"`
 	AccountUpdated time.Time `bson:"account_updated" json:"account_updated"`
 
