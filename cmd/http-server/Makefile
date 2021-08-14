@@ -22,7 +22,6 @@ fetch: ## Fetches the necessary dependencies to build.
 	go mod download
 	go mod tidy
 	go generate -x github.com/lrstanley/spectrograph/...
-	find . -not -path '*/\.*' -type f -name "*.pb.go" -exec protoc-go-inject-tag -input="{}" \;
 
 upgrade-deps: ## Upgrade all dependencies to the latest version.
 	go get -u ./...
