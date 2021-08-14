@@ -26,20 +26,19 @@ func NewWorkerClient(baseURL string, client *httpclient.Client) Worker {
 	return NewWorkerProtobufClient(baseURL, client, twirp.WithClientPathPrefix(PathPrefix))
 }
 
-func NewHTTPClient(timeout time.Duration, maxRetries int, headers map[string]string) *httpclient.Client {
-	initialTimeout := 1 * time.Second        // Initial timeout.
-	maxTimeout := 30 * time.Second           // Max time out.
+func NewHTTPClient(timeout time.Duration, headers map[string]string) *httpclient.Client {
+	initialTimeout := 500 * time.Millisecond // Initial timeout.
+	maxTimeout := timeout                    // Max time out.
 	exponentFactor := 2.0                    // Multiplier.
 	maximumJitterInterval := 1 * time.Second // Max jitter interval.
 
 	backoff := heimdall.NewExponentialBackoff(initialTimeout, maxTimeout, exponentFactor, maximumJitterInterval)
-	retrier := heimdall.NewRetrier(backoff)
 
 	client := httpclient.NewClient(
 		httpclient.WithHTTPClient(&rpcClient{client: http.DefaultClient, headers: headers}),
-		httpclient.WithHTTPTimeout(timeout),
-		httpclient.WithRetrier(retrier),
-		httpclient.WithRetryCount(maxRetries),
+		httpclient.WithHTTPTimeout(5*time.Second),
+		httpclient.WithRetrier(heimdall.NewRetrier(backoff)),
+		// httpclient.WithRetryCount(maxRetries),
 	)
 
 	// TODO: swap out with a leveled implementation:

@@ -78,7 +78,7 @@ func main() {
 	errorChan := make(chan error)
 	wg := &sync.WaitGroup{}
 
-	rpcWorker = rpc.NewWorkerClient(cli.API.URI, rpc.NewHTTPClient(10*time.Second, 5, map[string]string{
+	rpcWorker = rpc.NewWorkerClient(cli.API.URI, rpc.NewHTTPClient(30*time.Second, map[string]string{
 		"X-Api-Version": version,
 		"X-Api-Key":     cli.API.Key,
 		"X-Shard-Id":    strconv.Itoa(cli.Discord.ShardID),
