@@ -7,8 +7,6 @@ package models
 import (
 	"context"
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ServerService interface {
@@ -17,21 +15,21 @@ type ServerService interface {
 	List(ctx context.Context) ([]*Server, error)
 }
 type Server struct {
-	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Created time.Time          `bson:"created"       json:"created"`
-	Updated time.Time          `bson:"updated"       json:"updated"`
-	Discord ServerDiscordData  `bson:"discord"       json:"discord"`
+	ID      string            `bson:"_id,omitempty" json:"id"`
+	Created time.Time         `bson:"created"       json:"created"`
+	Updated time.Time         `bson:"updated"       json:"updated"`
+	Discord ServerDiscordData `bson:"discord"       json:"discord"`
 }
 
 // TODO: auto-generate status if last status message is greater than X period
 // of time?
 type ServerStatusMessage struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Timestamp time.Time          `bson:"timestamp"     json:"timestamp"`
-	Type      string             `bson:"type"          json:"type"`
-	Message   string             `bson:"message"       json:"message"`
-	Healthy   bool               `bson:"healthy"       json:"healthy"`
-	Available bool               `bson:"available"     json:"available"`
+	ID        string    `bson:"_id,omitempty" json:"id"`
+	Timestamp time.Time `bson:"timestamp"     json:"timestamp"`
+	Type      string    `bson:"type"          json:"type"`
+	Message   string    `bson:"message"       json:"message"`
+	Healthy   bool      `bson:"healthy"       json:"healthy"`
+	Available bool      `bson:"available"     json:"available"`
 }
 
 type ServerDiscordData struct {

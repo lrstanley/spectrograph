@@ -17,9 +17,8 @@ import (
 
 //go:generate sh -c "cd ../../;protoc --proto_path=. --go_out=paths=source_relative:. --twirp_out=paths=source_relative:. internal/rpc/*.proto"
 
-// PathPrefixWorker is the prefix used for calls to the rpc server. This does not
-// include any other prefixes that may be needed to mount the server on the
-// http server mux.
+// PathPrefix is the prefix used for calls to the rpc server. This is the
+// absolute path on the http server (baseURL).
 const PathPrefix = "/api/rpc"
 
 func NewWorkerClient(baseURL string, client *httpclient.Client) Worker {

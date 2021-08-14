@@ -8,7 +8,6 @@ import (
 	"context"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -19,18 +18,18 @@ type UserService interface {
 }
 
 type User struct {
-	ID             primitive.ObjectID `bson:"_id,omitempty"   json:"id"`
-	AccountCreated time.Time          `bson:"account_created" json:"account_created"`
-	AccountUpdated time.Time          `bson:"account_updated" json:"account_updated"`
+	ID             string    `bson:"_id,omitempty"   json:"id"`
+	AccountCreated time.Time `bson:"account_created" json:"account_created"`
+	AccountUpdated time.Time `bson:"account_updated" json:"account_updated"`
 
 	Discord        UserAuthDiscord     `bson:"discord"         json:"discord"`
 	DiscordServers []UserDiscordServer `bson:"discord_servers" json:"discord_servers"`
 }
 
 type UserPublic struct {
-	ID             primitive.ObjectID `json:"id"`
-	AccountCreated time.Time          `json:"account_created"`
-	AccountUpdated time.Time          `json:"account_updated"`
+	ID             string    `json:"id"`
+	AccountCreated time.Time `json:"account_created"`
+	AccountUpdated time.Time `json:"account_updated"`
 
 	Username      string `json:"username"`
 	Discriminator string `json:"discriminator"`

@@ -108,7 +108,7 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 		httpware.HandleError(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	h.session.Put(r.Context(), models.SessionUserIDKey, user.ID.Hex())
+	h.session.Put(r.Context(), models.SessionUserIDKey, user.ID)
 
 	w.WriteHeader(http.StatusOK)
 	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public()})

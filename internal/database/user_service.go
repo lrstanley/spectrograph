@@ -44,7 +44,7 @@ func (s *userService) Upsert(ctx context.Context, user *models.User) (err error)
 	if err == nil {
 		user.ID = res.ID
 	} else if err == mongo.ErrNoDocuments {
-		user.ID = primitive.NewObjectID()
+		user.ID = primitive.NewObjectID().Hex()
 		user.AccountCreated = time.Now()
 	} else {
 		return err
@@ -59,12 +59,7 @@ func (s *userService) Upsert(ctx context.Context, user *models.User) (err error)
 }
 
 func (s *userService) Get(ctx context.Context, id string) (user *models.User, err error) {
-	var oid primitive.ObjectID
-	if oid, err = primitive.ObjectIDFromHex(id); err != nil {
-		return nil, ErrInvalidObjectID
-	}
-
-	err = s.store.user.FindOne(ctx, bson.M{"_id": oid}).Decode(&user)
+	err = s.store.user.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
 	return user, errorWrapper(err)
 }
 
