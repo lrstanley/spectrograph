@@ -28,17 +28,16 @@ func NewWorkerClient(baseURL string, client *httpclient.Client) Worker {
 
 func NewHTTPClient(timeout time.Duration, headers map[string]string) *httpclient.Client {
 	initialTimeout := 500 * time.Millisecond // Initial timeout.
-	maxTimeout := timeout                    // Max time out.
+	maxTimeout := 15 * time.Second           // Max timeout.
 	exponentFactor := 2.0                    // Multiplier.
 	maximumJitterInterval := 1 * time.Second // Max jitter interval.
 
 	backoff := heimdall.NewExponentialBackoff(initialTimeout, maxTimeout, exponentFactor, maximumJitterInterval)
-
 	client := httpclient.NewClient(
 		httpclient.WithHTTPClient(&rpcClient{client: http.DefaultClient, headers: headers}),
-		httpclient.WithHTTPTimeout(5*time.Second),
+		httpclient.WithHTTPTimeout(timeout),
 		httpclient.WithRetrier(heimdall.NewRetrier(backoff)),
-		// httpclient.WithRetryCount(maxRetries),
+		httpclient.WithRetryCount(5),
 	)
 
 	// TODO: swap out with a leveled implementation:
