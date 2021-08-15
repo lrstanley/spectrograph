@@ -29,7 +29,7 @@ func (s *mongoStore) NewUserService() models.UserService {
 }
 
 func (s *userService) Upsert(ctx context.Context, user *models.User) (err error) {
-	if err = user.Validate(); err != nil {
+	if err = models.Validate(user); err != nil {
 		return err
 	}
 

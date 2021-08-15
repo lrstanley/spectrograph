@@ -7,8 +7,6 @@ package models
 import (
 	"context"
 	"time"
-
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type UserService interface {
@@ -52,17 +50,6 @@ func (u *User) Public() *UserPublic {
 
 		Servers: u.DiscordServers,
 	}
-}
-
-func (r *User) Validate() error {
-	err := validate.Struct(r)
-	if err != nil {
-		if _, ok := err.(*validator.InvalidValidationError); ok {
-			panic(err)
-		}
-		return err
-	}
-	return nil
 }
 
 // {

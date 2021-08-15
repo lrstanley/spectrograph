@@ -4,7 +4,11 @@
 
 package models
 
-import "gopkg.in/go-playground/validator.v9"
+import (
+	"errors"
+
+	"gopkg.in/go-playground/validator.v9"
+)
 
 var validate = validator.New()
 
@@ -13,7 +17,7 @@ var validate = validator.New()
 // type User struct {
 //     Email    string `json:"email"`
 //     Password string `json:"password"`
-//     // many more fields…
+//     // many more fields...
 // }
 // type PublicUser struct {
 //     *User
@@ -22,3 +26,33 @@ var validate = validator.New()
 // }
 // Using PublicUser{User}, would ensure Password isn't exposed.
 type Omit *struct{}
+
+// Validator can be used by a struct to implement it's own validation function,
+// rather than using the default struct validator.
+type Validator interface {
+	Validate() error
+}
+
+func Validate(v interface{}) (err error) {
+	if custom, ok := v.(Validator); ok {
+		err = custom.Validate()
+
+		if err != errUseBuiltinValidator {
+			return err
+		}
+		// Otherwise continue with the default validator.
+	}
+
+	err = validate.Struct(v)
+	if err != nil {
+		if _, ok := err.(*validator.InvalidValidationError); ok {
+			panic(err)
+		}
+		return err
+	}
+	return nil
+}
+
+// useBuiltinValidator can be used to tell the validator that it did it's own
+// checks, but still wants the standard validator checks to pass.
+var errUseBuiltinValidator = errors.New("use builtin")
