@@ -64,7 +64,6 @@ func FetchUser(client *http.Client, token *oauth2.Token) (user *models.User, err
 		return nil, fmt.Errorf("error fetching guild info: %w", err)
 	}
 
-	var extension string
 	for i := range servers {
 		// Check if they have the admin permission bit.
 		servers[i].Admin = servers[i].Permissions.Contains(models.DiscordPermAdministrator)
@@ -74,22 +73,7 @@ func FetchUser(client *http.Client, token *oauth2.Token) (user *models.User, err
 			continue
 		}
 
-		// TODO: default server icon?
-		if servers[i].Icon != "" {
-			extension = "png"
-
-			if len(servers[i].Icon) >= len(GIFAvatarPrefix) &&
-				servers[i].Icon[0:len(GIFAvatarPrefix)] == GIFAvatarPrefix {
-				extension = "gif"
-			}
-
-			servers[i].IconURL = fmt.Sprintf(
-				ServerIconEndpoint,
-				servers[i].ID,
-				servers[i].Icon,
-				extension,
-			)
-		}
+		servers[i].IconURL = GenerateGuildIconURL(servers[i].ID, servers[i].Icon)
 
 		user.DiscordServers = append(user.DiscordServers, servers[i])
 	}
@@ -99,4 +83,25 @@ func FetchUser(client *http.Client, token *oauth2.Token) (user *models.User, err
 	})
 
 	return user, nil
+}
+
+// GenerateGuildIconURL generates a discord server icon url from an icon hash.
+func GenerateGuildIconURL(guildID, iconHash string) string {
+	if guildID == "" || iconHash == "" {
+		return ""
+	}
+
+	extension := "png"
+
+	if len(iconHash) >= len(GIFAvatarPrefix) &&
+		iconHash[0:len(GIFAvatarPrefix)] == GIFAvatarPrefix {
+		extension = "gif"
+	}
+
+	return fmt.Sprintf(
+		ServerIconEndpoint,
+		guildID,
+		iconHash,
+		extension,
+	)
 }
