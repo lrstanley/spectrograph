@@ -105,7 +105,11 @@ func main() {
 		}
 	}()
 
-	discordSetup(ctx, wg, errorChan)
+	bot := &discordBot{
+		ctx:  ctx,
+		errs: errorChan,
+	}
+	bot.setup(wg)
 
 	logger.Info("listening for signals")
 

@@ -15,12 +15,19 @@ import (
 	"github.com/andersfylling/disgord"
 	"github.com/apex/log"
 	"github.com/kr/pretty"
+	"github.com/lrstanley/spectrograph/internal/discordapi"
+	"github.com/lrstanley/spectrograph/internal/models"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var client *disgord.Client
+type discordBot struct {
+	ctx    context.Context
+	errs   chan<- error
+	client *disgord.Client
+}
 
-func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
-	client = disgord.New(disgord.Config{
+func (b *discordBot) setup(wg *sync.WaitGroup) {
+	b.client = disgord.New(disgord.Config{
 		BotToken:    cli.Discord.BotToken,
 		ProjectName: "spectrograph (https://github.com/lrstanley, https://liam.sh)",
 		Presence: &disgord.UpdateStatusPayload{
@@ -54,19 +61,19 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 			ShardCount: 0,
 		},
 	})
-	gw := client.Gateway().WithContext(ctx)
+	gw := b.client.Gateway().WithContext(b.ctx)
 	// TODO: custom logger implementation that contains prefix info?
 
 	// Register hooks here.
-	gw.BotReady(botReady)
-	gw.GuildCreate(guildCreate)
-	gw.GuildUpdate(guildUpdate)
-	gw.GuildDelete(guildDelete)
+	gw.BotReady(b.botReady)
+	gw.GuildCreate(b.guildCreate)
+	gw.GuildUpdate(b.guildUpdate)
+	gw.GuildDelete(b.guildDelete)
 
 	// TODO: persist this into the db, and/or monitoring?
 	gwBot, err := gw.GetBot()
 	if err != nil {
-		errs <- err
+		b.errs <- err
 		return
 	}
 
@@ -81,7 +88,7 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 	percentRemaining := float64(gwBot.SessionStartLimit.Remaining) / float64(gwBot.SessionStartLimit.Total)
 
 	if percentRemaining < 0.5 {
-		errs <- errors.New("have less than 50% of available sessions remaining, is something broken?")
+		b.errs <- errors.New("have less than 50% of available sessions remaining, is something broken?")
 		return
 	}
 
@@ -103,13 +110,13 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 
 	select {
 	case <-time.After(duration):
-	case <-ctx.Done():
+	case <-b.ctx.Done():
 		return
 	}
 
 	if err = gw.Connect(); err != nil {
 		logger.WithError(err).Error("error connecting to gateway")
-		errs <- err
+		b.errs <- err
 		return
 	}
 
@@ -117,7 +124,7 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 	go func() {
 		defer wg.Done()
 
-		<-ctx.Done()
+		<-b.ctx.Done()
 
 		err = gw.Disconnect()
 		if err != nil {
@@ -127,12 +134,12 @@ func discordSetup(ctx context.Context, wg *sync.WaitGroup, errs chan<- error) {
 }
 
 // botReady is called when the bot successfully connects to the websocket.
-func botReady() {
-	guilds, err := client.CurrentUser().GetGuilds(&disgord.GetCurrentUserGuildsParams{})
-	if err != nil {
-		panic(err)
-	}
-	pretty.Println(guilds)
+func (b *discordBot) botReady() {
+	// guilds, err := client.CurrentUser().GetGuilds(&disgord.GetCurrentUserGuildsParams{})
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// pretty.Println(guilds)
 }
 
 // This event can be sent in three different scenarios:
@@ -142,17 +149,83 @@ func botReady() {
 //   - When a Guild becomes available again to the client.
 //   - When the current user joins a new Guild.
 //   - The inner payload is a guild object, with all the extra fields specified.
-func guildCreate(s disgord.Session, h *disgord.GuildCreate) {
+func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
+	// TODO: Crawl through roles and grab our permissions from it.
 	// pretty.Println(h.Guild)
 	// guild, err := client.Guild(h.Guild.ID).Get()
 	// if err != nil {
 	// 	panic(err)
 	// }
-	// pretty.Println(guild)
+
+	var permissions uint64
+	var err error
+	var botMember *disgord.Member
+
+	// The bot should be in the list of members returned during the guild create
+	// message (even if no other users are listed due to not having the
+	// permissions). Find this so we can understand what permissions we have.
+	if bot, err := b.client.CurrentUser().Get(); err != nil {
+		logger.WithError(err).Error("unable to fetch bot information during guild create event")
+	} else {
+		for _, member := range h.Guild.Members {
+			if member.UserID.HexString() == bot.ID.HexString() {
+				botMember = member
+				break
+			}
+		}
+	}
+
+	// If we found ourselves, iterate through our roles, and combine the
+	// permissions to understand what permissions we have.
+	if botMember != nil {
+		for _, role := range h.Guild.Roles {
+			if !role.Managed {
+				continue
+			}
+
+			var matches bool
+			for _, id := range botMember.Roles {
+				if role.ID.String() == id.String() {
+					matches = true
+					break
+				}
+			}
+
+			if matches {
+				permissions |= uint64(role.Permissions)
+			}
+		}
+	}
+	//  else {
+	// 	pretty.Print(bot)
+	// 	if permBit, err := bot.PartialMember.GetPermissions(context.Background(), b.client); err != nil {
+	// 		logger.WithError(err).Error("unable to fetch bot permissions during guild create event")
+	// 	} else {
+	// 		permissions = uint64(permBit)
+	// 	}
+	// }
+	// if role, err := h.Guild.RoleByName(b.client.CurrentUser().)
+
+	_, err = rpcWorker.UpdateServer(b.ctx, &models.ServerDiscordData{
+		Id:                 h.Guild.ID.String(),
+		Name:               h.Guild.Name,
+		Features:           h.Guild.Features,
+		Icon:               h.Guild.Icon,
+		IconUrl:            discordapi.GenerateGuildIconURL(h.Guild.ID.HexString(), h.Guild.Icon),
+		JoinedAt:           timestamppb.New(h.Guild.JoinedAt.Time),
+		Large:              h.Guild.Large,
+		MemberCount:        int64(h.Guild.MemberCount),
+		OwnerId:            h.Guild.OwnerID.String(),
+		Permissions:        permissions,
+		Region:             h.Guild.Region,
+		SystemChannelFlags: h.Guild.SystemChannelID.String(),
+	})
+	pretty.Print(err)
 }
 
 // Sent when a guild is updated. The inner payload is a guild object.
-func guildUpdate(s disgord.Session, h *disgord.GuildUpdate) {
+func (b *discordBot) guildUpdate(s disgord.Session, h *disgord.GuildUpdate) {
+	// TODO: Crawl through roles and grab our permissions from it.
 	// pretty.Println(h)
 }
 
@@ -160,7 +233,7 @@ func guildUpdate(s disgord.Session, h *disgord.GuildUpdate) {
 // when the user leaves or is removed from a guild. The inner payload is an
 // unavailable guild object. If the unavailable field is not set, the user
 // was removed from the guild.
-func guildDelete(s disgord.Session, h *disgord.GuildDelete) {
+func (b *discordBot) guildDelete(s disgord.Session, h *disgord.GuildDelete) {
 	if h.UserWasRemoved() {
 		// TODO: clean up from db, maybe have it send a notification?
 	}
