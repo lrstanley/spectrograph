@@ -24,7 +24,6 @@ require (
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.12.2 // indirect
-	github.com/kr/pretty v0.2.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lrstanley/pt v0.0.0-20180304040151-203b3db5ff8f
@@ -47,3 +46,5 @@ require (
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+replace github.com/favadi/protoc-go-inject-tag => github.com/lrstanley/protoc-go-inject-tag v1.1.1-0.20210814225302-fc274b6f6662
