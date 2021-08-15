@@ -7,6 +7,7 @@ package workerhandler
 import (
 	"context"
 
+	"github.com/apex/log/handlers/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/lrstanley/spectrograph/internal/models"
@@ -35,4 +36,19 @@ func (s *Server) Health(ctx context.Context, _ *empty.Empty) (*models.WorkerHeal
 	// By the time this endpoint is accessible, we should have initiated all
 	// of the necessary background connections/services and be considered healthy.
 	return &models.WorkerHealth{Ready: true}, nil
+}
+
+func (s *Server) UpdateServer(ctx context.Context, server *models.ServerDiscordData) (*empty.Empty, error) {
+	json.Default.Encode(server)
+	if err := models.Validate(server); err != nil {
+		return nil, rpc.ValidationError(err)
+	}
+	return &empty.Empty{}, nil
+}
+
+func (s *Server) UpdateServerStatus(ctx context.Context, status *models.ServerStatus) (*empty.Empty, error) {
+	if err := models.Validate(status); err != nil {
+		return nil, rpc.ValidationError(err)
+	}
+	return nil, nil
 }

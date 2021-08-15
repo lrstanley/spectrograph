@@ -6,53 +6,50 @@ option go_package = "github.com/lrstanley/spectrograph/internal/models";
 import "google/protobuf/timestamp.proto";
 
 message Server {
-    string id = 1; // @inject_tag: bson:"_id" json:"id"
-    google.protobuf.Timestamp created = 2; // @inject_tag: bson:"created" json:"created"
-    google.protobuf.Timestamp updated = 3; // @inject_tag: bson:"updated" json:"updated"
-    ServerDiscordData discord = 4; // @inject_tag: bson:"discord" json:"discord"`
+    string id = 1; // @inject_tag: bson:"_id" json:"id" validate:"required"
+    google.protobuf.Timestamp created = 2; // @inject_tag: bson:"created" json:"created" validate:"required"
+    google.protobuf.Timestamp updated = 3; // @inject_tag: bson:"updated" json:"updated" validate:"required"
+    ServerDiscordData discord = 4; // @inject_tag: bson:"discord" json:"discord"` validate:"required"
 }
 
+// TODO: wtf? only some fields are replaced?? ONLY ones that have two comment
+// types!
 message ServerDiscordData {
     // Guild ID.
-    string id = 1; // @inject_tag: bson:"id" json:"id"
+    string id = 1; // @inject_tag: bson:"id" json:"id" validate:"required"
     // Guild name (2-100 chars, excl. trailing/leading spaces).
-    string name = 2; // @inject_tag: bson:"name" json:"name"
-    // Guild description.
-    string description = 3; // @inject_tag: bson:"description" json:"description"
+    string name = 2; // @inject_tag: bson:"name" json:"name" validate:"required"
 
     // Enabled guild features.
-    repeated string features = 4; // @inject_tag: bson:"features" json:"features"
+    repeated string features = 3; // @inject_tag: bson:"features" json:"features"
     // Icon hash.
-    string icon = 5; // @inject_tag: bson:"icon" json:"icon"
+    string icon = 4; // @inject_tag: bson:"icon" json:"icon"
     // This is something we generate.
-    string icon_url = 6; // @inject_tag: bson:"icon_url" json:"icon_url"
+    string icon_url = 5; // @inject_tag: bson:"icon_url" json:"icon_url" validate:"omitempty,required_with=Icon,url"
     // When the bot joined the guild.
-	google.protobuf.Timestamp joined_at = 7; // @inject_tag: bson:"joined_at" json:"joined_at"
+	google.protobuf.Timestamp joined_at = 6; // @inject_tag: bson:"joined_at" json:"joined_at"
     // If the guild is considered large (to Discord standards).
-	bool large = 8; // @inject_tag: bson:"large" json:"large"
+	bool large = 7; // @inject_tag: bson:"large" json:"large"
     // Total members in this guild.
-	int64 member_count = 9; // @inject_tag: bson:"member_count" json:"member_count"
+	int64 member_count = 8; // @inject_tag: bson:"member_count" json:"member_count" validate:"required"
     // User ID of the owner.
-	string owner_id = 10; // @inject_tag: bson:"owner_id" json:"owner_id"
+	string owner_id = 9; // @inject_tag: bson:"owner_id" json:"owner_id"
     // Permissions of the bot on the server.
-	uint64 permissions = 11; // @inject_tag: bson:"permissions" json:"permissions"
-    // Preferred locale.
-	string preferred_locale = 12; // @inject_tag: bson:"preferred_locale" json:"preferred_locale"
+	uint64 permissions = 10; // @inject_tag: bson:"permissions" json:"permissions" validate:"required"
     // Voice region (deprecated?).
-	string Region = 13; // @inject_tag: bson:"region" json:"region"
+	string region = 11; // @inject_tag: bson:"region" json:"region"
 
-    string public_updates_channel_id = 14; // @inject_tag: bson:"public_updates_channel_id" json:"public_updates_channel_id"
-    string system_channel_flags = 15; // @inject_tag: bson:"system_channel_flags" json:"system_channel_flags"
+    string system_channel_flags = 12; // @inject_tag: bson:"system_channel_flags" json:"system_channel_flags"
 }
 
 // TODO: auto-generate status if last status message is greater than X period
 // of time?
 message ServerStatus {
-    // string id = 1; // @inject_tag: bson:"_id" json:"id"
-    string id = 1; // @gotags:[bson:"_id" json:"id"]
-    google.protobuf.Timestamp timestamp = 2; // @inject_tag: bson:"timestamp" json:"timestamp"
-    string type = 3; // @inject_tag: bson:"type" json:"type"
-    string message = 4; // @inject_tag: bson:"message" json:"message"
-    bool healthy = 5; // @inject_tag: bson:'healthy" json:"healthy"
-    bool available = 6; // @inject_tag: bson:"available" json:"available"
+    // id of server to update status for.
+    string id = 1; // @inject_tag: bson:"_id" json:"id" validate:"required"
+    google.protobuf.Timestamp timestamp = 2; // @inject_tag: bson:"timestamp" json:"timestamp" validate:"required"
+    string type = 3; // @inject_tag: bson:"type" json:"type" validate:"required"
+    string message = 4; // @inject_tag: bson:"message" json:"message" validate:"required"
+    bool healthy = 5; // @inject_tag: bson:'healthy" json:"healthy" validate:"required"
+    bool available = 6; // @inject_tag: bson:"available" json:"available" validate:"required"
 }

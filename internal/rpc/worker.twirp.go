@@ -18,6 +18,7 @@ import ctxsetters "github.com/twitchtv/twirp/ctxsetters"
 
 import google_protobuf "google.golang.org/protobuf/types/known/emptypb"
 import models "github.com/lrstanley/spectrograph/internal/models"
+import models1 "github.com/lrstanley/spectrograph/internal/models"
 
 import bytes "bytes"
 import errors "errors"
@@ -36,7 +37,11 @@ const _ = twirp.TwirpPackageMinVersion_8_1_0
 // ================
 
 type Worker interface {
-	Health(context.Context, *google_protobuf.Empty) (*models.WorkerHealth, error)
+	Health(context.Context, *google_protobuf.Empty) (*models1.WorkerHealth, error)
+
+	UpdateServer(context.Context, *models.ServerDiscordData) (*google_protobuf.Empty, error)
+
+	UpdateServerStatus(context.Context, *models.ServerStatus) (*google_protobuf.Empty, error)
 }
 
 // ======================
@@ -45,7 +50,7 @@ type Worker interface {
 
 type workerProtobufClient struct {
 	client      HTTPClient
-	urls        [1]string
+	urls        [3]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -73,8 +78,10 @@ func NewWorkerProtobufClient(baseURL string, client HTTPClient, opts ...twirp.Cl
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "rpc", "Worker")
-	urls := [1]string{
+	urls := [3]string{
 		serviceURL + "Health",
+		serviceURL + "UpdateServer",
+		serviceURL + "UpdateServerStatus",
 	}
 
 	return &workerProtobufClient{
@@ -85,13 +92,13 @@ func NewWorkerProtobufClient(baseURL string, client HTTPClient, opts ...twirp.Cl
 	}
 }
 
-func (c *workerProtobufClient) Health(ctx context.Context, in *google_protobuf.Empty) (*models.WorkerHealth, error) {
+func (c *workerProtobufClient) Health(ctx context.Context, in *google_protobuf.Empty) (*models1.WorkerHealth, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "rpc")
 	ctx = ctxsetters.WithServiceName(ctx, "Worker")
 	ctx = ctxsetters.WithMethodName(ctx, "Health")
 	caller := c.callHealth
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *google_protobuf.Empty) (*models.WorkerHealth, error) {
+		caller = func(ctx context.Context, req *google_protobuf.Empty) (*models1.WorkerHealth, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
 					typedReq, ok := req.(*google_protobuf.Empty)
@@ -102,9 +109,9 @@ func (c *workerProtobufClient) Health(ctx context.Context, in *google_protobuf.E
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*models.WorkerHealth)
+				typedResp, ok := resp.(*models1.WorkerHealth)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*models.WorkerHealth) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*models1.WorkerHealth) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -114,9 +121,101 @@ func (c *workerProtobufClient) Health(ctx context.Context, in *google_protobuf.E
 	return caller(ctx, in)
 }
 
-func (c *workerProtobufClient) callHealth(ctx context.Context, in *google_protobuf.Empty) (*models.WorkerHealth, error) {
-	out := new(models.WorkerHealth)
+func (c *workerProtobufClient) callHealth(ctx context.Context, in *google_protobuf.Empty) (*models1.WorkerHealth, error) {
+	out := new(models1.WorkerHealth)
 	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[0], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *workerProtobufClient) UpdateServer(ctx context.Context, in *models.ServerDiscordData) (*google_protobuf.Empty, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "Worker")
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateServer")
+	caller := c.callUpdateServer
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *models.ServerDiscordData) (*google_protobuf.Empty, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*models.ServerDiscordData)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*models.ServerDiscordData) when calling interceptor")
+					}
+					return c.callUpdateServer(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*google_protobuf.Empty)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *workerProtobufClient) callUpdateServer(ctx context.Context, in *models.ServerDiscordData) (*google_protobuf.Empty, error) {
+	out := new(google_protobuf.Empty)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *workerProtobufClient) UpdateServerStatus(ctx context.Context, in *models.ServerStatus) (*google_protobuf.Empty, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "Worker")
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateServerStatus")
+	caller := c.callUpdateServerStatus
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *models.ServerStatus) (*google_protobuf.Empty, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*models.ServerStatus)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*models.ServerStatus) when calling interceptor")
+					}
+					return c.callUpdateServerStatus(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*google_protobuf.Empty)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *workerProtobufClient) callUpdateServerStatus(ctx context.Context, in *models.ServerStatus) (*google_protobuf.Empty, error) {
+	out := new(google_protobuf.Empty)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -137,7 +236,7 @@ func (c *workerProtobufClient) callHealth(ctx context.Context, in *google_protob
 
 type workerJSONClient struct {
 	client      HTTPClient
-	urls        [1]string
+	urls        [3]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -165,8 +264,10 @@ func NewWorkerJSONClient(baseURL string, client HTTPClient, opts ...twirp.Client
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "rpc", "Worker")
-	urls := [1]string{
+	urls := [3]string{
 		serviceURL + "Health",
+		serviceURL + "UpdateServer",
+		serviceURL + "UpdateServerStatus",
 	}
 
 	return &workerJSONClient{
@@ -177,13 +278,13 @@ func NewWorkerJSONClient(baseURL string, client HTTPClient, opts ...twirp.Client
 	}
 }
 
-func (c *workerJSONClient) Health(ctx context.Context, in *google_protobuf.Empty) (*models.WorkerHealth, error) {
+func (c *workerJSONClient) Health(ctx context.Context, in *google_protobuf.Empty) (*models1.WorkerHealth, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "rpc")
 	ctx = ctxsetters.WithServiceName(ctx, "Worker")
 	ctx = ctxsetters.WithMethodName(ctx, "Health")
 	caller := c.callHealth
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *google_protobuf.Empty) (*models.WorkerHealth, error) {
+		caller = func(ctx context.Context, req *google_protobuf.Empty) (*models1.WorkerHealth, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
 					typedReq, ok := req.(*google_protobuf.Empty)
@@ -194,9 +295,9 @@ func (c *workerJSONClient) Health(ctx context.Context, in *google_protobuf.Empty
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*models.WorkerHealth)
+				typedResp, ok := resp.(*models1.WorkerHealth)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*models.WorkerHealth) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*models1.WorkerHealth) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -206,9 +307,101 @@ func (c *workerJSONClient) Health(ctx context.Context, in *google_protobuf.Empty
 	return caller(ctx, in)
 }
 
-func (c *workerJSONClient) callHealth(ctx context.Context, in *google_protobuf.Empty) (*models.WorkerHealth, error) {
-	out := new(models.WorkerHealth)
+func (c *workerJSONClient) callHealth(ctx context.Context, in *google_protobuf.Empty) (*models1.WorkerHealth, error) {
+	out := new(models1.WorkerHealth)
 	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[0], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *workerJSONClient) UpdateServer(ctx context.Context, in *models.ServerDiscordData) (*google_protobuf.Empty, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "Worker")
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateServer")
+	caller := c.callUpdateServer
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *models.ServerDiscordData) (*google_protobuf.Empty, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*models.ServerDiscordData)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*models.ServerDiscordData) when calling interceptor")
+					}
+					return c.callUpdateServer(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*google_protobuf.Empty)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *workerJSONClient) callUpdateServer(ctx context.Context, in *models.ServerDiscordData) (*google_protobuf.Empty, error) {
+	out := new(google_protobuf.Empty)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *workerJSONClient) UpdateServerStatus(ctx context.Context, in *models.ServerStatus) (*google_protobuf.Empty, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "Worker")
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateServerStatus")
+	caller := c.callUpdateServerStatus
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *models.ServerStatus) (*google_protobuf.Empty, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*models.ServerStatus)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*models.ServerStatus) when calling interceptor")
+					}
+					return c.callUpdateServerStatus(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*google_protobuf.Empty)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *workerJSONClient) callUpdateServerStatus(ctx context.Context, in *models.ServerStatus) (*google_protobuf.Empty, error) {
+	out := new(google_protobuf.Empty)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -323,6 +516,12 @@ func (s *workerServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	case "Health":
 		s.serveHealth(ctx, resp, req)
 		return
+	case "UpdateServer":
+		s.serveUpdateServer(ctx, resp, req)
+		return
+	case "UpdateServerStatus":
+		s.serveUpdateServerStatus(ctx, resp, req)
+		return
 	default:
 		msg := fmt.Sprintf("no handler for path %q", req.URL.Path)
 		s.writeError(ctx, resp, badRouteError(msg, req.Method, req.URL.Path))
@@ -372,7 +571,7 @@ func (s *workerServer) serveHealthJSON(ctx context.Context, resp http.ResponseWr
 
 	handler := s.Worker.Health
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *google_protobuf.Empty) (*models.WorkerHealth, error) {
+		handler = func(ctx context.Context, req *google_protobuf.Empty) (*models1.WorkerHealth, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
 					typedReq, ok := req.(*google_protobuf.Empty)
@@ -383,9 +582,9 @@ func (s *workerServer) serveHealthJSON(ctx context.Context, resp http.ResponseWr
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*models.WorkerHealth)
+				typedResp, ok := resp.(*models1.WorkerHealth)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*models.WorkerHealth) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*models1.WorkerHealth) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -394,7 +593,7 @@ func (s *workerServer) serveHealthJSON(ctx context.Context, resp http.ResponseWr
 	}
 
 	// Call service method
-	var respContent *models.WorkerHealth
+	var respContent *models1.WorkerHealth
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -405,7 +604,7 @@ func (s *workerServer) serveHealthJSON(ctx context.Context, resp http.ResponseWr
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *models.WorkerHealth and nil error while calling Health. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *models1.WorkerHealth and nil error while calling Health. nil responses are not supported"))
 		return
 	}
 
@@ -453,7 +652,7 @@ func (s *workerServer) serveHealthProtobuf(ctx context.Context, resp http.Respon
 
 	handler := s.Worker.Health
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *google_protobuf.Empty) (*models.WorkerHealth, error) {
+		handler = func(ctx context.Context, req *google_protobuf.Empty) (*models1.WorkerHealth, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
 					typedReq, ok := req.(*google_protobuf.Empty)
@@ -464,9 +663,9 @@ func (s *workerServer) serveHealthProtobuf(ctx context.Context, resp http.Respon
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*models.WorkerHealth)
+				typedResp, ok := resp.(*models1.WorkerHealth)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*models.WorkerHealth) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*models1.WorkerHealth) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -475,7 +674,7 @@ func (s *workerServer) serveHealthProtobuf(ctx context.Context, resp http.Respon
 	}
 
 	// Call service method
-	var respContent *models.WorkerHealth
+	var respContent *models1.WorkerHealth
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -486,7 +685,367 @@ func (s *workerServer) serveHealthProtobuf(ctx context.Context, resp http.Respon
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *models.WorkerHealth and nil error while calling Health. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *models1.WorkerHealth and nil error while calling Health. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *workerServer) serveUpdateServer(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveUpdateServerJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveUpdateServerProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *workerServer) serveUpdateServerJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateServer")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(models.ServerDiscordData)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.Worker.UpdateServer
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *models.ServerDiscordData) (*google_protobuf.Empty, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*models.ServerDiscordData)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*models.ServerDiscordData) when calling interceptor")
+					}
+					return s.Worker.UpdateServer(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*google_protobuf.Empty)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *google_protobuf.Empty
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf.Empty and nil error while calling UpdateServer. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *workerServer) serveUpdateServerProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateServer")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(models.ServerDiscordData)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.Worker.UpdateServer
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *models.ServerDiscordData) (*google_protobuf.Empty, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*models.ServerDiscordData)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*models.ServerDiscordData) when calling interceptor")
+					}
+					return s.Worker.UpdateServer(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*google_protobuf.Empty)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *google_protobuf.Empty
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf.Empty and nil error while calling UpdateServer. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *workerServer) serveUpdateServerStatus(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveUpdateServerStatusJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveUpdateServerStatusProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *workerServer) serveUpdateServerStatusJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateServerStatus")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(models.ServerStatus)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.Worker.UpdateServerStatus
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *models.ServerStatus) (*google_protobuf.Empty, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*models.ServerStatus)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*models.ServerStatus) when calling interceptor")
+					}
+					return s.Worker.UpdateServerStatus(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*google_protobuf.Empty)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *google_protobuf.Empty
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf.Empty and nil error while calling UpdateServerStatus. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *workerServer) serveUpdateServerStatusProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateServerStatus")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(models.ServerStatus)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.Worker.UpdateServerStatus
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *models.ServerStatus) (*google_protobuf.Empty, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*models.ServerStatus)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*models.ServerStatus) when calling interceptor")
+					}
+					return s.Worker.UpdateServerStatus(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*google_protobuf.Empty)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *google_protobuf.Empty
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf.Empty and nil error while calling UpdateServerStatus. nil responses are not supported"))
 		return
 	}
 
@@ -1094,16 +1653,20 @@ func callClientError(ctx context.Context, h *twirp.ClientHooks, err twirp.Error)
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 171 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x54, 0xcf, 0xb1, 0x0a, 0xc2, 0x30,
-	0x10, 0xc6, 0xf1, 0x41, 0xe8, 0xd0, 0xb1, 0x88, 0x60, 0x1d, 0xdd, 0xef, 0x44, 0xc1, 0x59, 0x04,
-	0xc1, 0x37, 0x10, 0xdc, 0xd2, 0x78, 0xa6, 0xc5, 0xb4, 0x17, 0x2e, 0x57, 0xa4, 0x6f, 0x2f, 0x26,
-	0x28, 0x3a, 0x26, 0xfc, 0xbf, 0x1f, 0x5c, 0xb9, 0xec, 0x06, 0x25, 0x19, 0x8c, 0x47, 0x09, 0x16,
-	0x9f, 0x2c, 0x0f, 0x12, 0x08, 0xc2, 0xca, 0xd5, 0x4c, 0x82, 0xad, 0x57, 0x8e, 0xd9, 0x79, 0xc2,
-	0xf4, 0xd5, 0x8c, 0x77, 0xa4, 0x3e, 0xe8, 0x94, 0x8b, 0x7a, 0xfd, 0x1d, 0xf7, 0x7c, 0x23, 0x1f,
-	0x73, 0x15, 0xff, 0x98, 0xed, 0xa1, 0x2c, 0x2e, 0xe9, 0x5d, 0xed, 0xcb, 0xe2, 0x4c, 0xc6, 0x6b,
-	0x5b, 0x2d, 0x20, 0xb3, 0xf0, 0x61, 0xe1, 0xf4, 0x66, 0xeb, 0x39, 0x64, 0x08, 0xf2, 0x22, 0xd7,
-	0xc7, 0xcd, 0x15, 0x5c, 0xa7, 0xed, 0xd8, 0x80, 0xe5, 0x1e, 0xbd, 0x44, 0x35, 0x83, 0xa7, 0x09,
-	0x63, 0x20, 0xab, 0xc2, 0x4e, 0x4c, 0x68, 0xf1, 0xf7, 0x8e, 0xa6, 0x48, 0xee, 0xee, 0x15, 0x00,
-	0x00, 0xff, 0xff, 0xeb, 0x72, 0x8e, 0x33, 0xde, 0x00, 0x00, 0x00,
+	// 230 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x90, 0x41, 0x4b, 0xc4, 0x30,
+	0x10, 0x46, 0x11, 0xa1, 0x87, 0xe0, 0x29, 0x2c, 0xc2, 0xd6, 0xa3, 0x9e, 0x13, 0x51, 0xf0, 0xee,
+	0xb2, 0x82, 0xf7, 0x45, 0x04, 0x6f, 0xd3, 0x74, 0x6c, 0x8b, 0x69, 0x27, 0xcc, 0x4c, 0x95, 0xfd,
+	0x85, 0xfe, 0x2d, 0xb1, 0xd9, 0x4a, 0x3d, 0xf4, 0x98, 0x8f, 0x37, 0xef, 0x41, 0xcc, 0xb6, 0x1b,
+	0x14, 0x79, 0x80, 0xe8, 0x39, 0x05, 0xff, 0x45, 0xfc, 0x81, 0xec, 0x12, 0x93, 0x92, 0x3d, 0xe7,
+	0x14, 0xca, 0xab, 0x86, 0xa8, 0x89, 0xe8, 0xa7, 0xa9, 0x1a, 0xdf, 0x3d, 0xf6, 0x49, 0x8f, 0x99,
+	0x28, 0x6f, 0xfe, 0x8e, 0x7b, 0xaa, 0x31, 0x4a, 0xa6, 0xc4, 0x0b, 0xf2, 0x27, 0xb2, 0x9c, 0xa8,
+	0xeb, 0x15, 0x6a, 0x19, 0xbb, 0xfb, 0x3e, 0x33, 0xc5, 0xeb, 0x34, 0xd8, 0x07, 0x53, 0x3c, 0x23,
+	0x44, 0x6d, 0xed, 0xa5, 0xcb, 0x75, 0x37, 0xd7, 0xdd, 0xd3, 0x6f, 0xbd, 0xdc, 0xb8, 0x6c, 0x72,
+	0xf9, 0xe2, 0x44, 0x3f, 0x9a, 0x8b, 0x97, 0x54, 0x83, 0xe2, 0x61, 0xca, 0xdb, 0xed, 0x4c, 0xe5,
+	0xf7, 0xbe, 0x93, 0x40, 0x5c, 0xef, 0x41, 0xa1, 0x5c, 0x11, 0xdb, 0x9d, 0xb1, 0x4b, 0xc5, 0x41,
+	0x41, 0x47, 0xb1, 0x9b, 0xff, 0xa2, 0xbc, 0xae, 0x39, 0x76, 0xb7, 0x6f, 0xae, 0xe9, 0xb4, 0x1d,
+	0x2b, 0x17, 0xa8, 0xf7, 0x91, 0x45, 0x61, 0x88, 0x78, 0xf4, 0x92, 0x30, 0x28, 0x53, 0xc3, 0x90,
+	0x5a, 0xbf, 0xfc, 0xf5, 0xaa, 0x98, 0x0c, 0xf7, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x0e, 0x12,
+	0xe8, 0xcb, 0x8c, 0x01, 0x00, 0x00,
 }
