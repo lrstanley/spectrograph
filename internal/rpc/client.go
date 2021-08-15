@@ -63,3 +63,8 @@ func (c *rpcClient) Do(req *http.Request) (*http.Response, error) {
 	}
 	return c.client.Do(req)
 }
+
+// ValidationError wraps a validation error for use with the rpc server.
+func ValidationError(err error) error {
+	return twirp.WrapError(twirp.NewError(twirp.InvalidArgument, err.Error()), err)
+}
