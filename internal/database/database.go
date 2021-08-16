@@ -46,8 +46,9 @@ type mongoStore struct {
 	log    *log.Entry
 
 	// Pre-initialized collection configs.
-	user    *mongo.Collection
-	session *mongo.Collection
+	users    *mongo.Collection
+	sessions *mongo.Collection
+	servers  *mongo.Collection
 }
 
 // Ensure struct matches necessary interface.
@@ -89,8 +90,9 @@ func (s *mongoStore) Setup(flags *models.MongoConfig) (err error) {
 	// wcMajorityCollectionOpts := options.Collection().SetWriteConcern(wcMajority)
 
 	s.db = s.client.Database(flags.DBName)
-	s.user = s.db.Collection("users")
-	s.session = s.db.Collection("sessions")
+	s.users = s.db.Collection("users")
+	s.sessions = s.db.Collection("sessions")
+	s.servers = s.db.Collection("servers")
 
 	return nil
 }

@@ -62,7 +62,7 @@ func (s *sessionService) expiredCleanupWorker() {
 // session store. If the token does not exist then Delete should be a no-op
 // and return nil (not an error).
 func (s *sessionService) Delete(token string) (err error) {
-	_, err = s.store.session.DeleteOne(context.Background(), bson.M{"token": token})
+	_, err = s.store.sessions.DeleteOne(context.Background(), bson.M{"token": token})
 	if err == mongo.ErrNoDocuments {
 		return nil
 	}
@@ -76,7 +76,7 @@ func (s *sessionService) Delete(token string) (err error) {
 // nil err value. The err return value should be used for system errors only.
 func (s *sessionService) Find(token string) (b []byte, found bool, err error) {
 	var session *models.Session
-	err = s.store.session.FindOne(context.Background(), bson.M{"token": token}).Decode(&session)
+	err = s.store.sessions.FindOne(context.Background(), bson.M{"token": token}).Decode(&session)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, false, nil
@@ -102,7 +102,7 @@ func (s *sessionService) Commit(token string, b []byte, expiry time.Time) (err e
 		Expires: expiry,
 	}
 
-	_, err = s.store.session.UpdateOne(context.TODO(),
+	_, err = s.store.sessions.UpdateOne(context.TODO(),
 		bson.M{"token": token},
 		bson.M{"$set": session},
 		options.Update().SetUpsert(true),

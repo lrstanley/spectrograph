@@ -36,7 +36,7 @@ func (s *userService) Upsert(ctx context.Context, user *models.User) (err error)
 	var res models.User
 
 	// TODO: if multi-auth, do "$or".
-	err = s.store.user.FindOne(ctx,
+	err = s.store.users.FindOne(ctx,
 		bson.M{"discord.id": user.Discord.ID},
 		options.FindOne().SetProjection(bson.M{"_id": 1}), // TODO: bson.D{}?
 	).Decode(&res)
@@ -45,12 +45,12 @@ func (s *userService) Upsert(ctx context.Context, user *models.User) (err error)
 		user.ID = res.ID
 	} else if err == mongo.ErrNoDocuments {
 		user.ID = primitive.NewObjectID().Hex()
-		user.AccountCreated = time.Now()
+		user.AccountCreated = time.Now() // TODO: move to validate model logic.
 	} else {
 		return err
 	}
 
-	_, err = s.store.user.UpdateOne(
+	_, err = s.store.users.UpdateOne(
 		ctx,
 		bson.M{"discord.id": user.Discord.ID}, bson.M{"$set": user},
 		options.Update().SetUpsert(true),
@@ -59,14 +59,14 @@ func (s *userService) Upsert(ctx context.Context, user *models.User) (err error)
 }
 
 func (s *userService) Get(ctx context.Context, id string) (user *models.User, err error) {
-	err = s.store.user.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	err = s.store.users.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
 	return user, errorWrapper(err)
 }
 
 func (s *userService) List(ctx context.Context) (users []*models.User, err error) {
 	var cursor *mongo.Cursor
 
-	cursor, err = s.store.user.Find(ctx, bson.M{})
+	cursor, err = s.store.users.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, errorWrapper(err)
 	}
