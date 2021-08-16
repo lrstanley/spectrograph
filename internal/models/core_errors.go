@@ -6,18 +6,22 @@ package models
 
 type ErrNotFound struct{ Err error }
 
+func (e ErrNotFound) Unwrap() error { return e.Err }
 func (e ErrNotFound) Error() string { return e.Err.Error() }
 
 type ErrDuplicate struct{ Err error }
 
+func (e ErrDuplicate) Unwrap() error { return e.Err }
 func (e ErrDuplicate) Error() string { return e.Err.Error() }
 
 type ErrClientError struct{ Err error }
 
+func (e ErrClientError) Unwrap() error { return e.Err }
 func (e ErrClientError) Error() string { return e.Err.Error() }
 
 type ErrValidationFailed struct{ Err error }
 
+func (e ErrValidationFailed) Unwrap() error { return e.Err }
 func (e ErrValidationFailed) Error() string { return e.Err.Error() }
 
 func IsClientError(e error) bool {

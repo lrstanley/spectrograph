@@ -19,14 +19,21 @@ var (
 
 // errorWrapper is a useful wrapper for returning customized errors from mongo.
 func errorWrapper(err error) error {
+	// Compare values.
 	switch err {
 	case mongo.ErrNoDocuments:
 		return &models.ErrClientError{Err: &models.ErrNotFound{Err: err}}
 	default:
 	}
 
-	if terr, ok := err.(mongo.WriteException); ok {
-		for _, werr := range terr.WriteErrors {
+	// Compare types.
+	switch v := err.(type) {
+	case *models.ErrClientError:
+		return err
+	case *models.ErrDuplicate, *models.ErrNotFound, *models.ErrValidationFailed:
+		return &models.ErrClientError{Err: v}
+	case mongo.WriteException:
+		for _, werr := range v.WriteErrors {
 			if werr.Code == 11000 {
 				return &models.ErrClientError{Err: &models.ErrDuplicate{Err: err}}
 			}
@@ -34,11 +41,3 @@ func errorWrapper(err error) error {
 	}
 	return err
 }
-
-// mongo.WriteException{
-// 	WriteConcernError: (*mongo.WriteConcernError)(nil),
-// 	WriteErrors:       {
-// 		{Index:0, Code:11000, Message:"E11000 duplicate key error collection: spectrograph-dev.scan_requests index: scan_requests_unique dup key: { project_id: \"5ff2922bd091e4695cc98775\", reference: \"refs/heads/master\" }"},
-// 	},
-// 	Labels: nil,
-// }

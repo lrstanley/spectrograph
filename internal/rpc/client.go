@@ -5,6 +5,7 @@
 package rpc
 
 import (
+	fmt "fmt"
 	http "net/http"
 	"os"
 	"time"
@@ -12,7 +13,9 @@ import (
 	"github.com/gojek/heimdall/v7"
 	"github.com/gojek/heimdall/v7/httpclient"
 	"github.com/gojek/heimdall/v7/plugins"
+	"github.com/lrstanley/spectrograph/internal/models"
 	"github.com/twitchtv/twirp"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 //go:generate sh -c "cd ../../;protoc --proto_path=. --go_out=paths=source_relative:. --twirp_out=paths=source_relative:. internal/rpc/*.proto"
@@ -64,7 +67,45 @@ func (c *rpcClient) Do(req *http.Request) (*http.Response, error) {
 	return c.client.Do(req)
 }
 
-// ValidationError wraps a validation error for use with the rpc server.
-func ValidationError(err error) error {
-	return twirp.WrapError(twirp.NewError(twirp.InvalidArgument, err.Error()), err)
+// WrapError calls WrapErrorMsg.
+func WrapError(err error) error {
+	return WrapErrorMsg(err, "")
+}
+
+// WrapErrorMsg wraps various errors created by our application, or errors we
+// likely want to have specific logic against, to ensure they're the most
+// acceptable by twirp (i.e. to prevent retrying on client-errors). msg is
+// added as a prefix to give request context.
+func WrapErrorMsg(err error, msg string) error {
+	if err == nil {
+		return nil
+	}
+
+	if msg == "" {
+		msg = fmt.Sprintf("%T: %v", err, err)
+	} else {
+		msg = fmt.Sprintf("%v (%T: %v)", msg, err, err)
+	}
+
+	var code twirp.ErrorCode
+
+	switch terr := err.(type) {
+	case *models.ErrClientError:
+		switch terr.Err.(type) {
+		case *models.ErrNotFound:
+			code = twirp.NotFound
+		case *models.ErrDuplicate:
+			code = twirp.AlreadyExists
+		case *models.ErrValidationFailed:
+			code = twirp.InvalidArgument
+		default:
+			code = twirp.Internal
+		}
+	case *validator.InvalidValidationError:
+		code = twirp.InvalidArgument
+	default:
+		code = twirp.Internal
+	}
+
+	return twirp.WrapError(twirp.NewError(code, msg), err)
 }
