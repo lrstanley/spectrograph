@@ -38,7 +38,7 @@ func Validate(v interface{}) (err error) {
 		err = custom.Validate()
 
 		if err != errUseBuiltinValidator {
-			return err
+			return &ErrValidationFailed{Err: err}
 		}
 		// Otherwise continue with the default validator.
 	}
@@ -48,7 +48,7 @@ func Validate(v interface{}) (err error) {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			panic(err)
 		}
-		return err
+		return &ErrValidationFailed{Err: err}
 	}
 	return nil
 }

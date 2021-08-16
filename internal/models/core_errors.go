@@ -16,6 +16,10 @@ type ErrClientError struct{ Err error }
 
 func (e ErrClientError) Error() string { return e.Err.Error() }
 
+type ErrValidationFailed struct{ Err error }
+
+func (e ErrValidationFailed) Error() string { return e.Err.Error() }
+
 func IsClientError(e error) bool {
 	if e == nil {
 		return false
