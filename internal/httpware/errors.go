@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/apex/log"
 	"github.com/go-chi/chi/v5/middleware"
@@ -49,6 +50,7 @@ func HandleError(w http.ResponseWriter, r *http.Request, statusCode int, err err
 			"type":       statusText,
 			"code":       statusCode,
 			"request_id": middleware.GetReqID(r.Context()),
+			"timestamp":  time.Now().UTC().Format(time.RFC3339),
 		})
 	} else {
 		http.Error(w, fmt.Sprintf(
