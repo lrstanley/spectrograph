@@ -26,6 +26,7 @@ type Store interface {
 
 	NewUserService() UserService
 	NewSessionService(ctx context.Context, cleanup time.Duration) scs.Store
+	NewServerService() ServerService
 }
 
 // MigrateLogger implements the migrate.Logger interface.

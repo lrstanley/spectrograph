@@ -38,6 +38,7 @@ var (
 
 	svcUsers    models.UserService
 	svcSessions scs.Store
+	svcServers  models.ServerService
 	oauthConfig *oauth2.Config
 )
 
@@ -112,6 +113,7 @@ func main() {
 	// Initialize services.
 	svcUsers = store.NewUserService()
 	svcSessions = store.NewSessionService(ctx, 5*time.Minute)
+	svcServers = store.NewServerService()
 
 	// Initialize the http/https server.
 	httpServer(ctx, wg, errorChan)

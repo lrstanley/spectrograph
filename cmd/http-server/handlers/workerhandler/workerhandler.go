@@ -7,7 +7,6 @@ package workerhandler
 import (
 	"context"
 
-	"github.com/apex/log/handlers/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/lrstanley/spectrograph/internal/models"
@@ -15,40 +14,56 @@ import (
 	"github.com/twitchtv/twirp"
 )
 
+// Validate that the Handler interface satisfies the necessary RPC interface.
+var _ rpc.Worker = (*Handler)(nil)
+
 type Handler struct {
-	svc rpc.TwirpServer
+	svcRpc     rpc.TwirpServer
+	svcServers models.ServerService
 }
 
-func New() *Handler {
-	return &Handler{svc: rpc.NewWorkerServer(&Server{}, twirp.WithServerPathPrefix(rpc.PathPrefix))}
+func New(svcServers models.ServerService) *Handler {
+	handler := &Handler{
+		svcServers: svcServers,
+	}
+
+	handler.svcRpc = rpc.NewWorkerServer(handler, twirp.WithServerPathPrefix(rpc.PathPrefix))
+	return handler
 }
 
 func (h *Handler) Route(r chi.Router) {
-	r.Mount("/", h.svc)
+	r.Mount("/", h.svcRpc)
 }
 
-// Validate that the Server interface satisfies the RPC interface.
-var _ rpc.Worker = (*Server)(nil)
-
-type Server struct{}
-
-func (s *Server) Health(ctx context.Context, _ *empty.Empty) (*models.WorkerHealth, error) {
+func (h *Handler) Health(ctx context.Context, _ *empty.Empty) (*models.WorkerHealth, error) {
 	// By the time this endpoint is accessible, we should have initiated all
 	// of the necessary background connections/services and be considered healthy.
 	return &models.WorkerHealth{Ready: true}, nil
 }
 
-func (s *Server) UpdateServer(ctx context.Context, server *models.ServerDiscordData) (*empty.Empty, error) {
-	json.Default.Encode(server)
-	if err := models.Validate(server); err != nil {
-		return nil, rpc.ValidationError(err)
+func (h *Handler) UpdateServer(ctx context.Context, data *models.ServerDiscordData) (*empty.Empty, error) {
+	// json.Default.Encode(server)
+	// if err := models.Validate(server); err != nil {
+	// 	return nil, rpc.ValidationError(err)
+	// }
+
+	server, err := h.svcServers.GetByDiscordID(ctx, data.Id)
+	if err != nil {
+		if !models.IsNotFound(err) {
+			return nil, rpc.WrapError(err)
+		}
+		err = nil
+		server = &models.Server{}
 	}
-	return &empty.Empty{}, nil
+
+	server.Discord = data
+
+	return &empty.Empty{}, rpc.WrapError(h.svcServers.Upsert(ctx, server))
 }
 
-func (s *Server) UpdateServerStatus(ctx context.Context, status *models.ServerStatus) (*empty.Empty, error) {
+func (h *Handler) UpdateServerStatus(ctx context.Context, status *models.ServerStatus) (*empty.Empty, error) {
 	if err := models.Validate(status); err != nil {
-		return nil, rpc.ValidationError(err)
+		return nil, rpc.WrapError(err)
 	}
 	return nil, nil
 }
