@@ -14,7 +14,7 @@ type ServerService interface {
 	Upsert(ctx context.Context, r *Server) error
 	Get(ctx context.Context, id string) (*Server, error)
 	GetByDiscordID(ctx context.Context, id string) (*Server, error)
-	List(ctx context.Context) ([]*Server, error)
+	List(ctx context.Context, opts *ServerListOpts) ([]*Server, error)
 }
 
 func (s *Server) Validate() error {
@@ -31,4 +31,8 @@ func (s *Server) Validate() error {
 
 func (s *ServerDiscordData) ParsePermissions() DiscordPermissions {
 	return DiscordPermissions(s.Permissions)
+}
+
+type ServerListOpts struct {
+	OwnerID string
 }

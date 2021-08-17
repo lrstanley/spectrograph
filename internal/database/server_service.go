@@ -54,10 +54,35 @@ func (s *serverService) GetByDiscordID(ctx context.Context, id string) (server *
 	return server, errorWrapper(err)
 }
 
-func (s *serverService) List(ctx context.Context) (servers []*models.Server, err error) {
+func (s *serverService) List(ctx context.Context, opts *models.ServerListOpts) (servers []*models.Server, err error) {
+	if opts == nil {
+		opts = &models.ServerListOpts{}
+	}
+
 	var cursor *mongo.Cursor
 
-	cursor, err = s.store.servers.Find(ctx, bson.M{})
+	filter := bson.M{}
+
+	if opts.OwnerID != "" {
+		var user models.User
+
+		err := s.store.users.FindOne(
+			ctx,
+			bson.M{"_id": opts.OwnerID},
+			options.FindOne().SetProjection(bson.M{"discord_servers.id": 1}),
+		).Decode(&user)
+		if err != nil {
+			return nil, errorWrapper(err)
+		}
+
+		serverIds := []string{}
+		for _, server := range user.DiscordServers {
+			serverIds = append(serverIds, server.ID)
+		}
+		filter["discord.id"] = bson.M{"$in": serverIds}
+	}
+
+	cursor, err = s.store.servers.Find(ctx, filter)
 	if err != nil {
 		return nil, errorWrapper(err)
 	}

@@ -11,6 +11,7 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
+	"github.com/kr/pretty"
 	"github.com/lrstanley/pt"
 	"github.com/lrstanley/spectrograph/internal/discordapi"
 	"github.com/lrstanley/spectrograph/internal/httpware"
@@ -25,13 +26,15 @@ const (
 
 type Handler struct {
 	users   models.UserService
+	servers models.ServerService
 	session *scs.SessionManager
 	config  *oauth2.Config
 }
 
-func New(users models.UserService, config *oauth2.Config, session *scs.SessionManager) *Handler {
+func New(users models.UserService, servers models.ServerService, config *oauth2.Config, session *scs.SessionManager) *Handler {
 	return &Handler{
 		users:   users,
+		servers: servers,
 		config:  config,
 		session: session,
 	}
@@ -122,7 +125,17 @@ func (h *Handler) getSelf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public()})
+	servers, err := h.servers.List(r.Context(), &models.ServerListOpts{
+		OwnerID: user.ID,
+	})
+	if err != nil {
+		httpware.HandleError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	pretty.Print(servers)
+
+	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public(), "servers": servers})
 }
 
 func (h *Handler) getLogout(w http.ResponseWriter, r *http.Request) {

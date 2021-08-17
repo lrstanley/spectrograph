@@ -105,7 +105,7 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 		httpware.APIKeyRequired(cli.Auth.APIKeys),
 	).Route(rpc.PathPrefix, workerhandler.New(svcServers).Route)
 
-	r.With(contextUser).Route("/api/auth", authhandler.New(svcUsers, oauthConfig, session).Route)
+	r.With(contextUser).Route("/api/auth", authhandler.New(svcUsers, svcServers, oauthConfig, session).Route)
 	r.With(contextUser).Route("/api/admin", adminhandler.New(svcUsers, session).Route)
 
 	// Setup our http server.
