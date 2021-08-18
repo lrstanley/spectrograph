@@ -19,7 +19,7 @@ import (
 )
 
 //go:generate sh -c "cd ../../;protoc --proto_path=. --go_out=paths=source_relative:. --twirp_out=paths=source_relative:. internal/rpc/*.proto"
-//go:generate protoc-go-inject-tag -input=*.pb.go
+//go:generate flock /build/.gomodcache/tag-inject.lock protoc-go-inject-tag -input=*.pb.go
 
 // PathPrefix is the prefix used for calls to the rpc server. This is the
 // absolute path on the http server (baseURL).

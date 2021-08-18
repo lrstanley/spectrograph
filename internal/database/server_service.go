@@ -86,7 +86,5 @@ func (s *serverService) List(ctx context.Context, opts *models.ServerListOpts) (
 	if err != nil {
 		return nil, errorWrapper(err)
 	}
-	defer cursor.Close(ctx)
-
 	return servers, errorWrapper(cursor.All(ctx, &servers))
 }

@@ -5,4 +5,4 @@
 package generate
 
 //go:generate sh -c "protoc --proto_path=. --go_out=paths=source_relative:../ *.proto"
-//go:generate protoc-go-inject-tag -input=../*.pb.go
+//go:generate flock /build/.gomodcache/tag-inject.lock protoc-go-inject-tag -input=../*.pb.go
