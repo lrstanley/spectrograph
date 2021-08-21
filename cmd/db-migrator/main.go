@@ -8,22 +8,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/apex/log"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/golang-migrate/migrate"
 	"github.com/jessevdk/go-flags"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/lrstanley/pt"
 	"github.com/lrstanley/spectrograph/internal/database"
-	"github.com/lrstanley/spectrograph/internal/httpware"
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 
@@ -93,52 +87,7 @@ func main() {
 		}
 
 		logger.Info("migrations (if any) are complete")
-
-		if !cli.StayAlive {
-			logger.Info("stay-alive not set, closing")
-			closer()
-		}
 	}()
-
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(httpware.StructuredLogger(logger, nil, !cli.Debug))
-
-	if cli.HTTP.Proxy {
-		r.Use(middleware.RealIP)
-	}
-
-	r.Use(middleware.Timeout(5 * time.Second))
-	r.Use(middleware.GetHead)
-
-	r.Get("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		pt.JSON(w, r, pt.M{
-			"healthy":          true,
-			"migration_config": cli.Migration,
-		})
-	})
-
-	// Setup our http server that's used for healthchecks.
-	srv := &http.Server{
-		Addr:    cli.HTTP.BindAddr,
-		Handler: r,
-
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
-
-	if cli.StayAlive {
-		go func() {
-			logger.WithField("bind", cli.HTTP.BindAddr).Info("initializing http server")
-
-			if err := srv.ListenAndServe(); err != nil {
-				logger.WithError(err).Error("server closed")
-			}
-
-			closer()
-		}()
-	}
 
 	// Wait until we receive any signals, then close.
 	select {

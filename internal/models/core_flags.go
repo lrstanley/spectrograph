@@ -129,17 +129,10 @@ type FlagsWorkerServer struct {
 
 // FlagsMigratorServer are flags used by the db-migrator.
 type FlagsMigratorServer struct {
-	Debug     bool `env:"DEBUG" long:"debug" description:"enable debugging"`
-	StayAlive bool `env:"STAY_ALIVE" long:"stay-alive" description:"Keep db-migrator alive even after migrations have completed"`
+	Debug bool `env:"DEBUG" long:"debug" description:"enable debugging"`
 
 	// Logging.
 	Logger LoggerConfig `group:"Logging Options" namespace:"log" env-namespace:"LOG"`
-
-	// HTTP.
-	HTTP struct {
-		BindAddr string `env:"BIND_ADDR"    long:"bind-addr"    default:":8080" required:"true" description:"ip:port pair to bind to"`
-		Proxy    bool   `env:"BEHIND_PROXY" long:"behind-proxy" description:"if X-Forwarded-For headers should be trusted"`
-	}
 
 	// Databases.
 	Migration MigrateConfig `group:"Database Migration Options (CAUTION!)" namespace:"migration" env-namespace:"MIGRATION"`

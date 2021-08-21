@@ -2,6 +2,4 @@ FROM golang:alpine
 RUN apk add --no-cache g++ make entr curl
 
 WORKDIR /build/
-HEALTHCHECK --interval=10s --timeout=5s \
-    CMD curl -f http://localhost:8080/api/health || exit 1
 CMD ["/bin/sh", "-c", "make fetch-go watch-changes DIR='./cmd/db-migrator' TARGETS='debug'"]

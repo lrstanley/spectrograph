@@ -12,5 +12,4 @@ build: compile
 debug:
 	go run *.go --debug \
 		--mongo.db-name spectrograph-dev \
-		--mongo.uri "mongodb://mongo:27017/?maxPoolSize=5" \
-		# --stay-alive
+		--mongo.uri "mongodb://mongo:27017/?maxPoolSize=5"
