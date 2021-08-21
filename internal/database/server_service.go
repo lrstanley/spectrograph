@@ -28,8 +28,8 @@ func (s *mongoStore) NewServerService() models.ServerService {
 }
 
 func (s *serverService) Upsert(ctx context.Context, server *models.Server) (err error) {
-	if server.Id == "" {
-		server.Id = primitive.NewObjectID().Hex()
+	if server.ID == "" {
+		server.ID = primitive.NewObjectID().Hex()
 	}
 
 	if err = models.Validate(server); err != nil {
@@ -38,7 +38,7 @@ func (s *serverService) Upsert(ctx context.Context, server *models.Server) (err 
 
 	_, err = s.store.servers.UpdateOne(
 		ctx,
-		bson.M{"_id": server.Id}, bson.M{"$set": server},
+		bson.M{"_id": server.ID}, bson.M{"$set": server},
 		options.Update().SetUpsert(true),
 	)
 	return errorWrapper(err)

@@ -17,7 +17,6 @@ import (
 	"github.com/kr/pretty"
 	"github.com/lrstanley/spectrograph/internal/discordapi"
 	"github.com/lrstanley/spectrograph/internal/models"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type discordBot struct {
@@ -206,20 +205,34 @@ func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
 	// }
 	// if role, err := h.Guild.RoleByName(b.client.CurrentUser().)
 
-	_, err = rpcWorker.UpdateServer(b.ctx, &models.ServerDiscordData{
-		Id:                 h.Guild.ID.String(),
+	server, err := svcServers.GetByDiscordID(b.ctx, h.Guild.ID.String())
+	if err != nil {
+		if !models.IsNotFound(err) {
+			logGuild(logger, h.Guild).WithError(err).Error("error querying db for guild id")
+			return
+		}
+		err = nil
+		server = &models.Server{}
+	}
+
+	server.Discord = &models.ServerDiscordData{
+		ID:                 h.Guild.ID.String(),
 		Name:               h.Guild.Name,
 		Features:           h.Guild.Features,
 		Icon:               h.Guild.Icon,
 		IconUrl:            discordapi.GenerateGuildIconURL(h.Guild.ID.HexString(), h.Guild.Icon),
-		JoinedAt:           timestamppb.New(h.Guild.JoinedAt.Time),
+		JoinedAt:           h.Guild.JoinedAt.Time,
 		Large:              h.Guild.Large,
 		MemberCount:        int64(h.Guild.MemberCount),
-		OwnerId:            h.Guild.OwnerID.String(),
-		Permissions:        permissions,
+		OwnerID:            h.Guild.OwnerID.String(),
+		Permissions:        models.DiscordPermissions(permissions),
 		Region:             h.Guild.Region,
 		SystemChannelFlags: h.Guild.SystemChannelID.String(),
-	})
+	}
+
+	if err = svcServers.Upsert(b.ctx, server); err != nil {
+		logGuild(logger, server).WithError(err).Error("unable to update server in db")
+	}
 	pretty.Print(err)
 }
 

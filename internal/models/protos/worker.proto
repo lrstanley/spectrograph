@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package models;
-option go_package = "github.com/lrstanley/spectrograph/internal/models";
-
-message WorkerHealth {
-    bool ready   = 1;
-}

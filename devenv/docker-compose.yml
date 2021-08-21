@@ -7,7 +7,18 @@ services:
         build:
             context: ../
             dockerfile: ./cmd/frontend/Dockerfile.dev
-        working_dir: /build/cmd/frontend
+        environment:
+            - HOME=/build
+        volumes:
+            - /etc/passwd:/etc/passwd:ro
+            - /etc/group:/etc/group:ro
+            - ../:/build/ # root of repository
+    db-migrator:
+        user: $USER:$GROUP
+        depends_on: ["mongo"]
+        build:
+            context: ../
+            dockerfile: ./cmd/db-migrator/Dockerfile.dev
         environment:
             - HOME=/build
         volumes:
@@ -16,12 +27,11 @@ services:
             - ../:/build/ # root of repository
     http-server:
         user: $USER:$GROUP
-        depends_on: ["mongo"]
+        depends_on: ["db-migrator"]
         ports: [8080:8080]
         build:
             context: ../
             dockerfile: ./cmd/http-server/Dockerfile.dev
-        working_dir: /build/cmd/http-server
         environment:
             - HOME=/build
         volumes:
@@ -31,11 +41,10 @@ services:
             - ../:/build/ # root of repository
     worker:
         user: $USER:$GROUP
-        depends_on: ["http-server", "mongo"]
+        depends_on: ["http-server", "db-migrator"]
         build:
             context: ../
             dockerfile: ./cmd/worker/Dockerfile.dev
-        working_dir: /build/cmd/worker
         environment:
             - HOME=/build
         volumes:

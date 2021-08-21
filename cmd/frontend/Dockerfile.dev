@@ -1,3 +1,4 @@
 FROM node:15-alpine
 
+WORKDIR /build/cmd/frontend/
 CMD ["/bin/sh", "-c", "npm run run-install && npm run server"]

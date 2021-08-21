@@ -1,4 +1,4 @@
-BINARY = spectrograph-worker
+BINARY = db-migrator
 
 clean:
 	/bin/rm -rfv "rice-box.go" "${BINARY}"
@@ -12,6 +12,5 @@ build: compile
 debug:
 	go run *.go --debug \
 		--mongo.db-name spectrograph-dev \
-		--mongo.uri "mongodb://mongo:27017/?maxPoolSize=200" \
-		--discord.shard-id 0 \
-		--discord.num-shards 1
+		--mongo.uri "mongodb://mongo:27017/?maxPoolSize=5" \
+		# --stay-alive

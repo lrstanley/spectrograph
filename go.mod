@@ -14,10 +14,8 @@ require (
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-playground/form/v4 v4.2.0
-	github.com/gojek/heimdall/v7 v7.0.2
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.14.1
-	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect

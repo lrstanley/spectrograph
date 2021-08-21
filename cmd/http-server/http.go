@@ -23,9 +23,7 @@ import (
 	"github.com/lrstanley/recoverer"
 	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/adminhandler"
 	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/authhandler"
-	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/workerhandler"
 	"github.com/lrstanley/spectrograph/internal/httpware"
-	"github.com/lrstanley/spectrograph/internal/rpc"
 )
 
 func init() {
@@ -99,11 +97,6 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	r.Get("/.well-known/{:(?i)security.txt}", securityTxt)
 
 	contextUser := httpware.ContextUser(session, svcUsers)
-
-	r.With(
-		httpware.APIVersionMatch(version),
-		httpware.APIKeyRequired(cli.Auth.APIKeys),
-	).Route(rpc.PathPrefix, workerhandler.New(svcServers).Route)
 
 	r.With(contextUser).Route("/api/auth", authhandler.New(svcUsers, svcServers, oauthConfig, session).Route)
 	r.With(contextUser).Route("/api/admin", adminhandler.New(svcUsers, session).Route)

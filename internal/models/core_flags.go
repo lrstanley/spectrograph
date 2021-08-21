@@ -62,10 +62,9 @@ type MongoConfig struct {
 }
 
 type MigrateConfig struct {
-	Disabled bool `env:"DISABLED" long:"disabled" description:"disable database migrations"`
-	Purge    bool `env:"PURGE"    long:"purge"    hidden:"true" description:"PURGES ALL DATA ON STARTUP, BE WARNED"`
-	Force    bool `env:"FORCE"    long:"force"    description:"force update to version in database (must also specify version)"`
-	Version  uint `env:"VERSION"  long:"version"  description:"optional version to migrate the database to"`
+	Purge   bool `env:"PURGE"    long:"purge"    hidden:"true" description:"PURGES ALL DATA ON STARTUP, BE WARNED"`
+	Force   bool `env:"FORCE"    long:"force"    description:"force update to version in database (must also specify version)"`
+	Version uint `env:"VERSION"  long:"version"  description:"optional version to migrate the database to"`
 }
 
 // FlagsHTTPServer are flags specifically utilized by the HTTP service.
@@ -102,17 +101,15 @@ type FlagsHTTPServer struct {
 			Secret string   `env:"SECRET" long:"secret" required:"true" description:"Discord oauth2 secret"`
 			Admins []string `env:"ADMINS" long:"admins" required:"true" env-delim:"," description:"user id's of the users you want to be admins"`
 		} `group:"Discord Options" namespace:"discord" env-namespace:"DISCORD"`
-		APIKeys []string `env:"API_KEY" long:"api-key" required:"true" description:"API key(s) that internal components will use to authenticate with the api server"`
 	} `group:"Authentication Options" namespace:"auth" env-namespace:"AUTH"`
 
 	// Databases.
-	Migration MigrateConfig `group:"Database Migration Options (CAUTION!)" namespace:"migration" env-namespace:"MIGRATION"`
-	Mongo     MongoConfig   `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
+	Mongo MongoConfig `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
 }
 
 // FlagsWorkerServer are flags used by the worker service.
 type FlagsWorkerServer struct {
-	Debug bool `env:"DEBUG"   long:"debug"   description:"enable debugging"`
+	Debug bool `env:"DEBUG" long:"debug" description:"enable debugging"`
 
 	// Logging.
 	Logger LoggerConfig `group:"Logging Options" namespace:"log" env-namespace:"LOG"`
@@ -120,19 +117,33 @@ type FlagsWorkerServer struct {
 	Discord struct {
 		// https://discord.com/developers/docs/topics/gateway#sharding
 		// Note: Shard ID 0 will be the only one to receive DMs.
-		ShardID   int `env:"SHARD_ID" long:"shard-id" required:"true" description:"shard ID of this specific worker (from 0)"`
+		ShardID   int `env:"SHARD_ID"   long:"shard-id"   required:"true" description:"shard ID of this specific worker (from 0)"`
 		NumShards int `env:"NUM_SHARDS" long:"num-shards" required:"true" description:"number of total shards"`
 
 		BotToken string `env:"BOT_TOKEN" long:"bot-token" required:"true" description:"Discord bot token"`
 	} `group:"Discord Options" namespace:"discord" env-namespace:"DISCORD"`
 
-	// API.
-	API struct {
-		// TODO: support tls certs on both server and client, for authentication
-		// and encryption.
-		URI string `env:"URI" long:"uri" required:"true" description:"API server address"`
-		Key string `env:"KEY" long:"key" required:"true" description:"API key that this component will use to authenticate with the api server"`
-	} `group:"API Client Options" namespace:"api" env-namespace:"API"`
+	// Databases.
+	Mongo MongoConfig `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
+}
+
+// FlagsMigratorServer are flags used by the db-migrator.
+type FlagsMigratorServer struct {
+	Debug     bool `env:"DEBUG" long:"debug" description:"enable debugging"`
+	StayAlive bool `env:"STAY_ALIVE" long:"stay-alive" description:"Keep db-migrator alive even after migrations have completed"`
+
+	// Logging.
+	Logger LoggerConfig `group:"Logging Options" namespace:"log" env-namespace:"LOG"`
+
+	// HTTP.
+	HTTP struct {
+		BindAddr string `env:"BIND_ADDR"    long:"bind-addr"    default:":8080" required:"true" description:"ip:port pair to bind to"`
+		Proxy    bool   `env:"BEHIND_PROXY" long:"behind-proxy" description:"if X-Forwarded-For headers should be trusted"`
+	}
+
+	// Databases.
+	Migration MigrateConfig `group:"Database Migration Options (CAUTION!)" namespace:"migration" env-namespace:"MIGRATION"`
+	Mongo     MongoConfig   `group:"Database (MongoDB) Options" namespace:"mongo" env-namespace:"MONGO"`
 }
 
 func FlagParse(data interface{}) (args []string) {

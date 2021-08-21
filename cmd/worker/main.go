@@ -9,17 +9,14 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strconv"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/apex/log"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/jessevdk/go-flags"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/lrstanley/spectrograph/internal/database"
 	"github.com/lrstanley/spectrograph/internal/models"
-	"github.com/lrstanley/spectrograph/internal/rpc"
 )
 
 // Should be auto-injected by build tooling.
@@ -30,9 +27,10 @@ const (
 )
 
 var (
-	cli       models.FlagsWorkerServer
-	rpcWorker rpc.Worker
-	logger    log.Interface
+	cli    models.FlagsWorkerServer
+	logger log.Interface
+
+	svcServers models.ServerService
 )
 
 func main() {
@@ -78,32 +76,22 @@ func main() {
 	errorChan := make(chan error)
 	wg := &sync.WaitGroup{}
 
-	rpcWorker = rpc.NewWorkerClient(cli.API.URI, rpc.NewHTTPClient(30*time.Second, map[string]string{
-		"X-Api-Version": version,
-		"X-Api-Key":     cli.API.Key,
-		"X-Shard-Id":    strconv.Itoa(cli.Discord.ShardID),
-	}))
+	// Initialize storer/database.
+	var store models.Store
+	logger.WithFields(log.Fields{
+		"dbname": cli.Mongo.DBName,
+		"uri":    cli.Mongo.URI,
+	}).Info("database params")
+	store = database.New(logger)
 
-	if !checkAPIHealth(ctx) {
-		closer()
-		wg.Wait()
-		os.Exit(1)
+	logger.Info("initializing connections to database")
+	if err = store.Setup(&cli.Mongo); err != nil {
+		logger.WithError(err).Fatal("error initializing database")
 	}
+	defer store.Close()
 
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-time.After(150 * time.Second):
-				if !checkAPIHealth(ctx) {
-					closer()
-					wg.Wait()
-					os.Exit(1)
-				}
-			}
-		}
-	}()
+	// Setup any needed services here.
+	svcServers = store.NewServerService()
 
 	bot := &discordBot{
 		ctx:  ctx,
@@ -135,19 +123,4 @@ func main() {
 	wg.Wait()
 
 	logger.Info("shutdown complete")
-}
-
-func checkAPIHealth(ctx context.Context) (healthy bool) {
-	resp, err := rpcWorker.Health(ctx, &empty.Empty{})
-	if err != nil {
-		logger.WithError(err).Error("healthcheck: failed while waiting for api server to respond (multiple attempts)")
-		return false
-	}
-	if !resp.Ready {
-		logger.Error("healthcheck: api server is not ready yet")
-		return false
-	}
-
-	logger.Info("healthcheck: api server is responsive")
-	return true
 }

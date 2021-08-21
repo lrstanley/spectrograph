@@ -45,9 +45,12 @@ func StructuredLogger(logger log.Interface, session *scs.SessionManager, private
 					logEntry = logEntry.WithField("worker_version", workerVersion)
 				}
 
-				authed, userId := IsAuthed(session, r)
-				if authed {
-					logEntry = logEntry.WithField("user_id", userId)
+				if session != nil {
+					authed, userId := IsAuthed(session, r)
+					if authed {
+						logEntry = logEntry.WithField("user_id", userId)
+					}
+					logEntry = logEntry.WithField("authed", authed)
 				}
 
 				logEntry.WithFields(log.Fields{
@@ -60,8 +63,6 @@ func StructuredLogger(logger log.Interface, session *scs.SessionManager, private
 					"duration_ms": float64(finish.Sub(start).Nanoseconds()) / 1000000.0,
 					"bytes_in":    r.Header.Get("Content-Length"),
 					"bytes_out":   wrappedWriter.BytesWritten(),
-
-					"authed": authed,
 				}).Info("handled request")
 			}()
 

@@ -6,7 +6,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -18,7 +17,6 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/apex/log"
-	"github.com/golang-migrate/migrate"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/lrstanley/spectrograph/internal/database"
 	"github.com/lrstanley/spectrograph/internal/models"
@@ -85,9 +83,8 @@ func main() {
 	}
 	defer store.Close()
 
-	// Start listening for signals here, to prevent corruption during potential database
-	// migrations. I.e. even if the OS tries to send a signal, we won't act on it until
-	// we have initialized things.
+	// Start listening for signals here. If the OS tries to send a signal,
+	// we won't act on it until we have initialized things.
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, os.Interrupt)
 
@@ -95,20 +92,6 @@ func main() {
 	ctx, closer := context.WithCancel(context.Background())
 	errorChan := make(chan error)
 	wg := &sync.WaitGroup{}
-
-	// Initialize migrations.
-	if !cli.Migration.Disabled {
-		logger.Info("running database migrations")
-		if err = store.Migrate(ctx, &cli.Mongo, &cli.Migration); err != nil {
-			if errors.As(err, &migrate.ErrNoChange) {
-				logger.Info("database migration: no changes found")
-			} else if errors.As(err, &migrate.ErrNilVersion) {
-				logger.Info("database migration: no version information in the database")
-			} else {
-				logger.WithError(err).Fatal("error during migration")
-			}
-		}
-	}
 
 	// Initialize services.
 	svcUsers = store.NewUserService()
