@@ -18,6 +18,7 @@ import (
 	bindata "github.com/golang-migrate/migrate/v4/source/go_bindata"
 	"github.com/lrstanley/spectrograph/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/mgocompat"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -59,6 +60,11 @@ func (s *mongoStore) Setup(flags *models.MongoConfig) (err error) {
 	defer cancel()
 
 	opts := &options.ClientOptions{}
+
+	// See:
+	//   https://jira.mongodb.org/browse/GODRIVER-971
+	//   https://jira.mongodb.org/browse/GODRIVER-2137 (if it works?)
+	opts.SetRegistry(mgocompat.NewRegistryBuilder().Build())
 
 	// Set a handful of defaults, then we can override them as necessary in
 	// the connection URL.
