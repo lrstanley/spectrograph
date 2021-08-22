@@ -12,13 +12,15 @@
                     {{ $config.application }}
                 </v-toolbar-title>
 
-                <nav-appbar v-if="$vuetify.breakpoint.lgAndUp" />
+                <template v-if="$vuetify.breakpoint.lgAndUp">
+                    <nav-appbar />
+                    <!-- <v-avatar class="hidden-sm-and-down" color="grey darken-1 shrink" size="32"></v-avatar> -->
+                    <v-btn v-if="!authed" text exact :to="{ name: 'auth', params: { method: 'redirect' } }" class="pr-xs-0">Login</v-btn>
+                    <v-btn v-if="authed" text exact :to="{ name: 'auth', params: { method: 'logout' } }" class="pr-xs-0">Logout</v-btn>
+                </template>
                 <template v-else>
                     <v-spacer />
                 </template>
-                <!-- <v-avatar class="hidden-sm-and-down" color="grey darken-1 shrink" size="32"></v-avatar> -->
-                <v-btn v-if="!authed" text exact :to="{ name: 'auth', params: { method: 'redirect' } }" class="pr-xs-0">Login</v-btn>
-                <v-btn v-if="authed" text exact :to="{ name: 'auth', params: { method: 'logout' } }" class="pr-xs-0">Logout</v-btn>
             </v-container>
         </v-app-bar>
 
