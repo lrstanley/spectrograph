@@ -19,6 +19,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/jessevdk/go-flags v1.5.0
+	github.com/jinzhu/copier v0.3.2
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.13.4 // indirect
 	github.com/kr/pretty v0.2.0
@@ -44,4 +45,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/favadi/protoc-go-inject-tag => github.com/lrstanley/protoc-go-inject-tag v1.1.1-0.20210814225302-fc274b6f6662
+replace github.com/jinzhu/copier => github.com/BatmanAoD/copier v0.3.3-0.20210707221602-76c7f999f137

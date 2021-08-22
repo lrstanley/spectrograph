@@ -23,6 +23,7 @@ import (
 	"github.com/lrstanley/recoverer"
 	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/adminhandler"
 	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/authhandler"
+	"github.com/lrstanley/spectrograph/cmd/http-server/handlers/serverhandler"
 	"github.com/lrstanley/spectrograph/internal/httpware"
 )
 
@@ -98,8 +99,9 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 
 	contextUser := httpware.ContextUser(session, svcUsers)
 
+	r.With(contextUser, httpware.AuthRequired(session)).Route("/api/servers", serverhandler.New(svcServers).Route)
 	r.With(contextUser).Route("/api/auth", authhandler.New(svcUsers, svcServers, oauthConfig, session).Route)
-	r.With(contextUser).Route("/api/admin", adminhandler.New(svcUsers, session).Route)
+	r.With(contextUser, httpware.AdminRequired).Route("/api/admin", adminhandler.New(svcUsers, session).Route)
 
 	// Setup our http server.
 	srv := &http.Server{
