@@ -36,15 +36,15 @@
             <v-divider class="my-4" />
         </v-list>
         <v-list v-if="authed" color="transparent" dense nav>
-            <v-list-item v-for="server in user.joined_servers" :key="server.id" link>
+            <v-list-item v-for="server in servers" :key="server.id" link>
                 <v-list-item-avatar>
-                    <v-img v-if="server.icon_url" :src="server.icon_url" alt="server icon" />
+                    <v-img v-if="server.discord.icon_url" :src="server.discord.icon_url" alt="server icon" />
                     <v-avatar v-else color="#1E1E1E">
-                        <span class="white--text headline">{{ serverInitials(server.name) }}</span>
+                        <span class="white--text headline">{{ serverInitials(server.discord.name) }}</span>
                     </v-avatar>
                 </v-list-item-avatar>
                 <v-list-item-content>
-                    <v-list-item-title>{{ server.name }}</v-list-item-title>
+                    <v-list-item-title>{{ server.discord.name }}</v-list-item-title>
                 </v-list-item-content>
                 <v-icon :color="true ? 'success' : 'error'">{{ true ? mdiCheck : mdiCloseCircleOutline }}</v-icon>
             </v-list-item>
@@ -93,7 +93,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(["authed", "user"]),
+        ...mapGetters(["authed", "user", "servers"]),
         drawer: {
             get: function () {
                 return this.value
