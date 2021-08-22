@@ -44,6 +44,7 @@ func New(users models.UserService, servers models.ServerService, config *oauth2.
 
 func (h *Handler) Route(r chi.Router) {
 	r.Get("/bot-authorize", h.getAuthorizeBot)
+	r.Get("/bot-authorize/{id:[a-zA-Z0-9]{3,}}", h.getAuthorizeBot)
 	r.Get("/redirect", h.getRedirect)
 	r.Get("/callback", h.getCallback)
 	r.With(httpware.AuthRequired(h.session)).Get("/self", h.getSelf)
@@ -51,7 +52,12 @@ func (h *Handler) Route(r chi.Router) {
 }
 
 func (h *Handler) getAuthorizeBot(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, fmt.Sprintf(discordBotAuthEndpoint, h.config.ClientID), http.StatusTemporaryRedirect)
+	// https://discord.com/developers/docs/topics/oauth2#bot-authorization-flow
+	url := fmt.Sprintf(discordBotAuthEndpoint, h.config.ClientID)
+	if guildID := chi.URLParam(r, "id"); guildID != "" {
+		url += "&guild_id=" + guildID + "&disable_guild_select=true"
+	}
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 func (h *Handler) getRedirect(w http.ResponseWriter, r *http.Request) {

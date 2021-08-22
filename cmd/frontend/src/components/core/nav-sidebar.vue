@@ -36,7 +36,7 @@
             <v-divider class="my-4" />
         </v-list>
         <v-list v-if="authed" color="transparent" dense nav>
-            <v-list-item v-for="server in servers" :key="server.id" link>
+            <v-list-item v-for="server in servers" :key="server.id" :to="{ name: 'user-server', params: { id: server.id } }" link>
                 <v-list-item-avatar>
                     <v-img v-if="server.discord.icon_url" :src="server.discord.icon_url" alt="server icon" />
                     <v-avatar v-else color="#1E1E1E">
@@ -50,7 +50,23 @@
             </v-list-item>
         </v-list>
 
-        <template v-slot:append>
+        <v-list v-if="authed" color="transparent" dense nav>
+            <v-list-item v-for="server in serversToAdd" :key="server.id" link>
+                <v-list-item-avatar>
+                    <v-img v-if="server.icon_url" :src="server.icon_url" alt="server icon" />
+                    <v-avatar v-else color="#1E1E1E">
+                        <span class="white--text headline">{{ serverInitials(server.name) }}</span>
+                    </v-avatar>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                    <v-list-item-title>{{ server.name }}</v-list-item-title>
+                </v-list-item-content>
+                <!-- <v-icon :color="false ? 'success' : 'error'">{{ false ? mdiCheck : mdiCloseCircleOutline }}</v-icon> -->
+                <v-btn color="discord" :href="$config.bot_auth_url + '/' + server.id" target="_blank">Add</v-btn>
+            </v-list-item>
+        </v-list>
+
+        <template #append>
             <!-- <v-list-item exact :to="{ name: 'auth', params: { method: 'logout' } }">
                     <v-list-item-icon><v-icon>{{ mdiLockRemove }}</v-icon></v-list-item-icon>
                     <v-list-item-title>Logout</v-list-item-title>
@@ -94,6 +110,16 @@ export default {
     },
     computed: {
         ...mapGetters(["authed", "user", "servers"]),
+        serversToAdd: function () {
+            return this.user.joined_servers.filter((server) => {
+                for (var v of this.servers) {
+                    if (v.discord.id == server.id) {
+                        return
+                    }
+                }
+                return server
+            })
+        },
         drawer: {
             get: function () {
                 return this.value
