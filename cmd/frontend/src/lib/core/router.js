@@ -9,6 +9,7 @@ import NotFound from '@/views/not-found.vue'
 import Auth from '@/views/auth.vue'
 
 import UserDetails from '@/views/user/user-details.vue'
+import UserServer from '@/views/user/user-server.vue'
 
 Vue.use(VueRouter)
 
@@ -32,6 +33,11 @@ const routes = [
                         path: '/user/details',
                         name: UserDetails.name,
                         component: UserDetails
+                    },
+                    {
+                        path: '/user/servers/:id',
+                        name: UserServer.name,
+                        component: UserServer
                     }
                 ]
             }
@@ -157,6 +163,11 @@ Vue.prototype.anchor = function (refName) {
     element.scrollIntoView()
 }
 
+// Example, to reset data any time the route changes.
+//    beforeRouteUpdate: function (to, from, next) {
+//        this.resetComponentData()
+//        next()
+//    },
 Vue.prototype.resetComponentData = function () {
     Object.assign(this.$data, this.$options.data.apply(this))
 }
