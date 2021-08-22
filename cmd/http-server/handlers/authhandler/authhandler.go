@@ -117,6 +117,9 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 		user = &models.User{}
 	}
 
+	user.Discord = discordUser
+	user.JoinedServers = discordServers
+
 	if !user.Admin {
 		// Allow and discord ID's passed via the cli to override and grant
 		// admin privileges.
@@ -127,9 +130,6 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
-	user.Discord = discordUser
-	user.JoinedServers = discordServers
 
 	if err := h.users.Upsert(r.Context(), user); err != nil {
 		httpware.Error(w, r, http.StatusInternalServerError, err)
