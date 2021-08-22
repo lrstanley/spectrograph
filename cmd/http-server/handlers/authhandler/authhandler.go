@@ -28,14 +28,17 @@ type Handler struct {
 	servers models.ServerService
 	session *scs.SessionManager
 	config  *oauth2.Config
+
+	cliAdmins []string
 }
 
-func New(users models.UserService, servers models.ServerService, config *oauth2.Config, session *scs.SessionManager) *Handler {
+func New(users models.UserService, servers models.ServerService, config *oauth2.Config, session *scs.SessionManager, cliAdmins []string) *Handler {
 	return &Handler{
-		users:   users,
-		servers: servers,
-		config:  config,
-		session: session,
+		users:     users,
+		servers:   servers,
+		config:    config,
+		session:   session,
+		cliAdmins: cliAdmins,
 	}
 }
 
@@ -106,6 +109,17 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		user = &models.User{}
+	}
+
+	if !user.Admin {
+		// Allow and discord ID's passed via the cli to override and grant
+		// admin privileges.
+		for i := range h.cliAdmins {
+			if h.cliAdmins[i] == user.Discord.ID {
+				user.Admin = true
+				break
+			}
+		}
 	}
 
 	user.Discord = discordUser

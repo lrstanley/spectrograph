@@ -56,8 +56,8 @@ export default new Vuex.Store({
     },
     getters: {
         user: (state) => { return state.auth?.user },
+        servers: (state) => { return state.auth?.servers },
         authed: (state) => { return state.auth?.authenticated },
-        admin: (state) => { return state.auth?.admin },
         loading: (state) => { return state.loading }
     }
 })
