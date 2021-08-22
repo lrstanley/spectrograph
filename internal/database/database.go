@@ -113,8 +113,7 @@ func (s *mongoStore) Close() error {
 func (s *mongoStore) Migrate(ctx context.Context, mongoFlags *models.MongoConfig, migrateFlags *models.MigrateConfig) error {
 	// TODO: this should make another session with majority write concern.
 	// https://pkg.go.dev/go.mongodb.org/mongo-driver@v1.5.1/mongo#Client.UseSessionWithOptions
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
-	defer cancel()
+
 	// Access ricebox bundled migrations.
 	migrationAssets, err := rice.FindBox("migrations/")
 	if err != nil {

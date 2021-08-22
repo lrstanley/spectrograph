@@ -12,4 +12,5 @@ build: compile
 debug:
 	go run *.go --debug \
 		--mongo.db-name spectrograph-dev \
-		--mongo.uri "mongodb://mongo:27017/?maxPoolSize=5"
+		--mongo.uri "mongodb://mongo:27017/?maxPoolSize=5" \
+		--migration.purge

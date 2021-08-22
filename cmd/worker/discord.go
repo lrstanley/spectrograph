@@ -133,13 +133,7 @@ func (b *discordBot) setup(wg *sync.WaitGroup) {
 }
 
 // botReady is called when the bot successfully connects to the websocket.
-func (b *discordBot) botReady() {
-	// guilds, err := client.CurrentUser().GetGuilds(&disgord.GetCurrentUserGuildsParams{})
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// pretty.Println(guilds)
-}
+func (b *discordBot) botReady() {}
 
 // This event can be sent in three different scenarios:
 //   - When a user is initially connecting, to lazily load and backfill
@@ -149,13 +143,6 @@ func (b *discordBot) botReady() {
 //   - When the current user joins a new Guild.
 //   - The inner payload is a guild object, with all the extra fields specified.
 func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
-	// TODO: Crawl through roles and grab our permissions from it.
-	// pretty.Println(h.Guild)
-	// guild, err := client.Guild(h.Guild.ID).Get()
-	// if err != nil {
-	// 	panic(err)
-	// }
-
 	var permissions uint64
 	var err error
 	var botMember *disgord.Member
@@ -195,15 +182,6 @@ func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
 			}
 		}
 	}
-	//  else {
-	// 	pretty.Print(bot)
-	// 	if permBit, err := bot.PartialMember.GetPermissions(context.Background(), b.client); err != nil {
-	// 		logger.WithError(err).Error("unable to fetch bot permissions during guild create event")
-	// 	} else {
-	// 		permissions = uint64(permBit)
-	// 	}
-	// }
-	// if role, err := h.Guild.RoleByName(b.client.CurrentUser().)
 
 	server, err := svcServers.GetByDiscordID(b.ctx, h.Guild.ID.String())
 	if err != nil {

@@ -28,7 +28,10 @@ func (s *mongoStore) NewServerService() models.ServerService {
 }
 
 func (s *serverService) Upsert(ctx context.Context, server *models.Server) (err error) {
+	exists := true
+
 	if server.ID == "" {
+		exists = false
 		server.ID = primitive.NewObjectID().Hex()
 	}
 
@@ -36,9 +39,22 @@ func (s *serverService) Upsert(ctx context.Context, server *models.Server) (err 
 		return errorWrapper(err)
 	}
 
+	var update interface{}
+
+	if exists {
+		update = bson.M{
+			"updated":       server.Updated,
+			"discord":       server.Discord,
+			"options_admin": server.OptionsAdmin,
+			"options":       server.Options,
+		}
+	} else {
+		update = server
+	}
+
 	_, err = s.store.servers.UpdateOne(
 		ctx,
-		bson.M{"_id": server.ID}, bson.M{"$set": server},
+		bson.M{"_id": server.ID}, bson.M{"$set": update},
 		options.Update().SetUpsert(true),
 	)
 	return errorWrapper(err)

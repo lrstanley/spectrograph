@@ -19,25 +19,15 @@ type ServerService interface {
 // Server represents a Discord server/guild that we're connected to (or we
 // have connected to in the past).
 type Server struct {
-	ID      string             `json:"id"      bson:"_id"     validate:"required"`
-	Created time.Time          `json:"created" bson:"created" validate:"required"`
-	Updated time.Time          `json:"updated" bson:"updated" validate:"required"`
-	Discord *ServerDiscordData `json:"discord" bson:"discord" validate:"required"`
-}
+	ID      string    `json:"id"      bson:"_id"     validate:"required"`
+	Created time.Time `json:"created" bson:"created" validate:"required"`
+	Updated time.Time `json:"updated" bson:"updated" validate:"required"`
 
-// ServerStatus is a health status update event telling us if the server/guild
-// is online & available, and if we're connected to it.
-//
-// TODO: auto-generate status if last status message is greater than X period
-// of time?
-type ServerStatus struct {
-	// id of server to update status for.
-	ID        string    `json:"id"        bson:"_id"       validate:"required"`
-	Timestamp time.Time `json:"timestamp" bson:"timestamp" validate:"required"`
-	Type      string    `json:"type"      bson:"type"      validate:"required"`
-	Message   string    `json:"message"   bson:"message"   validate:"required"`
-	Healthy   bool      `json:"healthy"   bson:"healthy"   validate:"required"`
-	Available bool      `json:"available" bson:"available" validate:"required"`
+	OptionsAdmin *ServerOptionsAdmin `json:"options_admin" bson:"options_admin" validate:"required"`
+	Options      *ServerOptions      `json:"options"       bson:"options"       validate:"required"`
+
+	Discord *ServerDiscordData `json:"discord" bson:"discord" validate:"required"`
+	Events  []*ServerEvent     `json:"events"  bson:"events"  validate:"required"`
 }
 
 func (s *Server) Validate() error {
@@ -49,7 +39,35 @@ func (s *Server) Validate() error {
 		s.Updated = time.Now()
 	}
 
+	if s.OptionsAdmin == nil {
+		s.OptionsAdmin = &ServerOptionsAdmin{
+			Enabled: true,
+		}
+	}
+
+	if s.Options == nil {
+		s.Options = &ServerOptions{
+			Enabled: true,
+		}
+	}
+
 	return errUseBuiltinValidator
+}
+
+// ServerOptionsAdmin are settings that will be applied by admins.
+type ServerOptionsAdmin struct {
+	Enabled            bool   `json:"enabled"              bson:"enabled"`
+	Comment            string `json:"comment"              bson:"comment"`
+	DefaultMaxChannels int    `json:"default_max_channels" bson:"default_max_channels" validate:"gte=0"`
+	DefaultMaxClones   int    `json:"default_max_clones"   bson:"default_max_clones"   validate:"gte=0"`
+}
+
+// ServerOptions are settings that will be applied by users.
+type ServerOptions struct {
+	Enabled          bool   `json:"enabled"            bson:"enabled"`
+	DefaultMaxClones int    `json:"default_max_clones" bson:"default_max_clones" validate:"gte=0"`
+	RegexMatch       string `json:"regex_match"        bson:"regex_match"`
+	ContactEmail     string `json:"contact_email"      bson:"contact_email"      validate:"email"`
 }
 
 // ServerDiscordData represents the discord guild information returned by the
@@ -70,7 +88,7 @@ type ServerDiscordData struct {
 	// If the guild is considered large (to Discord standards).
 	Large bool `json:"large" bson:"large"`
 	// Total members in this guild.
-	MemberCount int64 `json:"member_count" bson:"member_count" validate:"required"`
+	MemberCount int64 `json:"member_count" bson:"member_count" validate:"gte=0,required"`
 	// User ID of the owner.
 	OwnerID string `json:"owner_id" bson:"owner_id"`
 	// Permissions of the bot on the server.
@@ -78,6 +96,21 @@ type ServerDiscordData struct {
 	// Voice region (deprecated?).
 	Region             string `json:"region" bson:"region"`
 	SystemChannelFlags string `json:"system_channel_flags" bson:"system_channel_flags"`
+}
+
+// ServerEvent is a health status update event telling us if the server/guild
+// is online & available, and if we're connected to it.
+//
+// TODO: auto-generate status if last status message is greater than X period
+// of time?
+type ServerEvent struct {
+	// id of server to update status for.
+	ID        string    `json:"id"        bson:"_id"       validate:"required"`
+	Timestamp time.Time `json:"timestamp" bson:"timestamp" validate:"required"`
+	Type      string    `json:"type"      bson:"type"      validate:"required"`
+	Message   string    `json:"message"   bson:"message"   validate:"required"`
+	Healthy   bool      `json:"healthy"   bson:"healthy"   validate:"required"`
+	Available bool      `json:"available" bson:"available" validate:"required"`
 }
 
 type ServerListOpts struct {
