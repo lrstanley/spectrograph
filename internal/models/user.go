@@ -110,12 +110,12 @@ type UserAuthDiscord struct {
 	LastLogin time.Time `bson:"last_login" json:"last_login"`
 
 	// Required dependencies.
-	ID            string `bson:"id"            json:"id"            validate:"required"`                        // The users id.
-	Username      string `bson:"username"      json:"username"      validate:"required" copier:"Username"`      // The users username, not unique across the platform.
-	Discriminator string `bson:"discriminator" json:"discriminator" validate:"required" copier:"Discriminator"` // The users 4-digit discord-tag.
-	Email         string `bson:"email"         json:"email"         validate:"required"`                        // The users email.
-	Avatar        string `bson:"avatar"        json:"avatar" copier:"Avatar"`                                   // The users avatar url.
-	AvatarURL     string `bson:"avatar_url"    json:"avatar_url"    validate:"required" copier:"AvatarURL"`     // The users avatar hash.
+	ID            string `bson:"id"            json:"id"            validate:"required"` // The users id.
+	Username      string `bson:"username"      json:"username"      validate:"required"` // The users username, not unique across the platform.
+	Discriminator string `bson:"discriminator" json:"discriminator" validate:"required"` // The users 4-digit discord-tag.
+	Email         string `bson:"email"         json:"email"         validate:"required"` // The users email.
+	Avatar        string `bson:"avatar"        json:"avatar"`                            // The users avatar url.
+	AvatarURL     string `bson:"avatar_url"    json:"avatar_url"    validate:"required"` // The users avatar hash.
 
 	// Additional parameters provided by the API.
 	Locale      string `bson:"locale"       json:"locale"`       // The users chosen language option.
