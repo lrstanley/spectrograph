@@ -15,6 +15,7 @@
                         <v-row align="center">
                             <v-col class="grow">{{ error }}</v-col>
                             <v-col class="shrink">
+                                <!-- TODO: call methods directly, rather than going through navigation? -->
                                 <v-btn color="error" @click.up="$router.replace({ name: 'auth', params: { method: 'redirect' } })">Try again</v-btn>
                             </v-col>
                         </v-row>

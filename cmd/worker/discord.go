@@ -153,7 +153,7 @@ func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
 		logger.WithError(err).Error("unable to fetch bot information during guild create event")
 	} else {
 		for _, member := range h.Guild.Members {
-			if member.UserID.HexString() == bot.ID.HexString() {
+			if member.UserID.String() == bot.ID.String() {
 				botMember = member
 				break
 			}
@@ -197,7 +197,7 @@ func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
 		Name:               h.Guild.Name,
 		Features:           h.Guild.Features,
 		Icon:               h.Guild.Icon,
-		IconUrl:            discordapi.GenerateGuildIconURL(h.Guild.ID.HexString(), h.Guild.Icon),
+		IconUrl:            discordapi.GenerateGuildIconURL(h.Guild.ID.String(), h.Guild.Icon),
 		JoinedAt:           h.Guild.JoinedAt.Time,
 		Large:              h.Guild.Large,
 		MemberCount:        int64(h.Guild.MemberCount),
