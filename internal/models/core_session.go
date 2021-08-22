@@ -17,5 +17,4 @@ type Session struct {
 
 const (
 	SessionUserIDKey = "user_id"
-	SessionAdminKey  = "isadmin"
 )

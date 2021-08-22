@@ -6,6 +6,7 @@ package httpware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
@@ -13,20 +14,16 @@ import (
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 
-func AdminRequired(session *scs.SessionManager) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			admin := session.GetBool(r.Context(), models.SessionAdminKey) // TODO: should not be in session?
+func AdminRequired(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := GetUser(r)
+		if user == nil || !user.Admin {
+			Error(w, r, http.StatusForbidden, errors.New("user not authenticated or not admin"))
+			return
+		}
 
-			if !admin {
-				w.WriteHeader(http.StatusForbidden)
-				Error(w, r, http.StatusForbidden, nil)
-				return
-			}
-
-			next.ServeHTTP(w, r)
-		})
-	}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func AuthRequired(session *scs.SessionManager) func(next http.Handler) http.Handler {
@@ -47,6 +44,12 @@ func AuthRequired(session *scs.SessionManager) func(next http.Handler) http.Hand
 func ContextUser(session *scs.SessionManager, svcUsers models.UserService) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Check if the user is already in context.
+			if user := GetUser(r); user != nil {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			user_id := session.GetString(r.Context(), models.SessionUserIDKey)
 
 			// Assume they're not authenticated.

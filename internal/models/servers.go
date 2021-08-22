@@ -7,6 +7,8 @@ package models
 import (
 	"context"
 	"time"
+
+	"github.com/jinzhu/copier"
 )
 
 type ServerService interface {
@@ -27,7 +29,23 @@ type Server struct {
 	Options      *ServerOptions      `json:"options"       bson:"options"       validate:"required"`
 
 	Discord *ServerDiscordData `json:"discord" bson:"discord" validate:"required"`
-	Events  []*ServerEvent     `json:"events"  bson:"events"  validate:"required"`
+	Events  []*ServerEvent     `json:"events"  bson:"events"`
+}
+
+func (s *Server) Public() (p *ServerPublic) {
+	p = &ServerPublic{}
+	err := copier.CopyWithOption(p, s, copier.Option{DeepCopy: true})
+	if err != nil {
+		panic(err)
+	}
+	return p
+}
+
+type ServerPublic struct {
+	ID      string             `json:"id"`
+	Created time.Time          `json:"created"`
+	Updated time.Time          `json:"updated"`
+	Discord *ServerDiscordData `json:"discord"`
 }
 
 func (s *Server) Validate() error {
@@ -67,7 +85,7 @@ type ServerOptions struct {
 	Enabled          bool   `json:"enabled"            bson:"enabled"`
 	DefaultMaxClones int    `json:"default_max_clones" bson:"default_max_clones" validate:"gte=0"`
 	RegexMatch       string `json:"regex_match"        bson:"regex_match"`
-	ContactEmail     string `json:"contact_email"      bson:"contact_email"      validate:"email"`
+	ContactEmail     string `json:"contact_email"      bson:"contact_email"      validate:"omitempty,email"`
 }
 
 // ServerDiscordData represents the discord guild information returned by the

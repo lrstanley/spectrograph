@@ -14,7 +14,6 @@ import (
 
 	"github.com/andersfylling/disgord"
 	"github.com/apex/log"
-	"github.com/kr/pretty"
 	"github.com/lrstanley/spectrograph/internal/discordapi"
 	"github.com/lrstanley/spectrograph/internal/models"
 )
@@ -211,7 +210,6 @@ func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
 	if err = svcServers.Upsert(b.ctx, server); err != nil {
 		logGuild(logger, server).WithError(err).Error("unable to update server in db")
 	}
-	pretty.Print(err)
 }
 
 // Sent when a guild is updated. The inner payload is a guild object.
