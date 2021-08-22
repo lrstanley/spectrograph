@@ -30,7 +30,7 @@ func AuthRequired(session *scs.SessionManager) func(next http.Handler) http.Hand
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if authed, _ := IsAuthed(session, r); !authed {
-				Error(w, r, http.StatusUnauthorized, nil)
+				Error(w, r, http.StatusUnauthorized, errors.New("authentication required"))
 				return
 			}
 
