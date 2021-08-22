@@ -85,14 +85,14 @@ func (s *serverService) List(ctx context.Context, opts *models.ServerListOpts) (
 		err := s.store.users.FindOne(
 			ctx,
 			bson.M{"_id": opts.OwnerID},
-			options.FindOne().SetProjection(bson.M{"discord_servers.id": 1}),
+			options.FindOne().SetProjection(bson.M{"joined_servers.id": 1}),
 		).Decode(&user)
 		if err != nil {
 			return nil, errorWrapper(err)
 		}
 
 		serverIds := []string{}
-		for _, server := range user.DiscordServers {
+		for _, server := range user.JoinedServers {
 			serverIds = append(serverIds, server.ID)
 		}
 		filter["discord.id"] = bson.M{"$in": serverIds}

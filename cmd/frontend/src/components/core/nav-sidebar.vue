@@ -36,7 +36,7 @@
             <v-divider class="my-4" />
         </v-list>
         <v-list v-if="authed" color="transparent" dense nav>
-            <v-list-item v-for="server in user.servers" :key="server.id" link>
+            <v-list-item v-for="server in user.joined_servers" :key="server.id" link>
                 <v-list-item-avatar>
                     <v-img v-if="server.icon_url" :src="server.icon_url" alt="server icon" />
                     <v-avatar v-else color="#1E1E1E">

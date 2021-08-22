@@ -7,6 +7,8 @@ package models
 import (
 	"context"
 	"time"
+
+	"github.com/jinzhu/copier"
 )
 
 type UserService interface {
@@ -16,40 +18,67 @@ type UserService interface {
 }
 
 type User struct {
-	ID             string    `bson:"_id"   json:"id"`
-	AccountCreated time.Time `bson:"account_created" json:"account_created"`
-	AccountUpdated time.Time `bson:"account_updated" json:"account_updated"`
+	ID      string    `bson:"_id"     json:"id"`
+	Created time.Time `bson:"created" json:"created"`
+	Updated time.Time `bson:"updated" json:"updated"`
+	Admin   bool      `bson:"admin"   json:"admin"`
 
-	Discord        UserAuthDiscord     `bson:"discord"         json:"discord"`
-	DiscordServers []UserDiscordServer `bson:"discord_servers" json:"discord_servers"`
+	Discord       *UserAuthDiscord     `bson:"discord" json:"discord"`
+	JoinedServers []*UserDiscordServer `bson:"joined_servers" json:"joined_servers"`
+}
+
+func (u *User) Validate() error {
+	if u.Created.IsZero() {
+		u.Created = time.Now()
+	}
+
+	if u.Updated.IsZero() {
+		u.Updated = time.Now()
+	}
+
+	return errUseBuiltinValidator
 }
 
 type UserPublic struct {
-	ID             string    `json:"id"`
-	AccountCreated time.Time `json:"account_created"`
-	AccountUpdated time.Time `json:"account_updated"`
+	ID      string    `json:"id"`
+	Created time.Time `json:"created"`
+	Updated time.Time `json:"updated"`
+	Admin   bool      `json:"admin"`
 
 	Username      string `json:"username"`
 	Discriminator string `json:"discriminator"`
 	Avatar        string `json:"avatar"`
 	AvatarURL     string `json:"avatar_url"`
 
-	Servers []UserDiscordServer `json:"servers"`
+	JoinedServers []*UserDiscordServer `json:"joined_servers"`
 }
 
-func (u *User) Public() *UserPublic {
-	return &UserPublic{
-		ID:             u.ID,
-		AccountCreated: u.AccountCreated,
-		AccountUpdated: u.AccountUpdated,
-
-		Username:      u.Discord.Username,
-		Discriminator: u.Discord.Discriminator,
-		Avatar:        u.Discord.Avatar,
-		AvatarURL:     u.Discord.AvatarURL,
-
-		Servers: u.DiscordServers,
+func (u *User) Public() (p *UserPublic) {
+	p = &UserPublic{}
+	err := copier.CopyWithOption(p, u, copier.Option{DeepCopy: true})
+	if err == nil {
+		err = copier.CopyWithOption(p, u.Discord, copier.Option{DeepCopy: true})
 	}
+	if err != nil {
+		panic(err)
+	}
+	return p
+}
+
+// HasPermission returns true if the user has privileges on the given discord
+// server id.
+func (u *User) HasPermissions(id string) bool {
+	if u.Admin {
+		return true
+	}
+
+	for _, server := range u.JoinedServers {
+		if server.ID == id {
+			return true
+		}
+	}
+
+	return false
 }
 
 // {
@@ -81,12 +110,12 @@ type UserAuthDiscord struct {
 	LastLogin time.Time `bson:"last_login" json:"last_login"`
 
 	// Required dependencies.
-	ID            string `bson:"id"            json:"id"            validate:"required"` // The users id.
-	Username      string `bson:"username"      json:"username"      validate:"required"` // The users username, not unique across the platform.
-	Discriminator string `bson:"discriminator" json:"discriminator" validate:"required"` // The users 4-digit discord-tag.
-	Email         string `bson:"email"         json:"email"         validate:"required"` // The users email.
-	Avatar        string `bson:"avatar"        json:"avatar"`                            // The users avatar url.
-	AvatarURL     string `bson:"avatar_url"    json:"avatar_url"    validate:"required"` // The users avatar hash.
+	ID            string `bson:"id"            json:"id"            validate:"required"`                        // The users id.
+	Username      string `bson:"username"      json:"username"      validate:"required" copier:"Username"`      // The users username, not unique across the platform.
+	Discriminator string `bson:"discriminator" json:"discriminator" validate:"required" copier:"Discriminator"` // The users 4-digit discord-tag.
+	Email         string `bson:"email"         json:"email"         validate:"required"`                        // The users email.
+	Avatar        string `bson:"avatar"        json:"avatar" copier:"Avatar"`                                   // The users avatar url.
+	AvatarURL     string `bson:"avatar_url"    json:"avatar_url"    validate:"required" copier:"AvatarURL"`     // The users avatar hash.
 
 	// Additional parameters provided by the API.
 	Locale      string `bson:"locale"       json:"locale"`       // The users chosen language option.

@@ -43,7 +43,7 @@ func (h *Handler) Route(r chi.Router) {
 	r.Get("/bot-authorize", h.getAuthorizeBot)
 	r.Get("/redirect", h.getRedirect)
 	r.Get("/callback", h.getCallback)
-	r.Get("/self", h.getSelf)
+	r.With(httpware.AuthRequired(h.session)).Get("/self", h.getSelf)
 	r.Get("/logout", h.getLogout)
 }
 
@@ -92,12 +92,24 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	client := h.config.Client(r.Context(), token)
 
-	user, err := discordapi.FetchUser(client, token)
+	discordUser, discordServers, err := discordapi.FetchUser(client, token)
 	if err != nil {
 		// TODO: return statusCode so we can do unauthorized or similar?
 		httpware.Error(w, r, http.StatusInternalServerError, fmt.Errorf("discord: %w", err))
 		return
 	}
+
+	user, err := h.users.Get(r.Context(), discordUser.ID)
+	if err != nil {
+		if !models.IsNotFound(err) {
+			httpware.Error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		user = &models.User{}
+	}
+
+	user.Discord = discordUser
+	user.JoinedServers = discordServers
 
 	if err := h.users.Upsert(r.Context(), user); err != nil {
 		httpware.Error(w, r, http.StatusInternalServerError, err)
@@ -117,14 +129,22 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getSelf(w http.ResponseWriter, r *http.Request) {
-	user := httpware.GetUser(r)
+	user := httpware.MustGetUser(r)
 
-	if user == nil {
-		httpware.Error(w, r, http.StatusUnauthorized, errors.New("not logged in"))
+	servers, err := h.servers.List(r.Context(), &models.ServerListOpts{
+		OwnerID: user.ID,
+	})
+	if err != nil {
+		httpware.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public()})
+	serversPublic := make([]*models.ServerPublic, len(servers))
+	for i, server := range servers {
+		serversPublic[i] = server.Public()
+	}
+
+	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public(), "servers": serversPublic})
 }
 
 func (h *Handler) getLogout(w http.ResponseWriter, r *http.Request) {

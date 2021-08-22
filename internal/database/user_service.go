@@ -6,7 +6,6 @@ package database
 
 import (
 	"context"
-	"time"
 
 	"github.com/lrstanley/spectrograph/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,24 +28,11 @@ func (s *mongoStore) NewUserService() models.UserService {
 }
 
 func (s *userService) Upsert(ctx context.Context, user *models.User) (err error) {
-	if err = models.Validate(user); err != nil {
-		return err
+	if user.ID == "" {
+		user.ID = primitive.NewObjectID().Hex()
 	}
 
-	var res models.User
-
-	// TODO: if multi-auth, do "$or".
-	err = s.store.users.FindOne(ctx,
-		bson.M{"discord.id": user.Discord.ID},
-		options.FindOne().SetProjection(bson.M{"_id": 1}), // TODO: bson.D{}?
-	).Decode(&res)
-
-	if err == nil {
-		user.ID = res.ID
-	} else if err == mongo.ErrNoDocuments {
-		user.ID = primitive.NewObjectID().Hex()
-		user.AccountCreated = time.Now() // TODO: move to validate model logic.
-	} else {
+	if err = models.Validate(user); err != nil {
 		return err
 	}
 
@@ -59,7 +45,10 @@ func (s *userService) Upsert(ctx context.Context, user *models.User) (err error)
 }
 
 func (s *userService) Get(ctx context.Context, id string) (user *models.User, err error) {
-	err = s.store.users.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	err = s.store.users.FindOne(ctx, bson.M{"$or": []bson.M{
+		bson.M{"_id": id},
+		bson.M{"discord.id": id},
+	}}).Decode(&user)
 	return user, errorWrapper(err)
 }
 
