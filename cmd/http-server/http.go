@@ -46,9 +46,12 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	session.IdleTimeout = 7 * 24 * time.Hour
 	session.Lifetime = 30 * 24 * time.Hour
 	session.Cookie.HttpOnly = true
-	session.Cookie.Path = cli.HTTP.BaseURL.Path
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteStrictMode
+
+	if cli.HTTP.BaseURL.Path != "" {
+		session.Cookie.Path = cli.HTTP.BaseURL.Path
+	}
 
 	if cli.HTTP.BaseURL.Scheme == "https" {
 		session.Cookie.Secure = true
