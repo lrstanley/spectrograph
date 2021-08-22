@@ -17,10 +17,10 @@ import (
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 
-// HandleError handles the error (if any). Handler WILL respond to the request
+// Error handles the error (if any). Handler WILL respond to the request
 // with a header and a response, if ther is an error. The return boolean tells
 // the caller if the handler has responded to the request or not.
-func HandleError(w http.ResponseWriter, r *http.Request, statusCode int, err error) bool {
+func Error(w http.ResponseWriter, r *http.Request, statusCode int, err error) bool {
 	// TODO: err being passed in should be interface{} so we can support passing
 	// in things other than errors (like strings!).
 	if statusCode == http.StatusNotFound && err == nil {

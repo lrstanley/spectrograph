@@ -39,7 +39,7 @@ func DecodeData(w http.ResponseWriter, r *http.Request, v interface{}) (ok bool)
 	}
 
 	if err != nil {
-		_ = HandleError(w, r, http.StatusBadRequest, rerr)
+		_ = Error(w, r, http.StatusBadRequest, rerr)
 	}
 
 	return err == nil

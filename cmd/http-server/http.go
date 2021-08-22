@@ -38,7 +38,7 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	// Initialize sessions.
 	session = scs.New()
 	session.ErrorFunc = func(w http.ResponseWriter, r *http.Request, err error) {
-		httpware.HandleError(w, r, http.StatusInternalServerError, err)
+		httpware.Error(w, r, http.StatusInternalServerError, err)
 		log.FromContext(r.Context()).WithError(err).Error("session error")
 	}
 	session.Store = svcSessions
@@ -154,11 +154,11 @@ Preferred-Languages: en
 
 func catchAll(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/api/") {
-		httpware.HandleError(w, r, http.StatusNotFound, nil)
+		httpware.Error(w, r, http.StatusNotFound, nil)
 		return
 	}
 	if r.Method != http.MethodGet {
-		httpware.HandleError(w, r, http.StatusMethodNotAllowed, errors.New(http.StatusText(http.StatusMethodNotAllowed)))
+		httpware.Error(w, r, http.StatusMethodNotAllowed, errors.New(http.StatusText(http.StatusMethodNotAllowed)))
 		return
 	}
 	if strings.HasSuffix(r.URL.Path, ".ico") {

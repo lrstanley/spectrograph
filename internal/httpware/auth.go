@@ -20,7 +20,7 @@ func AdminRequired(session *scs.SessionManager) func(next http.Handler) http.Han
 
 			if !admin {
 				w.WriteHeader(http.StatusForbidden)
-				HandleError(w, r, http.StatusForbidden, nil)
+				Error(w, r, http.StatusForbidden, nil)
 				return
 			}
 
@@ -33,7 +33,7 @@ func AuthRequired(session *scs.SessionManager) func(next http.Handler) http.Hand
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if authed, _ := IsAuthed(session, r); !authed {
-				HandleError(w, r, http.StatusUnauthorized, nil)
+				Error(w, r, http.StatusUnauthorized, nil)
 				return
 			}
 
@@ -67,7 +67,7 @@ func ContextUser(session *scs.SessionManager, svcUsers models.UserService) func(
 					next.ServeHTTP(w, r)
 					return
 				}
-				HandleError(w, r, http.StatusInternalServerError, err)
+				Error(w, r, http.StatusInternalServerError, err)
 				return
 			}
 
@@ -76,6 +76,18 @@ func ContextUser(session *scs.SessionManager, svcUsers models.UserService) func(
 	}
 }
 
+// MustGetUser obtains the user from the request context. If the user is
+// unavailable, this will panic. It is expected that if ContextUser is used,
+// the authenticated user should always be available, or an error is returned.
+func MustGetUser(r *http.Request) (user *models.User) {
+	user = GetUser(r)
+	if user == nil {
+		panic("authenticated user not in context")
+	}
+	return user
+}
+
+// GetUser obtains the user from the request context.
 func GetUser(r *http.Request) (user *models.User) {
 	if r == nil {
 		return

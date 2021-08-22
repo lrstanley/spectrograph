@@ -11,7 +11,6 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
-	"github.com/kr/pretty"
 	"github.com/lrstanley/pt"
 	"github.com/lrstanley/spectrograph/internal/discordapi"
 	"github.com/lrstanley/spectrograph/internal/httpware"
@@ -54,7 +53,7 @@ func (h *Handler) getAuthorizeBot(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) getRedirect(w http.ResponseWriter, r *http.Request) {
 	if authed, _ := httpware.IsAuthed(h.session, r); authed {
-		httpware.HandleError(w, r, http.StatusBadRequest, errors.New("already authenticated"))
+		httpware.Error(w, r, http.StatusBadRequest, errors.New("already authenticated"))
 		return
 	}
 
@@ -73,14 +72,14 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 		// Only check CSRF tokens if we're out of debug mode.
 		state := h.session.GetString(r.Context(), "state")
 		if state == "" {
-			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? please try again"))
+			httpware.Error(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? please try again"))
 			return
 		}
 
 		h.session.Remove(r.Context(), "state")
 
 		if state != r.FormValue("state") {
-			httpware.HandleError(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? please try again"))
+			httpware.Error(w, r, http.StatusBadRequest, errors.New("session token not found, possible CSRF (or cookies disabled)? please try again"))
 			return
 		}
 	}
@@ -88,7 +87,7 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.config.Exchange(r.Context(), r.FormValue("code"))
 	if err != nil {
-		httpware.HandleError(w, r, http.StatusUnauthorized, fmt.Errorf("error getting token: %w", err))
+		httpware.Error(w, r, http.StatusUnauthorized, fmt.Errorf("error getting token: %w", err))
 		return
 	}
 	client := h.config.Client(r.Context(), token)
@@ -96,19 +95,19 @@ func (h *Handler) getCallback(w http.ResponseWriter, r *http.Request) {
 	user, err := discordapi.FetchUser(client, token)
 	if err != nil {
 		// TODO: return statusCode so we can do unauthorized or similar?
-		httpware.HandleError(w, r, http.StatusInternalServerError, fmt.Errorf("discord: %w", err))
+		httpware.Error(w, r, http.StatusInternalServerError, fmt.Errorf("discord: %w", err))
 		return
 	}
 
 	if err := h.users.Upsert(r.Context(), user); err != nil {
-		httpware.HandleError(w, r, http.StatusInternalServerError, err)
+		httpware.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	// Prevent session fixation (and change in auth, or privilege, make a new
 	// session token).
 	if err = h.session.RenewToken(r.Context()); err != nil {
-		httpware.HandleError(w, r, http.StatusInternalServerError, err)
+		httpware.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
 	h.session.Put(r.Context(), models.SessionUserIDKey, user.ID)
@@ -121,21 +120,11 @@ func (h *Handler) getSelf(w http.ResponseWriter, r *http.Request) {
 	user := httpware.GetUser(r)
 
 	if user == nil {
-		httpware.HandleError(w, r, http.StatusUnauthorized, errors.New("not logged in"))
+		httpware.Error(w, r, http.StatusUnauthorized, errors.New("not logged in"))
 		return
 	}
 
-	servers, err := h.servers.List(r.Context(), &models.ServerListOpts{
-		OwnerID: user.ID,
-	})
-	if err != nil {
-		httpware.HandleError(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	pretty.Print(servers)
-
-	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public(), "servers": servers})
+	pt.JSON(w, r, pt.M{"authenticated": true, "user": user.Public()})
 }
 
 func (h *Handler) getLogout(w http.ResponseWriter, r *http.Request) {
