@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import http from '@/lib/http/http'
 import auth from '@/lib/http/resources/auth'
+import servers from '@/lib/http/resources/servers'
 
 function install(Vue, options) {
     http.interceptors.request.use((config) => {
@@ -28,7 +29,10 @@ function install(Vue, options) {
 const api = {
     install: install,
     http: http,
+
+    // mounted resources.
     auth: auth,
+    servers: servers,
 }
 
 Vue.use(api)

@@ -9,15 +9,10 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/kr/pretty"
 	"github.com/lrstanley/pt"
 	"github.com/lrstanley/spectrograph/internal/httpware"
 	"github.com/lrstanley/spectrograph/internal/models"
 )
-
-type Handler struct {
-	servers models.ServerService
-}
 
 func New(servers models.ServerService) *Handler {
 	return &Handler{
@@ -25,8 +20,13 @@ func New(servers models.ServerService) *Handler {
 	}
 }
 
+type Handler struct {
+	servers models.ServerService
+}
+
 func (h *Handler) Route(r chi.Router) {
-	r.Get("/servers", h.list)
+	r.Get("/", h.list)
+	r.Get("/{id:[a-zA-Z0-9]{1,100}}", h.get)
 }
 
 func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
@@ -39,8 +39,6 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 		httpware.Error(w, r, http.StatusInternalServerError, err)
 		return
 	}
-
-	pretty.Print(servers)
 
 	pt.JSON(w, r, pt.M{"servers": servers})
 }
@@ -67,8 +65,9 @@ func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 		}
 
 		httpware.Error(w, r, http.StatusInternalServerError, err)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	pt.JSON(w, r, server)
+	pt.JSON(w, r, pt.M{"server": server})
 }

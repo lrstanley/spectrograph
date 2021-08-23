@@ -22,7 +22,6 @@ require (
 	github.com/jinzhu/copier v0.3.2
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.13.4 // indirect
-	github.com/kr/pretty v0.2.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lrstanley/pt v0.0.0-20180304040151-203b3db5ff8f
