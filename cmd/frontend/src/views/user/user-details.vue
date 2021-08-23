@@ -1,5 +1,5 @@
 <template>
-    <v-container>This is a test</v-container>
+    <v-container class="pa-4">This is a test</v-container>
 </template>
 
 <script>

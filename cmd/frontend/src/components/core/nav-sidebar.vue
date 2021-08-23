@@ -62,7 +62,7 @@
                     <v-list-item-title>{{ server.name }}</v-list-item-title>
                 </v-list-item-content>
                 <!-- <v-icon :color="false ? 'success' : 'error'">{{ false ? mdiCheck : mdiCloseCircleOutline }}</v-icon> -->
-                <v-btn color="discord" :href="$config.bot_auth_url + '/' + server.id" target="_blank">Add</v-btn>
+                <v-btn color="discord" small :href="$config.bot_auth_url + '/' + server.id" target="_blank">Add</v-btn>
             </v-list-item>
         </v-list>
 

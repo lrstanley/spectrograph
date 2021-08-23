@@ -28,7 +28,7 @@
     "vue": "^2.6.12",
     "vue-progressbar": "^0.7.5",
     "vue-router": "^3.5.1",
-    "vuetify": "^2.4.5",
+    "vuetify": "^2.5.8",
     "vuex": "^3.6.2"
   },
   "browserslist": [

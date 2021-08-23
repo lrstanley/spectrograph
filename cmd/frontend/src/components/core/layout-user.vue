@@ -8,7 +8,7 @@
             </v-col>
 
             <v-col>
-                <v-sheet min-height="70vh" rounded="lg" class="d-flex flex-column align-stretch justify-start pa-4">
+                <v-sheet min-height="70vh" rounded="lg" class="d-flex align-stretch justify-start">
                     <v-overlay :value="loading" absolute>
                         <v-progress-circular indeterminate size="64" />
                     </v-overlay>
