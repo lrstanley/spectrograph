@@ -77,6 +77,9 @@ func httpServer(ctx context.Context, wg *sync.WaitGroup, errors chan<- error) {
 	r.Use(middleware.StripSlashes)
 	r.Use(middleware.GetHead)
 
+	// https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+	r.Use(middleware.SetHeader("Content-Security-Policy", "default-src 'self' data: 'unsafe-inline'; img-src go.dev *.golang.org cdn.discordapp.com; upgrade-insecure-requests; block-all-mixed-content"))
+
 	// Bind/mount routes here.
 	r.Mount("/dist", http.StripPrefix("/dist", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Vary", "Accept-Encoding")
