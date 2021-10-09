@@ -34,6 +34,7 @@ var (
 )
 
 func main() {
+	// TODO: https://andrewlock.net/deploying-asp-net-core-applications-to-kubernetes-part-7-running-database-migrations/
 	_, err := flags.Parse(&cli)
 	if err != nil {
 		if FlagErr, ok := err.(*flags.Error); ok && FlagErr.Type == flags.ErrHelp {

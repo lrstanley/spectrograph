@@ -22,9 +22,14 @@ type discordBot struct {
 	ctx    context.Context
 	errs   chan<- error
 	client *disgord.Client
+
+	updateMu sync.RWMutex
+	updates  map[disgord.Snowflake]chan *updateEvent
 }
 
 func (b *discordBot) setup(wg *sync.WaitGroup) {
+	b.updates = make(map[disgord.Snowflake]chan *updateEvent)
+
 	b.client = disgord.New(disgord.Config{
 		BotToken:    cli.Discord.BotToken,
 		ProjectName: "spectrograph (https://github.com/lrstanley, https://liam.sh)",
@@ -67,6 +72,10 @@ func (b *discordBot) setup(wg *sync.WaitGroup) {
 	gw.GuildCreate(b.guildCreate)
 	gw.GuildUpdate(b.guildUpdate)
 	gw.GuildDelete(b.guildDelete)
+	gw.VoiceStateUpdate(b.voiceStateUpdate)
+	gw.ChannelCreate(b.channelCreate)
+	gw.ChannelDelete(b.channelDelete)
+	gw.ChannelUpdate(b.channelUpdate)
 
 	// TODO: persist this into the db, and/or monitoring?
 	gwBot, err := gw.GetBot()
@@ -142,6 +151,13 @@ func (b *discordBot) botReady() {}
 //   - When the current user joins a new Guild.
 //   - The inner payload is a guild object, with all the extra fields specified.
 func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
+	b.updateMu.Lock()
+	if _, ok := b.updates[update.guildID]; !ok {
+		b.updates[update.guildID] = make(chan *updateEvent)
+		// TODO: kick off goroutine.
+	}
+	b.updateMu.Unlock()
+
 	var permissions uint64
 	var err error
 	var botMember *disgord.Member
@@ -223,7 +239,69 @@ func (b *discordBot) guildUpdate(s disgord.Session, h *disgord.GuildUpdate) {
 // unavailable guild object. If the unavailable field is not set, the user
 // was removed from the guild.
 func (b *discordBot) guildDelete(s disgord.Session, h *disgord.GuildDelete) {
+	b.updateMu.Lock()
+	if ch, ok := b.updates[h.UnavailableGuild.ID]; ok {
+		close(ch)
+
+		delete(b.updates, h.UnavailableGuild.ID)
+	}
+	b.updateMu.Unlock()
+
 	if h.UserWasRemoved() {
 		// TODO: clean up from db, maybe have it send a notification?
 	}
+}
+
+func (b *discordBot) voiceStateUpdate(s disgord.Session, h *disgord.VoiceStateUpdate) {
+	processUpdate(s)
+}
+
+func (b *discordBot) channelCreate(s disgord.Session, h *disgord.ChannelCreate) {
+
+}
+
+func (b *discordBot) channelDelete(s disgord.Session, h *disgord.ChannelDelete) {
+
+}
+
+func (b *discordBot) channelUpdate(s disgord.Session, h *disgord.ChannelUpdate) {
+
+}
+
+type updateEvent struct {
+	sess    disgord.Session
+	guildID disgord.Snowflake
+	event   interface{}
+
+	guild *disgord.Guild
+}
+
+func (b *discordBot) processUpdate(update *updateEvent) {
+	var err error
+	if update.guild == nil {
+		update.guild, err = update.sess.Guild(update.guildID).Get()
+		if err != nil {
+			logGuild(logger, update.guildID).WithError(err).Error("unable to fetch guild for update event")
+		}
+	}
+
+	b.updateMu.Lock()
+	ch, ok := b.updates[update.guildID]
+
+	if !ok {
+		logGuild(logger, update.guild).Warn("dropping update vent due to missing channel")
+		return
+	}
+
+	select {
+	case ch <- update:
+		b.updateMu.Unlock()
+	default:
+		b.updateMu.Unlock()
+		logGuild(logger, update.guild).Warn("dropping update event due to full channel")
+	}
+}
+
+func (b *discordBot) processUpdateWorker(ctx context.Context, events <-chan *updateEvent) {
+	// TODO: make sure there is logic when channel gets closed
 }
