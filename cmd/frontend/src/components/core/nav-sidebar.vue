@@ -1,7 +1,7 @@
 <template>
     <!-- TODO: split user stuff out of this? -->
     <v-navigation-drawer v-model="drawer" v-bind="$attrs">
-        <v-list-item v-if="authed">
+        <v-list-item v-if="authed" :to="{ name: 'user-details' }">
             <v-list-item-avatar>
                 <v-img :src="user.avatar_url" alt="user avatar" />
             </v-list-item-avatar>
