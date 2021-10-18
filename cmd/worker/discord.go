@@ -7,6 +7,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"math/rand"
 	"sync"
@@ -151,13 +152,6 @@ func (b *discordBot) botReady() {}
 //   - When the current user joins a new Guild.
 //   - The inner payload is a guild object, with all the extra fields specified.
 func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
-	b.updateMu.Lock()
-	if _, ok := b.updates[update.guildID]; !ok {
-		b.updates[update.guildID] = make(chan *updateEvent)
-		// TODO: kick off goroutine.
-	}
-	b.updateMu.Unlock()
-
 	var permissions uint64
 	var err error
 	var botMember *disgord.Member
@@ -226,6 +220,19 @@ func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
 	if err = svcServers.Upsert(b.ctx, server); err != nil {
 		logGuild(logger, server).WithError(err).Error("unable to update server in db")
 	}
+
+	b.updateMu.Lock()
+	if _, ok := b.updates[h.Guild.ID]; !ok {
+		ch := make(chan *updateEvent)
+		b.updates[h.Guild.ID] = ch
+
+		// Process the first event.
+		b.processUpdateWorker(s, h.Guild.ID, &updateEvent{sess: s, event: h, guild: h.Guild})
+
+		// Then start the event watcher for all subsequent events.
+		go b.eventWatcher(s, h.Guild.ID, ch)
+	}
+	b.updateMu.Unlock()
 }
 
 // Sent when a guild is updated. The inner payload is a guild object.
@@ -253,43 +260,41 @@ func (b *discordBot) guildDelete(s disgord.Session, h *disgord.GuildDelete) {
 }
 
 func (b *discordBot) voiceStateUpdate(s disgord.Session, h *disgord.VoiceStateUpdate) {
-	processUpdate(s)
+	b.routeEvent(s, h, h.GuildID)
 }
 
 func (b *discordBot) channelCreate(s disgord.Session, h *disgord.ChannelCreate) {
-
+	b.routeEvent(s, h, h.Channel.GuildID)
 }
 
 func (b *discordBot) channelDelete(s disgord.Session, h *disgord.ChannelDelete) {
-
+	b.routeEvent(s, h, h.Channel.GuildID)
 }
 
 func (b *discordBot) channelUpdate(s disgord.Session, h *disgord.ChannelUpdate) {
-
+	b.routeEvent(s, h, h.Channel.GuildID)
 }
 
 type updateEvent struct {
-	sess    disgord.Session
-	guildID disgord.Snowflake
-	event   interface{}
-
+	sess  disgord.Session
+	event interface{}
 	guild *disgord.Guild
 }
 
-func (b *discordBot) processUpdate(update *updateEvent) {
+func (b *discordBot) routeEvent(sess disgord.Session, event interface{}, guildID disgord.Snowflake) {
+	update := &updateEvent{sess: sess, event: event}
+
 	var err error
-	if update.guild == nil {
-		update.guild, err = update.sess.Guild(update.guildID).Get()
-		if err != nil {
-			logGuild(logger, update.guildID).WithError(err).Error("unable to fetch guild for update event")
-		}
+	update.guild, err = update.sess.Guild(guildID).Get()
+	if err != nil {
+		logGuild(logger, guildID).WithError(err).Error("unable to fetch guild for update event")
+		return
 	}
 
 	b.updateMu.Lock()
-	ch, ok := b.updates[update.guildID]
-
+	ch, ok := b.updates[guildID]
 	if !ok {
-		logGuild(logger, update.guild).Warn("dropping update vent due to missing channel")
+		logGuild(logger, update.guild).Debug("dropping update event due to untracked guild")
 		return
 	}
 
@@ -298,10 +303,34 @@ func (b *discordBot) processUpdate(update *updateEvent) {
 		b.updateMu.Unlock()
 	default:
 		b.updateMu.Unlock()
-		logGuild(logger, update.guild).Warn("dropping update event due to full channel")
+		logGuild(logger, update.guild).Debug("dropping update event due to full channel")
 	}
 }
 
-func (b *discordBot) processUpdateWorker(ctx context.Context, events <-chan *updateEvent) {
-	// TODO: make sure there is logic when channel gets closed
+func (b *discordBot) eventWatcher(sess disgord.Session, guildID disgord.Snowflake, events <-chan *updateEvent) {
+	logGuild(logger, guildID).Debug("starting worker")
+	defer logGuild(logger, guildID).Debug("closing worker")
+
+	var event *updateEvent
+	var ok bool
+
+	for {
+		select {
+		case <-b.ctx.Done():
+			return
+		case event, ok = <-events:
+			if !ok {
+				// Assume channel was closed because we were disconnected from
+				// the guild.
+				return
+			}
+
+			b.processUpdateWorker(sess, guildID, event)
+		}
+	}
+}
+
+func (b *discordBot) processUpdateWorker(sess disgord.Session, guildID disgord.Snowflake, event *updateEvent) {
+	logGuild(logger, event.guild).Info("processing event")
+	fmt.Printf("%#v\n", event)
 }

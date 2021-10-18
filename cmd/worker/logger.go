@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/andersfylling/disgord"
 	"github.com/apex/log"
@@ -59,7 +58,7 @@ func logGuild(l log.Interface, v interface{}) log.Interface {
 			"guild_region": guild.Region,
 		})
 	case disgord.Snowflake:
-		return l.WithField("guild_id", strconv.Itoa(guild))
+		return l.WithField("guild_id", guild.String())
 	default:
 		return l.WithField("guild_id", v)
 	}
