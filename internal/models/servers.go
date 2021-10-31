@@ -14,7 +14,8 @@ import (
 type ServerService interface {
 	Upsert(ctx context.Context, r *Server) error
 	Get(ctx context.Context, id string) (*Server, error)
-	GetByDiscordID(ctx context.Context, id string) (*Server, error)
+	GetOptionsAdmin(ctx context.Context, id string) (*ServerOptionsAdmin, error)
+	GetOptions(ctx context.Context, id string) (*ServerOptions, error)
 	List(ctx context.Context, opts *ServerListOpts) ([]*Server, error)
 }
 
@@ -65,7 +66,8 @@ func (s *Server) Validate() error {
 
 	if s.Options == nil {
 		s.Options = &ServerOptions{
-			Enabled: true,
+			Enabled:    true,
+			RegexMatch: "^(.*) \\+$",
 		}
 	}
 

@@ -61,13 +61,35 @@ func (s *serverService) Upsert(ctx context.Context, server *models.Server) (err 
 }
 
 func (s *serverService) Get(ctx context.Context, id string) (server *models.Server, err error) {
-	err = s.store.servers.FindOne(ctx, bson.M{"_id": id}).Decode(&server)
+	err = s.store.servers.FindOne(ctx, bson.D{
+		{"$or", []interface{}{
+			bson.M{"_id": id},
+			bson.M{"discord.id": id},
+		}},
+	}).Decode(&server)
 	return server, errorWrapper(err)
 }
 
-func (s *serverService) GetByDiscordID(ctx context.Context, id string) (server *models.Server, err error) {
-	err = s.store.servers.FindOne(ctx, bson.M{"discord.id": id}).Decode(&server)
-	return server, errorWrapper(err)
+func (s *serverService) GetOptionsAdmin(ctx context.Context, id string) (opts *models.ServerOptionsAdmin, err error) {
+	server := &models.Server{}
+	err = s.store.servers.FindOne(ctx, bson.D{
+		{"$or", []interface{}{
+			bson.M{"_id": id},
+			bson.M{"discord.id": id},
+		}},
+	}, options.FindOne().SetProjection(bson.D{{"options_admin", 1}})).Decode(&server)
+	return server.OptionsAdmin, errorWrapper(err)
+}
+
+func (s *serverService) GetOptions(ctx context.Context, id string) (opts *models.ServerOptions, err error) {
+	server := &models.Server{}
+	err = s.store.servers.FindOne(ctx, bson.D{
+		{"$or", []interface{}{
+			bson.M{"_id": id},
+			bson.M{"discord.id": id},
+		}},
+	}, options.FindOne().SetProjection(bson.D{{"options", 1}})).Decode(&server)
+	return server.Options, errorWrapper(err)
 }
 
 func (s *serverService) List(ctx context.Context, opts *models.ServerListOpts) (servers []*models.Server, err error) {
