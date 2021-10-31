@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"regexp"
 	"sync"
 	"time"
 
@@ -192,7 +193,7 @@ func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
 		}
 	}
 
-	server, err := svcServers.GetByDiscordID(b.ctx, h.Guild.ID.String())
+	server, err := svcServers.Get(b.ctx, h.Guild.ID.String())
 	if err != nil {
 		if !models.IsNotFound(err) {
 			logGuild(logger, h.Guild).WithError(err).Error("error querying db for guild id")
@@ -303,7 +304,12 @@ func (b *discordBot) routeEvent(sess disgord.Session, event interface{}, guildID
 		b.updateMu.Unlock()
 	default:
 		b.updateMu.Unlock()
-		logGuild(logger, update.guild).Debug("dropping update event due to full channel")
+		// TODO: better way to handle us triggering subsequent events, as we
+		// go through and make changes? i.e. us moving channels around will
+		// cause events. Could we check the author?
+		//
+		// Alternatively, could we keep the last message, but do a wait and retry?
+		logGuild(logger, update.guild).Debug("dropping event, as already processing event")
 	}
 }
 
@@ -333,4 +339,71 @@ func (b *discordBot) eventWatcher(sess disgord.Session, guildID disgord.Snowflak
 func (b *discordBot) processUpdateWorker(sess disgord.Session, guildID disgord.Snowflake, event *updateEvent) {
 	logGuild(logger, event.guild).Info("processing event")
 	fmt.Printf("%#v\n", event)
+
+	// Get server options.
+	serverOptionsAdmin, err := svcServers.GetOptionsAdmin(b.ctx, event.guild.ID.String())
+	if err != nil {
+		logGuild(logger, event.guild).WithError(err).Error("unable to fetch server options (admin)")
+	}
+	serverOptions, err := svcServers.GetOptions(b.ctx, event.guild.ID.String())
+	if err != nil {
+		logGuild(logger, event.guild).WithError(err).Error("unable to fetch server options")
+	}
+
+	if !serverOptionsAdmin.Enabled || !serverOptions.Enabled {
+		return
+	}
+
+	// TODO: make a cache for this (with key just being the regex string).
+	// Probably TTL it or key off the guild ID so it can't be abused.
+	rgx, err := regexp.Compile(serverOptions.RegexMatch)
+	if err != nil {
+		logGuild(logger, event.guild).WithError(err).WithField("regex", serverOptions.RegexMatch).Error("unable to parse regex") // TODO
+		return
+	}
+
+	// Get number of users in each voice channel.
+	voiceCount := map[disgord.Snowflake]int{}
+	for _, state := range event.guild.VoiceStates {
+		voiceCount[state.ChannelID]++
+	}
+
+	// var hasEmptyChannel bool
+	// var emptyChannelID string
+	// var lastOccupiedChannel *disgord.Channel
+
+	// state defines the state of parent channels and their "buckets" of managed
+	// channels. See also:
+	//   {
+	//   	"<parent-id>": { // Could be nil or similar?
+	//   		"Channel group 1": []<channel>, // The key being the results of the regex.
+	//   		"Channel group 2": []<channel>,
+	//   	}
+	//   }
+	state := map[disgord.Snowflake]map[string][]*disgord.Channel{}
+
+	// TODO: count how many channel groups we have, as well as how many channels
+	// in each group. Check this against our configured limits.
+
+	for _, channel := range event.guild.Channels {
+		if channel.Type != disgord.ChannelTypeGuildVoice {
+			continue
+		}
+
+		if ok := rgx.MatchString(channel.Name); !ok {
+			continue
+		}
+
+		if _, ok := state[channel.ParentID]; !ok {
+			state[channel.ParentID] = map[string][]*disgord.Channel{}
+		}
+
+		if _, ok := state[channel.ParentID][channel.Name]; !ok {
+			state[channel.ParentID][channel.Name] = []*disgord.Channel{channel}
+		} else {
+			state[channel.ParentID][channel.Name] = append(state[channel.ParentID][channel.Name], channel)
+			// TODO: also check if the channel properties match that of the first entry.
+			// If not, change them (assuming it's something supported by the server options).
+		}
+	}
 }
