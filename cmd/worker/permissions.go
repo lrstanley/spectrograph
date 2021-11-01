@@ -14,6 +14,8 @@ import (
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 
+// TODO: sub-package.
+
 type BotPermissions struct {
 	member      *disgord.Member
 	permissions models.DiscordPermissions

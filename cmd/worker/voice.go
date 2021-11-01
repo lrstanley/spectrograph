@@ -10,6 +10,8 @@ import (
 	"github.com/andersfylling/disgord"
 )
 
+// TODO: sub-package.
+
 // NewVoiceStateTracker returns a new voice tracker.
 func NewVoiceStateTracker() *voiceStateTracker {
 	return &voiceStateTracker{
