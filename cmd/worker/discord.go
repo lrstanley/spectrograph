@@ -26,6 +26,7 @@ type discordBot struct {
 	client *disgord.Client
 
 	voiceStates *voiceStateTracker
+	permissions *permissionsCache
 
 	updateMu sync.RWMutex
 	updates  map[disgord.Snowflake]chan *updateEvent
@@ -34,6 +35,7 @@ type discordBot struct {
 func (b *discordBot) setup(wg *sync.WaitGroup) {
 	b.updates = make(map[disgord.Snowflake]chan *updateEvent)
 	b.voiceStates = NewVoiceStateTracker()
+	b.permissions = NewPermissionsCache()
 
 	b.client = disgord.New(disgord.Config{
 		BotToken:    cli.Discord.BotToken,
@@ -55,7 +57,7 @@ func (b *discordBot) setup(wg *sync.WaitGroup) {
 			disgord.EvtGuildUpdate,
 			disgord.EvtGuildDelete,
 			disgord.EvtGuildRoleCreate,
-			disgord.EvtGuildRoleUpdate,
+			disgord.EvtGuildRoleUpdate, // TODO: Also this.
 			disgord.EvtGuildRoleDelete,
 			disgord.EvtChannelCreate,
 			disgord.EvtChannelUpdate,
@@ -75,10 +77,13 @@ func (b *discordBot) setup(wg *sync.WaitGroup) {
 
 	// Register hooks here.
 	gw.BotReady(b.botReady)
+	gw.GuildRoleUpdate(b.GuildRoleUpdate)
+	gw.GuildRoleDelete(b.GuildRoleDelete)
 	gw.GuildCreate(b.guildCreate)
 	gw.GuildUpdate(b.guildUpdate)
 	gw.GuildDelete(b.guildDelete)
 	gw.VoiceStateUpdate(b.voiceStateUpdate)
+	gw.GuildMemberUpdate(b.guildMemberUpdate)
 	gw.ChannelCreate(b.channelCreate)
 	gw.ChannelDelete(b.channelDelete)
 	gw.ChannelUpdate(b.channelUpdate)
@@ -149,6 +154,20 @@ func (b *discordBot) setup(wg *sync.WaitGroup) {
 // botReady is called when the bot successfully connects to the websocket.
 func (b *discordBot) botReady() {}
 
+// guildMemberUpdate is sent for current-user updates regardless of whether
+// the GUILD_MEMBERS intent is set.
+func (b *discordBot) guildMemberUpdate(s disgord.Session, h *disgord.GuildMemberUpdate) {
+	b.permissions.guildMemberUpdate(s, h)
+}
+
+func (b *discordBot) GuildRoleUpdate(s disgord.Session, h *disgord.GuildRoleUpdate) {
+	b.permissions.guildRoleChange(s, h.GuildID)
+}
+
+func (b *discordBot) GuildRoleDelete(s disgord.Session, h *disgord.GuildRoleDelete) {
+	b.permissions.guildRoleChange(s, h.GuildID)
+}
+
 // This event can be sent in three different scenarios:
 //   - When a user is initially connecting, to lazily load and backfill
 //     information for all unavailable guilds sent in the Ready event. Guilds
@@ -157,44 +176,9 @@ func (b *discordBot) botReady() {}
 //   - When the current user joins a new Guild.
 //   - The inner payload is a guild object, with all the extra fields specified.
 func (b *discordBot) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
-	var permissions uint64
-	var err error
-	var botMember *disgord.Member
-
-	// The bot should be in the list of members returned during the guild create
-	// message (even if no other users are listed due to not having the
-	// permissions). Find this so we can understand what permissions we have.
-	if bot, err := b.client.CurrentUser().Get(); err != nil {
-		logger.WithError(err).Error("unable to fetch bot information during guild create event")
-	} else {
-		for _, member := range h.Guild.Members {
-			if member.UserID.String() == bot.ID.String() {
-				botMember = member
-				break
-			}
-		}
-	}
-
-	// If we found ourselves, iterate through our roles, and combine the
-	// permissions to understand what permissions we have.
-	if botMember != nil {
-		for _, role := range h.Guild.Roles {
-			if !role.Managed {
-				continue
-			}
-
-			var matches bool
-			for _, id := range botMember.Roles {
-				if role.ID.String() == id.String() {
-					matches = true
-					break
-				}
-			}
-
-			if matches {
-				permissions |= uint64(role.Permissions)
-			}
-		}
+	permissions, err := b.permissions.guildCreate(s, h)
+	if err != nil {
+		logGuild(logger, h.Guild).WithError(err).Error("unable to fetch permissions")
 	}
 
 	server, err := svcServers.Get(b.ctx, h.Guild.ID.String())
@@ -261,6 +245,7 @@ func (b *discordBot) guildDelete(s disgord.Session, h *disgord.GuildDelete) {
 
 	if h.UserWasRemoved() {
 		// TODO: clean up from db, maybe have it send a notification?
+		b.permissions.removeGuild(h.UnavailableGuild.ID)
 	}
 }
 
@@ -515,6 +500,12 @@ func (b *discordBot) processUpdateWorker(sess disgord.Session, guildID disgord.S
 	// "primary" channel in the list. I.e. change the primary, and the rest should
 	// change.
 	for parent := range state {
+		// parentChannel, err := sess.Channel(parent).Get()
+		// if err != nil {
+		// 	pretty.Println(err)
+		// } else {
+		// 	pretty.Println(parentChannel)
+		// }
 		for group := range state[parent] {
 			// Check if it's just one channel.
 			if len(state[parent][group]) < 2 {
@@ -553,7 +544,8 @@ func (b *discordBot) processUpdateWorker(sess disgord.Session, guildID disgord.S
 					SetBitrate(primary.Bitrate).
 					SetPermissionOverwrites(primary.PermissionOverwrites).Execute()
 				if err != nil {
-					// TODO: this should be propagated up to the user somehow.
+					// TODO: this should be propagated up to the user somehow. events?
+					// TODO: should we change the permissions ourselves?
 					logGuild(logger, event.guild).WithError(err).WithFields(log.Fields{
 						"channel_id": channel.ID,
 						"primary_id": primary.ID,
@@ -562,4 +554,11 @@ func (b *discordBot) processUpdateWorker(sess disgord.Session, guildID disgord.S
 			}
 		}
 	}
+}
+
+// TODO: function to re-order and/or add permissions specifically for the bot user, into
+// the channel permission overrides, ONLY if there is a permission that disallows
+// being able to read/update, etc??
+func (b *discordBot) changeChannelPermissions(sess *disgord.Session, channel *disgord.Channel) error {
+	return nil
 }
