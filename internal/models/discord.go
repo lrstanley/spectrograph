@@ -17,6 +17,28 @@ import (
 	"strconv"
 )
 
+//	{
+//	    "features": [
+//	        "WELCOME_SCREEN_ENABLED", "NEWS", "COMMUNITY"
+//	    ],
+//	    "icon":"3a0892e2c181bd2fe877e6c4341d163e",
+//	    "id":"679506910449500196",
+//	    "name":"bytecord",
+//	    "owner":true,
+//	    "permissions":2.147483647e+09,
+//	    "permissions_new":"8589934591"
+//	}
+//
+// https://discord.com/developers/docs/resources/guild#guild-object
+type UserGuildResponse struct {
+	ID          string             `json:"id"`              // Guild id.
+	Name        string             `json:"name"`            // Guild name (2-100 chars, excl. trailing/leading spaces).
+	Owner       bool               `json:"owner"`           // True if the user is the owner of the guild
+	Features    []string           `json:"features"`        // Enabled guild features.
+	Icon        string             `json:"icon"`            // Icon hash.
+	Permissions DiscordPermissions `json:"permissions_new"` // Permissions for the user (excludes overrides).
+}
+
 // DiscordPermissions is used to convert Discord permission bits to Go bitwise-able
 // values for comparison and validation.
 // Discord docs: https://discord.com/developers/docs/topics/permissions#permissions-bitwise-permission-flags

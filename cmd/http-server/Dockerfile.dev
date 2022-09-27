@@ -1,5 +1,0 @@
-FROM golang:1.17-alpine
-RUN apk add --no-cache g++ make entr
-
-WORKDIR /build/
-CMD ["/bin/sh", "-c", "make fetch-go watch-changes DIR='./cmd/http-server' TARGETS='debug'"]

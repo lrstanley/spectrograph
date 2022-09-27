@@ -1,0 +1,90 @@
+/**
+ * Copyright (c) Liam Stanley <me@liamstanley.io>. All rights reserved. Use
+ * of this source code is governed by the MIT license that can be found in
+ * the LICENSE file.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+:root {
+  --color-discord: #7289da;
+  --color-bravery: #9b84ee;
+  --color-online: #34b581;
+  --color-balance: #44ddbf;
+  --color-dnd: #f04747;
+  --color-brilliance: #f47b68;
+  --color-idle: #faa61a;
+  --color-high: #f57731;
+  --color-nitro: #ff73fa;
+  --color-skin: #f9c9a9;
+  --color-white: #ffffff;
+  --color-grey: #99aab5;
+  --color-chat: #36393f;
+  --color-channels: #2f3136;
+  --color-servers: #2f3136;
+
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  @apply flex flex-auto;
+  @apply bg-channel-900 text-channel-100;
+  font-family: Consolas, monaco, monospace;
+}
+
+#app {
+  max-height: 100%;
+  max-width: 100%;
+  font-family: Consolas, monaco, monospace;
+  @apply antialiased;
+  @apply flex flex-auto;
+}
+
+.text-gradient {
+  @apply font-bold text-transparent bg-clip-text;
+}
+
+.icon {
+  @apply inline align-middle;
+}
+
+.stepped-enter-active,
+.stepped-leave-active {
+  @apply transition-opacity duration-300 transform;
+  transition-delay: min(0.05s, calc(0.005s * (var(--total) - var(--i))));
+}
+
+.stepped-enter-from,
+.stepped-leave-to {
+  @apply opacity-0;
+}
+
+*::-webkit-scrollbar {
+  background-color: transparent;
+  width: 12px;
+  height: 12px;
+}
+*::-webkit-scrollbar-thumb {
+  transition: background 0.5s ease-in-out;
+  border: 3px solid transparent;
+  -webkit-background-clip: content-box;
+  background-clip: content-box;
+  @apply rounded-md bg-discord-500;
+}
+*::-webkit-scrollbar-thumb:hover {
+  @apply rounded-md bg-discord-800;
+}
+*::-webkit-scrollbar-thumb:window-inactive {
+  @apply bg-channel-300;
+}
+
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
+}

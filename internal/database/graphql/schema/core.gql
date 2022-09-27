@@ -1,0 +1,9 @@
+scalar Time
+scalar Map
+scalar Any
+scalar Uint64
+
+# stub that other mutations should extend.
+type Mutation {
+    ping: String
+}

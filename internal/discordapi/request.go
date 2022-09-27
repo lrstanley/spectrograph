@@ -5,22 +5,26 @@
 package discordapi
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-
-	"golang.org/x/oauth2"
+	"time"
 )
 
-func handleRequest(client *http.Client, token *oauth2.Token, method string, url string, body io.Reader, result interface{}) (resp *http.Response, err error) {
-	req, err := http.NewRequest(method, url, body)
+var client = &http.Client{
+	Timeout: 10 * time.Second,
+}
+
+func handleRequest[T any](ctx context.Context, token, method, url string, body io.Reader, result T) (resp *http.Response, err error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err = client.Do(req)
 	if err != nil {

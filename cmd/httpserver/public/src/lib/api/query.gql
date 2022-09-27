@@ -1,0 +1,52 @@
+# http://localhost:8080/-/playground
+
+query base {
+    self {
+        id
+        admin
+        username
+        discriminator
+        avatarURL
+
+        # 200 is the current Discord guild limit.
+        userGuilds(first: 200, orderBy: { direction: DESC, field: NAME }) {
+            edges {
+                node {
+                    guildID
+                    name
+                    iconURL
+
+                    guildConfig {
+                        enabled
+                    }
+
+                    guildAdminConfig {
+                        enabled
+                    }
+                }
+            }
+        }
+    }
+}
+
+# query getPost($id: ID!) {
+#     node(id: $id) {
+#         ... on Post {
+#             id
+#             title
+#             slug
+#             content
+#             viewCount
+#             public
+#             publishedAt
+#             labels {
+#                 edges {
+#                     node {
+#                         id
+#                         name
+#                     }
+#                 }
+#             }
+#         }
+#     }
+# }

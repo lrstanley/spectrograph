@@ -9,13 +9,10 @@ dist
 *.toml
 *.db
 vendor
+rice*.go
 .git
-.env
-**/rice*.go
-**/tmp
-**/bin
+bin
 **/*.md
+**/.env
 **/node_modules
-**/.cache
-**/.npm
-**/.gomodcache
+**/.gitapicache

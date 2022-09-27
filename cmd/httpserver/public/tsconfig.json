@@ -1,0 +1,26 @@
+{
+    "extends": "@vue/tsconfig/tsconfig.web.json",
+    "compilerOptions": {
+        "allowJs": true,
+        "paths": {
+            "@/*": [
+                "./src/*",
+                "./*"
+            ]
+        },
+        "removeComments": true,
+        "resolveJsonModule": true,
+        "strict": false,
+        "types": [
+            "vite/client",
+            "vite-plugin-pages/client"
+        ],
+    },
+    "exclude": [
+        "node_modules",
+        "dist",
+        ".git",
+        "./src/lib/api/index.ts",
+        "./src/*.config.js",
+    ],
+}

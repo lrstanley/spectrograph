@@ -1,5 +1,0 @@
-[
-    { "drop": "users" },
-    { "drop": "server" },
-    { "drop": "sessions" }
-]

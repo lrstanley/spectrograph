@@ -1,41 +1,124 @@
-#!/usr/bin/make -f
+DEFAULT_GOAL := build-all
 
-# .ONESHELL:
-# .SHELLFLAGS = -e
+export PROJECT := "httpserver"
+export PACKAGE := "github.com/lrstanley/spectrograph/cmd/httpserver"
+export COMPOSE_PROJECT := "spectrograph"
+export COMPOSE_ARGS := "postgres"
+export COMPOSE_DOCKER_CLI_BUILD := 1
+export DOCKER_BUILDKIT := 1
+export USER := $(shell id -u)
+export GROUP := $(shell id -g)
+export LICENSE_IGNORE := "graphql-tag"
 
-MAKEPID := $(shell echo $$PPID)
+license:
+	curl -sL https://liam.sh/-/gh/g/license-header.sh | bash -s
 
+build-all: clean node-fetch go-fetch node-build go-build
+	@echo
 
-GO_MOD_ROOT = $(shell dirname $(shell go env GOMOD))
-export GOBIN = ${GO_MOD_ROOT}/bin
-export GOMODCACHE = ${GO_MOD_ROOT}/.gomodcache
-$(info $(shell mkdir -p $(GOBIN)))
-export PATH = $(shell printenv PATH):$(GOBIN)
-export GOPRIVATE = github.com/lrstanley/spectrograph/*
+up: node-upgrade-deps go-upgrade-deps
+	@echo
 
-help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
+clean:
+	/bin/rm -rfv "cmd/httpserver/public/dist/*" ${PROJECT}
 
-fetch-go: ## Fetches the necessary dependencies to build.
-	go install github.com/GeertJohan/go.rice/rice
+docker:
+	docker compose \
+		--project-name ${COMPOSE_PROJECT} \
+		--file docker-compose.yaml \
+		up \
+		--remove-orphans \
+		--build \
+		--timeout 0 ${COMPOSE_ARGS}
+
+docker-clean:
+	docker compose \
+		--project-name ${COMPOSE_PROJECT} \
+		--file docker-compose.yaml \
+		down \
+		--volumes \
+		--remove-orphans \
+		--rmi local --timeout 1
+
+docker-build:
+	docker build \
+		--tag ${PROJECT} \
+		--force-rm .
+
+# frontend
+node-fetch:
+	command -v pnpm >/dev/null >&2 || npm install \
+		--no-audit \
+		--no-fund \
+		--quiet \
+		--global pnpm
+	cd cmd/httpserver/public && \
+		pnpm install --silent
+
+node-upgrade-deps:
+	cd cmd/httpserver/public && \
+		pnpm up -i
+
+node-prepare: license node-fetch
+	cd cmd/httpserver/public && \
+		pnpm exec graphql-codegen --config graphql.yaml
+
+node-lint: node-build # needed to generate eslint auto-import ignores.
+	cd cmd/httpserver/public && \
+		pnpm exec eslint \
+			--ignore-path ../../../.gitignore \
+			--ext .js,.ts,.vue .
+	cd cmd/httpserver/public && \
+		pnpm exec vue-tsc --noEmit
+
+node-debug: node-prepare
+	cd cmd/httpserver/public && \
+		pnpm exec vite
+
+node-build: node-prepare
+	cd cmd/httpserver/public && \
+		pnpm exec vite build
+
+node-preview: node-build
+	cd cmd/httpserver/public && \
+		pnpm exec vite preview
+
+# backend
+go-prepare: license go-fetch
+	go generate -x ./...
+
+go-fetch:
 	go mod download
 	go mod tidy
-	go generate -x github.com/lrstanley/spectrograph/...
 
-upgrade-deps-go: ## Upgrade all dependencies to the latest version.
+go-upgrade-deps:
 	go get -u ./...
+	go mod tidy
 
-upgrade-deps-go-patch: ## Upgrade all dependencies to the latest patch release.
+go-upgrade-deps-patch:
 	go get -u=patch ./...
+	go mod tidy
 
-watch-changes: ## Should be run from within go main dir, not repo root.
-	while true;do \
-		{ \
-			find internal/ -type f | grep -Ev '\\.(pb|twirp).go'; \
-			if [ -d "public" ];then \
-				find $(DIR) -mindepth 1 -path $(DIR)/public -prune -o -type f -print; \
-			else \
-				find $(DIR) -type f; \
-			fi; \
-		} | entr -r -n -d -s -- "sleep 3;$(MAKE) -C $(DIR) $(TARGETS)"; \
-	done
+go-dlv: go-prepare
+	dlv debug \
+		--headless --listen=:2345 \
+		--api-version=2 --log \
+		--allow-non-terminal-interactive \
+		${PACKAGE} -- --debug
+
+go-debug: go-prepare
+	go run ${PACKAGE} --debug
+
+go-debug-fast: license go-fetch
+	go run ${PACKAGE} --debug
+
+go-build: go-prepare go-fetch
+	CGO_ENABLED=0 \
+	go build \
+		-ldflags '-d -s -w -extldflags=-static' \
+		-tags=netgo,osusergo,static_build \
+		-installsuffix netgo \
+		-buildvcs=false \
+		-trimpath \
+		-o ${PROJECT} \
+		${PACKAGE}

@@ -5,20 +5,18 @@
 package discordapi
 
 import (
+	"context"
 	"fmt"
 	"net/http"
-	"sort"
 	"strconv"
-	"strings"
-	"time"
 
+	"github.com/andersfylling/disgord"
 	"github.com/lrstanley/spectrograph/internal/models"
-	"golang.org/x/oauth2"
 )
 
 const (
 	UserEndpoint   = "https://discord.com/api/users/@me"
-	GuildsEndpoint = "https://discord.com/api/users/@me/guilds"
+	GuildsEndpoint = "https://discord.com/api/users/@me/guilds?limit=200"
 
 	// https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
 	GIFAvatarPrefix       = "a_"
@@ -27,80 +25,79 @@ const (
 	ServerIconEndpoint    = "https://cdn.discordapp.com/icons/%s/%s.%s"       // guild id, icon id, extension.
 )
 
-func FetchUser(client *http.Client, token *oauth2.Token) (user *models.UserAuthDiscord, servers []*models.UserDiscordServer, err error) {
-	user = &models.UserAuthDiscord{}
-	servers = []*models.UserDiscordServer{}
+// FetchUser fetches the current discord user that is authenticated with the token,
+// as well as any guilds that are a part of. Make sure to check that the user
+// has the administrator permission in the guild, or is an owner of the guild.
+func FetchUser(ctx context.Context, token string) (user *disgord.User, guilds []*models.UserGuildResponse, err error) {
+	user = &disgord.User{}
+	guilds = []*models.UserGuildResponse{}
 
 	// Fetch user details.
-	_, err = handleRequest(client, token, "GET", UserEndpoint, nil, &user)
+	_, err = handleRequest(ctx, token, "GET", UserEndpoint, http.NoBody, user)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error fetching user info: %w", err)
 	}
 
-	user.LastLogin = time.Now()
-	user.AccessToken = token.AccessToken
-	user.RefreshToken = token.RefreshToken
-	user.ExpiresAt = token.Expiry
-
-	// Properly parse out the discord avatar. If they don't have an avatar,
-	// use the default avatar endpoint.
-	if user.Avatar == "" {
-		discriminator, _ := strconv.Atoi(user.Discriminator)
-		user.AvatarURL = fmt.Sprintf(DefaultAvatarEndpoint, discriminator%5)
-	} else {
-		extension := "png"
-		if len(user.Avatar) >= len(GIFAvatarPrefix) &&
-			user.Avatar[0:len(GIFAvatarPrefix)] == GIFAvatarPrefix {
-			extension = "gif"
-		}
-
-		user.AvatarURL = fmt.Sprintf(AvatarEndpoint, user.ID, user.Avatar, extension)
-	}
-
 	// Fetch guild details.
-	rawServers := []*models.UserDiscordServer{}
-	_, err = handleRequest(client, token, "GET", GuildsEndpoint, nil, &rawServers)
+	_, err = handleRequest(ctx, token, "GET", GuildsEndpoint, nil, &guilds)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error fetching guild info: %w", err)
 	}
 
-	for i := range rawServers {
-		// Check if they have the admin permission bit.
-		rawServers[i].Admin = rawServers[i].Permissions.Contains(models.DiscordPermAdministrator)
+	return user, guilds, nil
+}
 
-		if !rawServers[i].Owner && !rawServers[i].Admin {
-			// Ignore servers that they're not an owner of.
-			continue
-		}
-
-		rawServers[i].IconURL = GenerateGuildIconURL(rawServers[i].ID, rawServers[i].Icon)
-		servers = append(servers, rawServers[i])
+// UserHasAdmin checks if a user has the administrator permission in a guild.
+func UserHasAdmin(user *disgord.User, guild *models.UserGuildResponse) bool {
+	if user == nil {
+		return false
 	}
 
-	sort.SliceStable(servers, func(i, j int) bool {
-		return strings.ToLower(servers[i].Name) < strings.ToLower(servers[j].Name)
-	})
+	if guild.Permissions.Contains(models.DiscordPermAdministrator) || guild.Permissions.Contains(models.DiscordPermManageServer) {
+		return true
+	}
 
-	return user, servers, nil
+	return false
+}
+
+// GenerateUserAvatarURL parses out the discord avatar. If they don't have an avatar,
+// use the default avatar endpoint.
+func GenerateUserAvatarURL(user *disgord.User) string {
+	if user == nil {
+		return ""
+	}
+
+	if user.Avatar == "" {
+		discriminator, _ := strconv.Atoi(user.Discriminator.String())
+		return fmt.Sprintf(DefaultAvatarEndpoint, discriminator%5)
+	}
+
+	extension := "png"
+	if len(user.Avatar) >= len(GIFAvatarPrefix) &&
+		user.Avatar[0:len(GIFAvatarPrefix)] == GIFAvatarPrefix {
+		extension = "gif"
+	}
+
+	return fmt.Sprintf(AvatarEndpoint, user.ID, user.Avatar, extension)
 }
 
 // GenerateGuildIconURL generates a discord server icon url from an icon hash.
-func GenerateGuildIconURL(guildID, iconHash string) string {
-	if guildID == "" || iconHash == "" {
+func GenerateGuildIconURL(id, icon string) string {
+	if id == "" || icon == "" {
 		return ""
 	}
 
 	extension := "png"
 
-	if len(iconHash) >= len(GIFAvatarPrefix) &&
-		iconHash[0:len(GIFAvatarPrefix)] == GIFAvatarPrefix {
+	if len(icon) >= len(GIFAvatarPrefix) &&
+		icon[0:len(GIFAvatarPrefix)] == GIFAvatarPrefix {
 		extension = "gif"
 	}
 
 	return fmt.Sprintf(
 		ServerIconEndpoint,
-		guildID,
-		iconHash,
+		id,
+		icon,
 		extension,
 	)
 }

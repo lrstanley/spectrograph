@@ -1,0 +1,4 @@
+extend type Mutation {
+    updateGuildConfig(id: ID!, input: UpdateGuildConfigInput!): GuildConfig!
+    updateGuildAdminConfig(id: ID!, input: UpdateGuildAdminConfigInput!): GuildAdminConfig!
+}
