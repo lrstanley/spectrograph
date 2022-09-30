@@ -44,6 +44,7 @@ const props = withDefaults(
     noPadding?: boolean
     block?: boolean
     transparent?: boolean
+    active?: boolean // TODO: do something with this.
     size?: "xs" | "sm" | "md" | "lg" | "xl"
     type?: "success" | "error" | "warning" | "info" | "default"
   }>(),

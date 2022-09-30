@@ -12,9 +12,11 @@ query base {
         userGuilds(first: 200, orderBy: { direction: DESC, field: NAME }) {
             edges {
                 node {
+                    id
                     guildID
                     name
                     iconURL
+                    joinedAt
 
                     guildConfig {
                         enabled

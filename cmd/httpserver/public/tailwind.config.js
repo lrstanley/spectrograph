@@ -131,5 +131,9 @@ module.exports = {
     },
     extend: {},
   },
+  safelist:
+    "inline-flex items-center justify-center rounded-full bg-channel-400 shrink-0 text-sm font-medium leading-none text-white capitalize".split(
+      " "
+    ),
   plugins: [require("@tailwindcss/forms")],
 }

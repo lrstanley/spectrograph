@@ -3,27 +3,39 @@
  * of this source code is governed by the MIT license that can be found in
  * the LICENSE file.
  */
-
-import { createRouter, createWebHistory } from "vue-router"
-import routes from "~pages"
+import { createRouter, createWebHistory } from "vue-router/auto"
 import { BaseDocument } from "@/lib/api"
 import { client } from "@/lib/api/client"
 import { useState } from "@/lib/core/state"
+import { loadingBar } from "@/lib/core/status"
 import { titleCase } from "@/lib/util"
 
 import type { CombinedError } from "@urql/vue"
 
 const router = createRouter({
   history: createWebHistory("/"),
-  routes,
+  extendRoutes: (routes) =>
+    routes.map((route) => {
+      if (route.path.startsWith("/admin") || route.path.startsWith("/dashboard")) {
+        return {
+          ...route,
+          meta: {
+            ...route.meta,
+            auth: true,
+          },
+        }
+      }
+
+      return route
+    }),
 })
 
 router.beforeEach(async (to, from, next) => {
   const state = useState()
 
-  // if (from.name != to.name || JSON.stringify(from.params) != JSON.stringify(to.params)) {
-  //   loadingBar.start()
-  // }
+  if (from.name != to.name || JSON.stringify(from.params) != JSON.stringify(to.params)) {
+    loadingBar.value = true
+  }
 
   let error: CombinedError
 
@@ -93,7 +105,7 @@ router.afterEach((to) => {
 
   // Scroll to anchor, just in case the page happens to not render fast enough.
   nextTick(() => {
-    // loadingBar.finish()
+    loadingBar.value = false
 
     if (location.hash && !to.meta.disableAnchor) {
       const el = document.getElementById(location.hash.slice(1))

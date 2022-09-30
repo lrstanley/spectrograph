@@ -4,8 +4,9 @@ import IconsResolver from "unplugin-icons/resolver"
 import Icons from "unplugin-icons/vite"
 import { HeadlessUiResolver } from "unplugin-vue-components/resolvers"
 import Components from "unplugin-vue-components/vite"
+import { VueRouterAutoImports } from "unplugin-vue-router"
+import VueRouter from "unplugin-vue-router/vite"
 import { defineConfig } from "vite"
-import Pages from "vite-plugin-pages"
 import Vue from "@vitejs/plugin-vue"
 
 export default defineConfig({
@@ -16,22 +17,10 @@ export default defineConfig({
   },
   publicDir: `${path.resolve(__dirname, "src")}/assets`,
   plugins: [
-    Pages({
-      dirs: "src/pages",
+    VueRouter({
+      routesFolder: "src/pages",
       routeBlockLang: "yaml",
-      extendRoute(route) {
-        // route, parent
-        if (route.path.startsWith("/admin")) {
-          route = {
-            ...route,
-            meta: {
-              auth: true,
-            },
-          }
-        }
-
-        return route
-      },
+      logs: true,
     }),
     Vue({}),
     Components({
@@ -56,11 +45,11 @@ export default defineConfig({
       dts: true,
       imports: [
         "vue",
-        "vue-router",
         "@vueuse/core",
         {
           "@/lib/core/state": ["useState"],
         },
+        VueRouterAutoImports,
       ],
       resolvers: [
         IconsResolver({

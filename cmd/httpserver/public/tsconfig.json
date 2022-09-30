@@ -13,7 +13,6 @@
         "strict": false,
         "types": [
             "vite/client",
-            "vite-plugin-pages/client"
         ],
     },
     "exclude": [

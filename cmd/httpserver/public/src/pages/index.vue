@@ -1,3 +1,8 @@
+<route lang="yaml">
+meta:
+  title: "Home"
+</route>
+
 <template>
   <div class="flex flex-col flex-auto max-w-full">
     <Popover as="header" class="relative">
@@ -10,7 +15,9 @@
             <div class="flex items-center justify-between w-full md:w-auto">
               <a href="#" class="inline-flex items-center">
                 <img class="w-auto h-12" src="/img/mic.png" />
-                <h2 class="text-xl text-nitro-600">Spectrograph</h2>
+                <h2 class="text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
+                  Spectrograph
+                </h2>
               </a>
               <div class="flex items-center -mr-2 md:hidden">
                 <PopoverButton
@@ -33,14 +40,14 @@
             </div>
           </div>
           <div class="hidden md:flex md:items-center md:space-x-6">
-            <BaseButton
-              href="#"
+            <RouterButton
+              to="dashboard"
               block
               type="default"
               class="bg-gradient-to-r from-nitro-700/80 to-bravery-700/80 hover:from-nitro-600/80 hover:to-bravery-600/80"
             >
-              Login
-            </BaseButton>
+              {{ state.base.self ? "Go to Dashboard" : "Login" }}
+            </RouterButton>
           </div>
         </nav>
       </div>
@@ -59,7 +66,9 @@
               <div>
                 <a href="#" class="inline-flex items-center">
                   <img class="w-auto h-12" src="/img/mic.png" />
-                  <h2 class="text-xl text-nitro-600">Spectrograph</h2>
+                  <h2 class="text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
+                    Spectrograph
+                  </h2>
                 </a>
               </div>
               <div class="-mr-2">
@@ -83,14 +92,14 @@
                 </a>
               </div>
               <div class="px-5 mt-6">
-                <BaseButton
-                  href="#"
+                <RouterButton
+                  to="dashboard"
                   block
                   type="default"
                   class="bg-gradient-to-r from-nitro-500 to-bravery-500"
                 >
-                  Login
-                </BaseButton>
+                  {{ state.base.self ? "Go to Dashboard" : "Login" }}
+                </RouterButton>
               </div>
             </div>
           </div>
@@ -118,8 +127,10 @@
                   on occupancy, <span class="text-dnd-400">so you don't have to</span>.
                 </p>
                 <div class="flex flex-col flex-auto w-full gap-2 mt-10 lg:flex-row sm:mt-12">
-                  <BaseButton href="#" size="lg" type="info" block> More information </BaseButton>
-                  <BaseButton href="#" size="lg" type="success" block transparent>
+                  <BaseButton href="#more-info" size="lg" type="info" block>
+                    More information
+                  </BaseButton>
+                  <BaseButton href="/-/invite" size="lg" type="success" block transparent>
                     Add to your server
                   </BaseButton>
                 </div>
@@ -139,7 +150,7 @@
         </div>
       </div>
 
-      <div class="relative pt-16 pb-32 overflow-hidden">
+      <div id="more-info" class="relative pt-16 pb-32 overflow-hidden">
         <div class="relative max-w-xl px-4 mx-auto sm:px-6 lg:max-w-7xl lg:px-8">
           <div class="relative mt-12 sm:mt-16 lg:mt-24">
             <div class="lg:grid lg:grid-flow-row-dense lg:grid-cols-2 lg:items-center lg:gap-8">
@@ -314,6 +325,8 @@
 
 <script setup lang="ts">
 import { headerLinks, mainLinks, socialLinks } from "@/lib/core/navigation"
+
+const state = useState()
 
 const features = [
   {

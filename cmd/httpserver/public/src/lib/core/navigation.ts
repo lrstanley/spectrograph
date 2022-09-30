@@ -3,11 +3,16 @@
  * of this source code is governed by the MIT license that can be found in
  * the LICENSE file.
  */
+import { h } from "vue"
 
-import type { Component } from "vue"
+import type { Component, ComputedRef } from "vue"
+import type { RouteNamedMap } from "vue-router/auto/routes"
+import type { RouteLocationNormalized } from "vue-router/auto"
+
+const state = useState()
 
 export const headerLinks = [
-  { name: "Features", href: "#", current: true },
+  { name: "Features", href: "/#more-info", current: true },
   { name: "Documentation", href: "#", current: false },
   { name: "Service Health", href: "#", current: false },
 ]
@@ -16,8 +21,20 @@ export interface Link {
   name: string
   description: string
   href?: string
-  to?: Record<string, any>
+  to?: keyof RouteNamedMap | RouteLocationNormalized
   icon: Component
+}
+
+export interface DashboardLink extends Link {
+  isChild?: boolean
+  hasStatus?: boolean
+  status?: LinkStatus
+}
+
+export enum LinkStatus {
+  Healthy = "healthy",
+  Unhealthy = "unhealthy",
+  NotJoined = "not-joined",
 }
 
 export const mainLinks: Link[] = [
@@ -30,17 +47,67 @@ export const mainLinks: Link[] = [
   {
     name: "Service Health",
     description: "Health of all components of the platform",
-    href: "#",
+    to: "/info/service-health",
     icon: IconFasHeartPulse,
   },
-  { name: "Privacy", description: "Spetrograph's Privacy Policy", href: "#", icon: IconFasFingerprint },
+  {
+    name: "Privacy",
+    description: "Spetrograph's Privacy Policy",
+    to: "/info/privacy",
+    icon: IconFasFingerprint,
+  },
   {
     name: "Terms",
     description: "Spectrograph's Terms of Service",
-    href: "#",
+    to: "/info/terms",
     icon: IconFasBuildingColumns,
   },
 ]
+
+function guildIcon(name: string, url: string): Component {
+  if (url) {
+    return h("img", { src: url, alt: `${name}'s Guild Icon`, class: "rounded-full" })
+  }
+
+  return h(
+    "span",
+    { class: "inline-flex items-center justify-center rounded-full bg-channel-400 shrink-0" },
+    [h("span", { class: "text-sm font-medium leading-none text-white capitalize" }, name[0])]
+  )
+}
+
+export const dashboardLinks: ComputedRef<DashboardLink[]> = computed(() => {
+  const guilds = state.base.self?.userGuilds.edges?.map(({ node }) => node) ?? []
+  return [
+    {
+      name: "Dashboard",
+      description: "View your dashboard",
+      to: "/dashboard/",
+      icon: IconFasHouse,
+    },
+    ...guilds.map((guild) => ({
+      name: guild.name,
+      description: `View ${guild.name}'s dashboard`,
+      to: {
+        name: "/dashboard/guild/[id]",
+        params: { id: guild.id },
+      } as RouteLocationNormalized<"/dashboard/guild/[id]">,
+      icon: guildIcon(guild.name, guild.iconURL),
+      isChild: true,
+      hasStatus: true,
+      status: guild.joinedAt
+        ? (guild.guildConfig?.enabled && guild.guildAdminConfig?.enabled && LinkStatus.Healthy) ||
+          LinkStatus.Unhealthy
+        : LinkStatus.NotJoined,
+    })),
+    {
+      name: "Service Health",
+      description: "Health of all components of the platform",
+      to: "/info/service-health",
+      icon: IconFasHeartPulse,
+    },
+  ]
+})
 
 export const socialLinks: Link[] = [
   {
