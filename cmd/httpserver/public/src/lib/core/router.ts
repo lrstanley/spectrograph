@@ -14,35 +14,36 @@ import { titleCase } from "@/lib/util"
 import type { RouteRecordRaw } from "vue-router/auto"
 import type { CombinedError } from "@urql/vue"
 
-function recursiveLayouts(route: RouteRecordRaw): RouteRecordRaw {
+type RouteCallback = (route: RouteRecordRaw) => RouteRecordRaw
+
+function recurseRoute(route: RouteRecordRaw, cb: RouteCallback): RouteRecordRaw {
   if (route.children) {
     for (let i = 0; i < route.children.length; i++) {
-      route.children[i] = recursiveLayouts(route.children[i])
+      route.children[i] = recurseRoute(route.children[i], cb)
     }
-
-    return route
   }
 
-  return setupLayouts([route])[0]
+  return cb(route)
 }
 
 const router = createRouter({
   history: createWebHistory("/"),
   extendRoutes(routes) {
-    console.log(routes)
-    return routes.map((route) => {
-      if (route.path.startsWith("/admin") || route.path.startsWith("/dashboard")) {
-        route = {
-          ...route,
-          meta: {
-            auth: true,
-            ...route.meta,
-          },
+    return routes.map((r) =>
+      recurseRoute(r, (route) => {
+        if (route.path.startsWith("/admin") || route.path.startsWith("/dashboard")) {
+          route = {
+            ...route,
+            meta: {
+              auth: true,
+              ...route.meta,
+            },
+          }
         }
-      }
 
-      return recursiveLayouts(route)
-    })
+        return route.component ? setupLayouts([route])[0] : route
+      })
+    )
   },
 })
 

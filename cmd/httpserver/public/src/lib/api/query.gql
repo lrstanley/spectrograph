@@ -41,3 +41,30 @@ query getGuildID($id: ID!) {
         }
     }
 }
+
+query getGuild($id: ID!) {
+    node(id: $id) {
+        ... on Guild {
+            id
+            iconURL
+            guildID
+            name
+            joinedAt
+
+            guildConfig {
+                enabled
+                updateTime
+                defaultMaxClones
+                regexMatch
+                contactEmail
+            }
+
+            guildAdminConfig {
+                enabled
+                updateTime
+                defaultMaxChannels
+                defaultMaxClones
+            }
+        }
+    }
+}

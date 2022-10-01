@@ -4,7 +4,6 @@ liam.sh
 vendor/*
 bin/*
 *.lock
-rice-box.go
 release
 *.upx
 *.txt
