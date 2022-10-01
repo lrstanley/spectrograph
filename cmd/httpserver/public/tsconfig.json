@@ -13,6 +13,7 @@
         "strict": false,
         "types": [
             "vite/client",
+            "vite-plugin-vue-layouts/client"
         ],
     },
     "exclude": [

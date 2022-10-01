@@ -41,7 +41,7 @@ meta:
           </div>
           <div class="hidden md:flex md:items-center md:space-x-6">
             <RouterButton
-              to="dashboard"
+              to="/dashboard"
               block
               type="default"
               class="bg-gradient-to-r from-nitro-700/80 to-bravery-700/80 hover:from-nitro-600/80 hover:to-bravery-600/80"

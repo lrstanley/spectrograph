@@ -3,6 +3,7 @@
  * of this source code is governed by the MIT license that can be found in
  * the LICENSE file.
  */
+import { setupLayouts } from "virtual:generated-layouts"
 import { createRouter, createWebHistory } from "vue-router/auto"
 import { BaseDocument } from "@/lib/api"
 import { client } from "@/lib/api/client"
@@ -10,24 +11,39 @@ import { useState } from "@/lib/core/state"
 import { loadingBar } from "@/lib/core/status"
 import { titleCase } from "@/lib/util"
 
+import type { RouteRecordRaw } from "vue-router/auto"
 import type { CombinedError } from "@urql/vue"
+
+function recursiveLayouts(route: RouteRecordRaw): RouteRecordRaw {
+  if (route.children) {
+    for (let i = 0; i < route.children.length; i++) {
+      route.children[i] = recursiveLayouts(route.children[i])
+    }
+
+    return route
+  }
+
+  return setupLayouts([route])[0]
+}
 
 const router = createRouter({
   history: createWebHistory("/"),
-  extendRoutes: (routes) =>
-    routes.map((route) => {
+  extendRoutes(routes) {
+    console.log(routes)
+    return routes.map((route) => {
       if (route.path.startsWith("/admin") || route.path.startsWith("/dashboard")) {
-        return {
+        route = {
           ...route,
           meta: {
-            ...route.meta,
             auth: true,
+            ...route.meta,
           },
         }
       }
 
-      return route
-    }),
+      return recursiveLayouts(route)
+    })
+  },
 })
 
 router.beforeEach(async (to, from, next) => {

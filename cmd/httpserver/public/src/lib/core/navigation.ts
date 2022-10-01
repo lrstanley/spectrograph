@@ -8,6 +8,7 @@ import { h } from "vue"
 import type { Component, ComputedRef } from "vue"
 import type { RouteNamedMap } from "vue-router/auto/routes"
 import type { RouteLocationNormalized } from "vue-router/auto"
+import type { Guild } from "@/lib/api"
 
 const state = useState()
 
@@ -76,30 +77,49 @@ function guildIcon(name: string, url: string): Component {
   )
 }
 
+function guildLink(guild: Guild): DashboardLink {
+  const status = guild.joinedAt
+    ? (guild.guildConfig?.enabled && guild.guildAdminConfig?.enabled && LinkStatus.Healthy) ||
+      LinkStatus.Unhealthy
+    : LinkStatus.NotJoined
+
+  let to: RouteLocationNormalized
+
+  if (status == LinkStatus.NotJoined) {
+    to = {
+      name: "/dashboard/guild/[id]/invite",
+      params: { id: guild.id },
+    } as RouteLocationNormalized<"/dashboard/guild/[id]/invite">
+  } else {
+    to = {
+      name: "/dashboard/guild/[id]/",
+      params: { id: guild.id },
+    } as RouteLocationNormalized<"/dashboard/guild/[id]/">
+  }
+
+  return {
+    name: guild.name,
+    description: `View ${guild.name}'s dashboard`,
+    to: to,
+    icon: guildIcon(guild.name, guild.iconURL),
+    isChild: true,
+    hasStatus: true,
+    status: status,
+  }
+}
+
 export const dashboardLinks: ComputedRef<DashboardLink[]> = computed(() => {
   const guilds = state.base.self?.userGuilds.edges?.map(({ node }) => node) ?? []
   return [
     {
       name: "Dashboard",
       description: "View your dashboard",
-      to: "/dashboard/",
+      to: {
+        name: "/dashboard/",
+      } as RouteLocationNormalized<"/dashboard/">,
       icon: IconFasHouse,
     },
-    ...guilds.map((guild) => ({
-      name: guild.name,
-      description: `View ${guild.name}'s dashboard`,
-      to: {
-        name: "/dashboard/guild/[id]",
-        params: { id: guild.id },
-      } as RouteLocationNormalized<"/dashboard/guild/[id]">,
-      icon: guildIcon(guild.name, guild.iconURL),
-      isChild: true,
-      hasStatus: true,
-      status: guild.joinedAt
-        ? (guild.guildConfig?.enabled && guild.guildAdminConfig?.enabled && LinkStatus.Healthy) ||
-          LinkStatus.Unhealthy
-        : LinkStatus.NotJoined,
-    })),
+    ...guilds.map(guildLink),
     {
       name: "Service Health",
       description: "Health of all components of the platform",

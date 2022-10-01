@@ -68,7 +68,7 @@ body {
 
 .fade-enter-active,
 .fade-leave-active {
-  @apply transition-opacity duration-300 transform;
+  @apply transition-opacity duration-200 transform;
 }
 
 .fade-enter-from,

@@ -24,5 +24,6 @@ const props = defineProps<{
   error?: Error | string
 }>()
 
+console.log("DEFAULT")
 const state = useState()
 </script>

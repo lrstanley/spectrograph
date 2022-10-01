@@ -31,24 +31,13 @@ query base {
     }
 }
 
-# query getPost($id: ID!) {
-#     node(id: $id) {
-#         ... on Post {
-#             id
-#             title
-#             slug
-#             content
-#             viewCount
-#             public
-#             publishedAt
-#             labels {
-#                 edges {
-#                     node {
-#                         id
-#                         name
-#                     }
-#                 }
-#             }
-#         }
-#     }
-# }
+query getGuildID($id: ID!) {
+    node(id: $id) {
+        ... on Guild {
+            id
+            iconURL
+            guildID
+            name
+        }
+    }
+}

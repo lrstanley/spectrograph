@@ -58,7 +58,7 @@
       <div class="sticky top-0 z-10 pt-1 pl-1 bg-channel-500 sm:pl-3 sm:pt-3 md:hidden">
         <button
           type="button"
-          class="-ml-0.5 -mt-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-channel-400 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+          class="-ml-0.5 -mt-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-channel-400 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-bravery-500"
           @click="sidebarOpen = true"
         >
           <i-fas-bars class="w-6 h-6" aria-hidden="true" />
@@ -66,13 +66,14 @@
       </div>
 
       <main class="flex-1 bg-chat-500">
-        <div class="py-6">
-          <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <h1 class="text-2xl font-semibold text-white">Dashboard</h1>
-          </div>
-          <div class="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
-            <slot />
-          </div>
+        <div class="flex flex-col h-full px-6 py-8 mx-auto md:px-0 max-w-7xl">
+          <slot>
+            <router-view v-slot="{ Component, route }">
+              <transition name="fade" mode="out-in" appear>
+                <component :is="Component" :key="route.path" />
+              </transition>
+            </router-view>
+          </slot>
         </div>
       </main>
     </div>
