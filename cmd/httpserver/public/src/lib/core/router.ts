@@ -5,8 +5,6 @@
  */
 import { setupLayouts } from "virtual:generated-layouts"
 import { createRouter, createWebHistory } from "vue-router/auto"
-import { BaseDocument } from "@/lib/api"
-import { client } from "@/lib/api/client"
 import { useState } from "@/lib/core/state"
 import { loadingBar } from "@/lib/core/status"
 import { titleCase } from "@/lib/util"
@@ -54,19 +52,10 @@ router.beforeEach(async (to, from, next) => {
     loadingBar.value = true
   }
 
-  let error: CombinedError
+  let error: CombinedError = null
 
   if (state.base == null || (from.path == "/" && from.name == undefined)) {
-    await client
-      .query(BaseDocument, {}, { requestPolicy: "network-only" })
-      .toPromise()
-      .then((resp) => {
-        state.base = resp.data
-
-        if (resp.error !== null) {
-          error = resp.error
-        }
-      })
+    error = await state.fetchBase()
   }
 
   if (to.meta.auth == true && state.base.self == null) {
@@ -75,7 +64,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (
-    error !== undefined &&
+    error !== null &&
     !error.graphQLErrors?.some((e) => e.path?.includes("self")) &&
     to.name !== "catchall"
   ) {

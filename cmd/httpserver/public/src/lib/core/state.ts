@@ -5,8 +5,11 @@
  */
 
 import { defineStore } from "pinia"
+import { BaseDocument } from "@/lib/api"
+import { client } from "@/lib/api/client"
 import { useStorage } from "@vueuse/core"
 
+import type { CombinedError } from "@urql/vue"
 import type { BaseQuery } from "@/lib/api"
 
 export interface History {
@@ -30,6 +33,22 @@ export const useState = defineStore("state", {
     } as State)
   },
   actions: {
+    async fetchBase(): Promise<CombinedError | null> {
+      let error: CombinedError
+
+      await client
+        .query<BaseQuery>(BaseDocument, {}, { requestPolicy: "network-only" })
+        .toPromise()
+        .then((resp) => {
+          Object.assign(this.base, resp.data)
+
+          if (resp.error !== null) {
+            error = resp.error
+          }
+        })
+
+      return error ?? null
+    },
     addToHistory(item: History) {
       // Truncate to a max size.
       if (this.history.length > 4) {
