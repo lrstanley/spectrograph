@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-auto">
+  <!-- <div class="flex flex-col flex-auto">
     <div class="flex flex-col flex-auto sm:container sm:mx-auto">
       <template v-if="props.loading"> Loading... </template>
       <FeedbackAlert
@@ -15,15 +15,6 @@
         <slot><router-view /></slot>
       </template>
     </div>
-  </div>
+  </div> -->
+  <router-view />
 </template>
-
-<script setup lang="ts">
-const props = defineProps<{
-  loading?: boolean
-  error?: Error | string
-}>()
-
-console.log("DEFAULT")
-const state = useState()
-</script>

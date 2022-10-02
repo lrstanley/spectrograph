@@ -22,24 +22,22 @@ meta:
 
         <div class="pt-1.5">
           <h1 class="text-2xl font-bold text-white">Guild: {{ guild.name }}</h1>
-          <span
-            class="inline-flex items-center rounded bg-discord-700 px-2 py-0.5 text-xs font-medium text-white"
-          >
-            joined: {{ joinedAt }}
-          </span>
+          <span class="rounded badge badge-info">joined: {{ joinedAt }}</span>
         </div>
       </div>
       <div
         class="flex flex-col-reverse mt-6 space-y-4 space-y-reverse justify-stretch sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
       >
-        <BaseButton
-          :type="guild.guildConfig?.enabled ? 'error' : 'success'"
-          el="button"
+        <button
+          class="h-10 min-h-0 rounded btn"
+          :class="guild.guildConfig?.enabled ? 'btn-error' : 'btn-success'"
           :disabled="!guild.guildAdminConfig.enabled"
           @click="toggleEnabled"
         >
+          <i-fas-circle-xmark v-if="guild.guildConfig?.enabled" class="h-4 mr-2" />
+          <i-fas-circle-check v-else class="h-4 mr-2" />
           {{ guild.guildConfig?.enabled ? "Disable" : "Enable" }}
-        </BaseButton>
+        </button>
       </div>
     </div>
 

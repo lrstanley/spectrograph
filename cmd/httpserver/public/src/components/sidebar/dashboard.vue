@@ -4,10 +4,12 @@
     <div class="flex flex-col flex-auto min-h-0 bg-channel-500">
       <div class="flex flex-col flex-auto pt-5 pb-4 overflow-y-auto">
         <a href="#" class="inline-flex items-center px-4 shrink-0">
-          <img class="w-auto h-14 md:h-12" src="/img/mic.png" />
-          <h2 class="text-3xl md:text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
-            Spectrograph
-          </h2>
+          <img class="h-14 w-14 md:h-12 md:w-12" src="/img/mic.png" />
+          <router-link to="/">
+            <h2 class="text-3xl md:text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
+              Spectrograph
+            </h2>
+          </router-link>
         </a>
 
         <nav class="flex flex-col flex-auto px-4 mt-5 space-y-2 md:space-y-1">
@@ -66,6 +68,4 @@
 import { dashboardLinks, LinkStatus } from "@/lib/core/navigation"
 
 const state = useState()
-
-const guilds = state.base.self?.userGuilds.edges?.map(({ node }) => node)
 </script>

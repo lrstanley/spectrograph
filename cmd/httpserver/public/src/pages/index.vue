@@ -14,10 +14,12 @@ meta:
           <div class="flex items-center flex-1">
             <div class="flex items-center justify-between w-full md:w-auto">
               <a href="#" class="inline-flex items-center">
-                <img class="w-auto h-12" src="/img/mic.png" />
-                <h2 class="text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
-                  Spectrograph
-                </h2>
+                <img class="w-12 h-12" src="/img/mic.png" />
+                <router-link to="/">
+                  <h2 class="text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
+                    Spectrograph
+                  </h2>
+                </router-link>
               </a>
               <div class="flex items-center -mr-2 md:hidden">
                 <PopoverButton
@@ -40,14 +42,12 @@ meta:
             </div>
           </div>
           <div class="hidden md:flex md:items-center md:space-x-6">
-            <RouterButton
+            <router-link
+              class="h-10 min-h-0 rounded btn bg-gradient-to-r from-nitro-700/80 to-bravery-700/80 hover:from-nitro-600/80 hover:to-bravery-600/80"
               to="/dashboard"
-              block
-              type="default"
-              class="bg-gradient-to-r from-nitro-700/80 to-bravery-700/80 hover:from-nitro-600/80 hover:to-bravery-600/80"
             >
               {{ state.base.self ? "Go to Dashboard" : "Login" }}
-            </RouterButton>
+            </router-link>
           </div>
         </nav>
       </div>
@@ -65,7 +65,7 @@ meta:
             <div class="flex items-center justify-between px-5 pt-4">
               <div>
                 <a href="#" class="inline-flex items-center">
-                  <img class="w-auto h-12" src="/img/mic.png" />
+                  <img class="w-12 h-12" src="/img/mic.png" />
                   <h2 class="text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
                     Spectrograph
                   </h2>
@@ -92,14 +92,12 @@ meta:
                 </a>
               </div>
               <div class="px-5 mt-6">
-                <RouterButton
-                  to="dashboard"
-                  block
-                  type="default"
-                  class="bg-gradient-to-r from-nitro-500 to-bravery-500"
+                <router-link
+                  class="h-10 min-h-0 rounded btn-block btn bg-gradient-to-r from-nitro-700/80 to-bravery-700/80 hover:from-nitro-600/80 hover:to-bravery-600/80"
+                  to="/dashboard"
                 >
                   {{ state.base.self ? "Go to Dashboard" : "Login" }}
-                </RouterButton>
+                </router-link>
               </div>
             </div>
           </div>
@@ -127,12 +125,14 @@ meta:
                   on occupancy, <span class="text-dnd-400">so you don't have to</span>.
                 </p>
                 <div class="flex flex-col flex-auto w-full gap-2 mt-10 lg:flex-row sm:mt-12">
-                  <BaseButton href="#more-info" size="lg" type="info" block>
+                  <a class="h-10 min-h-0 rounded btn btn-primary" href="#more-info">
+                    <i-fas-circle-info class="h-8 mr-2" />
                     More information
-                  </BaseButton>
-                  <BaseButton href="/-/invite" size="lg" type="success" block transparent>
+                  </a>
+                  <a class="h-10 min-h-0 rounded btn btn-secondary" href="/-/invite">
+                    <i-fas-circle-plus class="h-8 mr-2" />
                     Add to your server
-                  </BaseButton>
+                  </a>
                 </div>
               </div>
             </div>
