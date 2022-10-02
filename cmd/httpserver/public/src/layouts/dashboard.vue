@@ -66,14 +66,22 @@
       </div>
 
       <main class="flex-1 bg-chat-500">
-        <div class="flex flex-col h-full px-6 py-8 mx-auto md:px-0 max-w-7xl">
-          <slot>
-            <router-view v-slot="{ Component, route }">
-              <transition name="fade" mode="out-in" appear>
+        <div class="flex flex-col h-full px-6 py-8 mx-auto max-w-7xl">
+          <router-view v-slot="{ Component, route }">
+            <transition name="fade" mode="out-in" appear>
+              <Suspense>
                 <component :is="Component" :key="route.path" />
-              </transition>
-            </router-view>
-          </slot>
+
+                <template #fallback>
+                  <div class="flex flex-col h-full gap-4 mx-auto place-content-center">
+                    <i-fas-circle-notch
+                      class="h-12 text-4xl align-middle animate-spin text-discord-500"
+                    />
+                  </div>
+                </template>
+              </Suspense>
+            </transition>
+          </router-view>
         </div>
       </main>
     </div>

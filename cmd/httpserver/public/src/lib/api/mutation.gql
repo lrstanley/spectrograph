@@ -24,3 +24,9 @@
 #         name
 #     }
 # }
+
+mutation updateGuildConfig($id: ID!, $input: UpdateGuildConfigInput!) {
+    updateGuildConfig(id: $id, input: $input) {
+        id
+    }
+}

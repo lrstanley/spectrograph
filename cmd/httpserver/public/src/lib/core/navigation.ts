@@ -4,6 +4,7 @@
  * the LICENSE file.
  */
 import { h } from "vue"
+import GuildIcon from "@/components/guild/icon.vue"
 
 import type { Component, ComputedRef } from "vue"
 import type { RouteNamedMap } from "vue-router/auto/routes"
@@ -65,18 +66,6 @@ export const mainLinks: Link[] = [
   },
 ]
 
-function guildIcon(name: string, url: string): Component {
-  if (url) {
-    return h("img", { src: url, alt: `${name}'s Guild Icon`, class: "rounded-full" })
-  }
-
-  return h(
-    "span",
-    { class: "inline-flex items-center justify-center rounded-full bg-channel-400 shrink-0" },
-    [h("span", { class: "text-sm font-medium leading-none text-white capitalize" }, name[0])]
-  )
-}
-
 function guildLink(guild: Guild): DashboardLink {
   const status = guild.joinedAt
     ? (guild.guildConfig?.enabled && guild.guildAdminConfig?.enabled && LinkStatus.Healthy) ||
@@ -101,7 +90,7 @@ function guildLink(guild: Guild): DashboardLink {
     name: guild.name,
     description: `View ${guild.name}'s dashboard`,
     to: to,
-    icon: guildIcon(guild.name, guild.iconURL),
+    icon: h(GuildIcon, { guild: guild }, {}),
     isChild: true,
     hasStatus: true,
     status: status,

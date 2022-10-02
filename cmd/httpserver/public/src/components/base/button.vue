@@ -14,13 +14,13 @@
       'text-sm': props.size === 'md',
       'text-base': props.size === 'lg' || props.size === 'xl',
 
-      'bg-online-600 hover:bg-online-700 focus:ring-online-500': props.type === 'success',
+      'bg-online-700 hover:bg-online-800 focus:ring-online-500': props.type === 'success',
       'bg-discord-500 hover:bg-discord-600 focus:ring-discord-400': props.type === 'info',
       'bg-idle-600 hover:bg-idle-700 focus:ring-idle-500': props.type === 'warning',
-      'bg-dnd-500 hover:bg-dnd-600 focus:ring-dnd-400': props.type === 'error',
+      'bg-dnd-600 hover:bg-dnd-700 focus:ring-dnd-500': props.type === 'error',
       'bg-opacity-70': props.transparent,
     }"
-    class="items-center font-medium transition-all duration-100 ease-in-out border border-transparent rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
+    class="items-center font-medium transition-all duration-100 ease-in-out border border-transparent rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
   >
     <div
       v-if="props.icon"

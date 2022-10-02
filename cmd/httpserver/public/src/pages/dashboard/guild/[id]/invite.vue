@@ -26,9 +26,7 @@ import { useGetGuildIdQuery } from "@/lib/api"
 const route = useRoute("/dashboard/guild/[id]/invite")
 
 const { data, fetching } = useGetGuildIdQuery({
-  variables: {
-    id: route.params.id,
-  },
+  variables: { id: route.params.id },
 })
 
 interface Guild {

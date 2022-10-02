@@ -52,6 +52,7 @@ query getGuild($id: ID!) {
             joinedAt
 
             guildConfig {
+                id
                 enabled
                 updateTime
                 defaultMaxClones
@@ -60,6 +61,7 @@ query getGuild($id: ID!) {
             }
 
             guildAdminConfig {
+                id
                 enabled
                 updateTime
                 defaultMaxChannels

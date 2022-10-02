@@ -26,7 +26,7 @@
               {{ item.name }}
 
               <span v-if="item.hasStatus" class="pl-1 ml-auto">
-                <i-fas-check v-if="item.status == LinkStatus.Healthy" class="text-online-500" />
+                <i-fas-check v-if="item.status == LinkStatus.Healthy" class="text-balance-500" />
                 <i-fas-xmark v-else-if="item.status == LinkStatus.Unhealthy" class="text-dnd-500" />
                 <i-fas-circle-plus
                   v-else-if="item.status == LinkStatus.NotJoined"
