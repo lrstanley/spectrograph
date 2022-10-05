@@ -11,6 +11,7 @@ import (
 
 	"github.com/andersfylling/disgord"
 	"github.com/apex/log"
+	"github.com/lrstanley/spectrograph/internal/models"
 )
 
 type updateEvent struct {
@@ -99,7 +100,7 @@ func (w *Worker) processUpdateWorker(sess disgord.Session, guildID disgord.Snowf
 	rgx, err := regexp.Compile(config.RegexMatch)
 	if err != nil {
 		w.es.Guild(event.guild).WithError(err).WithField("regex", config.RegexMatch).Error("unable to parse regex")
-		return
+		rgx = models.DefaultChannelMatch
 	}
 
 	// Get number of users in each voice channel.

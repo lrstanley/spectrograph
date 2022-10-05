@@ -127,10 +127,14 @@ func init() {
 	guildadminconfigDescDefaultMaxChannels := guildadminconfigFields[1].Descriptor()
 	// guildadminconfig.DefaultDefaultMaxChannels holds the default value on creation for the default_max_channels field.
 	guildadminconfig.DefaultDefaultMaxChannels = guildadminconfigDescDefaultMaxChannels.Default.(int)
+	// guildadminconfig.DefaultMaxChannelsValidator is a validator for the "default_max_channels" field. It is called by the builders before save.
+	guildadminconfig.DefaultMaxChannelsValidator = guildadminconfigDescDefaultMaxChannels.Validators[0].(func(int) error)
 	// guildadminconfigDescDefaultMaxClones is the schema descriptor for default_max_clones field.
 	guildadminconfigDescDefaultMaxClones := guildadminconfigFields[2].Descriptor()
 	// guildadminconfig.DefaultDefaultMaxClones holds the default value on creation for the default_max_clones field.
 	guildadminconfig.DefaultDefaultMaxClones = guildadminconfigDescDefaultMaxClones.Default.(int)
+	// guildadminconfig.DefaultMaxClonesValidator is a validator for the "default_max_clones" field. It is called by the builders before save.
+	guildadminconfig.DefaultMaxClonesValidator = guildadminconfigDescDefaultMaxClones.Validators[0].(func(int) error)
 	// guildadminconfigDescComment is the schema descriptor for comment field.
 	guildadminconfigDescComment := guildadminconfigFields[3].Descriptor()
 	// guildadminconfig.DefaultComment holds the default value on creation for the comment field.
@@ -167,6 +171,22 @@ func init() {
 	guildconfigDescDefaultMaxClones := guildconfigFields[1].Descriptor()
 	// guildconfig.DefaultDefaultMaxClones holds the default value on creation for the default_max_clones field.
 	guildconfig.DefaultDefaultMaxClones = guildconfigDescDefaultMaxClones.Default.(int)
+	// guildconfig.DefaultMaxClonesValidator is a validator for the "default_max_clones" field. It is called by the builders before save.
+	guildconfig.DefaultMaxClonesValidator = func() func(int) error {
+		validators := guildconfigDescDefaultMaxClones.Validators
+		fns := [...]func(int) error{
+			validators[0].(func(int) error),
+			validators[1].(func(int) error),
+		}
+		return func(default_max_clones int) error {
+			for _, fn := range fns {
+				if err := fn(default_max_clones); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// guildconfigDescRegexMatch is the schema descriptor for regex_match field.
 	guildconfigDescRegexMatch := guildconfigFields[2].Descriptor()
 	// guildconfig.DefaultRegexMatch holds the default value on creation for the regex_match field.
@@ -192,7 +212,21 @@ func init() {
 	// guildconfig.DefaultContactEmail holds the default value on creation for the contact_email field.
 	guildconfig.DefaultContactEmail = guildconfigDescContactEmail.Default.(string)
 	// guildconfig.ContactEmailValidator is a validator for the "contact_email" field. It is called by the builders before save.
-	guildconfig.ContactEmailValidator = guildconfigDescContactEmail.Validators[0].(func(string) error)
+	guildconfig.ContactEmailValidator = func() func(string) error {
+		validators := guildconfigDescContactEmail.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(contact_email string) error {
+			for _, fn := range fns {
+				if err := fn(contact_email); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	guildeventMixin := schema.GuildEvent{}.Mixin()
 	guildevent.Policy = privacy.NewPolicies(schema.GuildEvent{})
 	guildevent.Hooks[0] = func(next ent.Mutator) ent.Mutator {

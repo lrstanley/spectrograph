@@ -214,6 +214,16 @@ func (gacu *GuildAdminConfigUpdate) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (gacu *GuildAdminConfigUpdate) check() error {
+	if v, ok := gacu.mutation.DefaultMaxChannels(); ok {
+		if err := guildadminconfig.DefaultMaxChannelsValidator(v); err != nil {
+			return &ValidationError{Name: "default_max_channels", err: fmt.Errorf(`ent: validator failed for field "GuildAdminConfig.default_max_channels": %w`, err)}
+		}
+	}
+	if v, ok := gacu.mutation.DefaultMaxClones(); ok {
+		if err := guildadminconfig.DefaultMaxClonesValidator(v); err != nil {
+			return &ValidationError{Name: "default_max_clones", err: fmt.Errorf(`ent: validator failed for field "GuildAdminConfig.default_max_clones": %w`, err)}
+		}
+	}
 	if _, ok := gacu.mutation.GuildID(); gacu.mutation.GuildCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "GuildAdminConfig.guild"`)
 	}
@@ -525,6 +535,16 @@ func (gacuo *GuildAdminConfigUpdateOne) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (gacuo *GuildAdminConfigUpdateOne) check() error {
+	if v, ok := gacuo.mutation.DefaultMaxChannels(); ok {
+		if err := guildadminconfig.DefaultMaxChannelsValidator(v); err != nil {
+			return &ValidationError{Name: "default_max_channels", err: fmt.Errorf(`ent: validator failed for field "GuildAdminConfig.default_max_channels": %w`, err)}
+		}
+	}
+	if v, ok := gacuo.mutation.DefaultMaxClones(); ok {
+		if err := guildadminconfig.DefaultMaxClonesValidator(v); err != nil {
+			return &ValidationError{Name: "default_max_clones", err: fmt.Errorf(`ent: validator failed for field "GuildAdminConfig.default_max_clones": %w`, err)}
+		}
+	}
 	if _, ok := gacuo.mutation.GuildID(); gacuo.mutation.GuildCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "GuildAdminConfig.guild"`)
 	}

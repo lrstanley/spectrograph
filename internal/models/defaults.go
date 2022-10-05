@@ -4,7 +4,11 @@
 
 package models
 
+import "regexp"
+
 const (
 	DefaultMaxClones   = 20
 	DefaultMaxChannels = 10
 )
+
+var DefaultChannelMatch = regexp.MustCompile(`^.* +$`)

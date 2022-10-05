@@ -21,10 +21,14 @@ type GuildAdminConfig struct {
 
 func (GuildAdminConfig) Fields() []ent.Field {
 	return []ent.Field{
-		field.Bool("enabled").Optional().Default(true).Comment("True if the guild should be monitored/acted upon (overrides user-defined settings)."),
-		field.Int("default_max_channels").Optional().Default(0).Comment("Default max channels for the guild (overrides user-defined settings)."),
-		field.Int("default_max_clones").Optional().Default(0).Comment("Default max clones for the guild (overrides user-defined settings)."),
-		field.String("comment").Optional().Default("").Comment("Admin comment for the guild."),
+		field.Bool("enabled").Optional().Default(true).
+			Comment("True if the guild should be monitored/acted upon (overrides user-defined settings)."),
+		field.Int("default_max_channels").Optional().Default(0).Min(0).
+			Comment("Default max channels for the guild (overrides user-defined settings)."),
+		field.Int("default_max_clones").Optional().Default(0).Min(0).
+			Comment("Default max clones for the guild (overrides user-defined settings)."),
+		field.String("comment").Optional().Default("").
+			Comment("Admin comment for the guild."),
 	}
 }
 

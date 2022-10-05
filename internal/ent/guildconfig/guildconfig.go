@@ -92,6 +92,8 @@ var (
 	DefaultEnabled bool
 	// DefaultDefaultMaxClones holds the default value on creation for the "default_max_clones" field.
 	DefaultDefaultMaxClones int
+	// DefaultMaxClonesValidator is a validator for the "default_max_clones" field. It is called by the builders before save.
+	DefaultMaxClonesValidator func(int) error
 	// DefaultRegexMatch holds the default value on creation for the "regex_match" field.
 	DefaultRegexMatch string
 	// RegexMatchValidator is a validator for the "regex_match" field. It is called by the builders before save.

@@ -207,6 +207,11 @@ func (gcu *GuildConfigUpdate) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (gcu *GuildConfigUpdate) check() error {
+	if v, ok := gcu.mutation.DefaultMaxClones(); ok {
+		if err := guildconfig.DefaultMaxClonesValidator(v); err != nil {
+			return &ValidationError{Name: "default_max_clones", err: fmt.Errorf(`ent: validator failed for field "GuildConfig.default_max_clones": %w`, err)}
+		}
+	}
 	if v, ok := gcu.mutation.RegexMatch(); ok {
 		if err := guildconfig.RegexMatchValidator(v); err != nil {
 			return &ValidationError{Name: "regex_match", err: fmt.Errorf(`ent: validator failed for field "GuildConfig.regex_match": %w`, err)}
@@ -514,6 +519,11 @@ func (gcuo *GuildConfigUpdateOne) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (gcuo *GuildConfigUpdateOne) check() error {
+	if v, ok := gcuo.mutation.DefaultMaxClones(); ok {
+		if err := guildconfig.DefaultMaxClonesValidator(v); err != nil {
+			return &ValidationError{Name: "default_max_clones", err: fmt.Errorf(`ent: validator failed for field "GuildConfig.default_max_clones": %w`, err)}
+		}
+	}
 	if v, ok := gcuo.mutation.RegexMatch(); ok {
 		if err := guildconfig.RegexMatchValidator(v); err != nil {
 			return &ValidationError{Name: "regex_match", err: fmt.Errorf(`ent: validator failed for field "GuildConfig.regex_match": %w`, err)}

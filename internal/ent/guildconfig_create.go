@@ -242,6 +242,11 @@ func (gcc *GuildConfigCreate) check() error {
 	if _, ok := gcc.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "GuildConfig.update_time"`)}
 	}
+	if v, ok := gcc.mutation.DefaultMaxClones(); ok {
+		if err := guildconfig.DefaultMaxClonesValidator(v); err != nil {
+			return &ValidationError{Name: "default_max_clones", err: fmt.Errorf(`ent: validator failed for field "GuildConfig.default_max_clones": %w`, err)}
+		}
+	}
 	if v, ok := gcc.mutation.RegexMatch(); ok {
 		if err := guildconfig.RegexMatchValidator(v); err != nil {
 			return &ValidationError{Name: "regex_match", err: fmt.Errorf(`ent: validator failed for field "GuildConfig.regex_match": %w`, err)}

@@ -92,8 +92,12 @@ var (
 	DefaultEnabled bool
 	// DefaultDefaultMaxChannels holds the default value on creation for the "default_max_channels" field.
 	DefaultDefaultMaxChannels int
+	// DefaultMaxChannelsValidator is a validator for the "default_max_channels" field. It is called by the builders before save.
+	DefaultMaxChannelsValidator func(int) error
 	// DefaultDefaultMaxClones holds the default value on creation for the "default_max_clones" field.
 	DefaultDefaultMaxClones int
+	// DefaultMaxClonesValidator is a validator for the "default_max_clones" field. It is called by the builders before save.
+	DefaultMaxClonesValidator func(int) error
 	// DefaultComment holds the default value on creation for the "comment" field.
 	DefaultComment string
 )

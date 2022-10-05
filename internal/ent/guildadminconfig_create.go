@@ -242,6 +242,16 @@ func (gacc *GuildAdminConfigCreate) check() error {
 	if _, ok := gacc.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "GuildAdminConfig.update_time"`)}
 	}
+	if v, ok := gacc.mutation.DefaultMaxChannels(); ok {
+		if err := guildadminconfig.DefaultMaxChannelsValidator(v); err != nil {
+			return &ValidationError{Name: "default_max_channels", err: fmt.Errorf(`ent: validator failed for field "GuildAdminConfig.default_max_channels": %w`, err)}
+		}
+	}
+	if v, ok := gacc.mutation.DefaultMaxClones(); ok {
+		if err := guildadminconfig.DefaultMaxClonesValidator(v); err != nil {
+			return &ValidationError{Name: "default_max_clones", err: fmt.Errorf(`ent: validator failed for field "GuildAdminConfig.default_max_clones": %w`, err)}
+		}
+	}
 	if _, ok := gacc.mutation.GuildID(); !ok {
 		return &ValidationError{Name: "guild", err: errors.New(`ent: missing required edge "GuildAdminConfig.guild"`)}
 	}
