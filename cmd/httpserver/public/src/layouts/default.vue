@@ -5,11 +5,10 @@
       <FeedbackAlert
         v-else-if="props.error"
         v-motion-fade
-        title="An error occurred"
-        status="error"
+        type="error"
         class="m-2 md:m-6"
       >
-        {{ props.error }}
+        An error occurred: {{ props.error }}
       </FeedbackAlert>
       <template v-else>
         <slot><router-view /></slot>

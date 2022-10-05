@@ -1,32 +1,11 @@
-# mutation regeneratePosts {
-#     regeneratePosts
-# }
-
-# mutation deletePost($id: ID!) {
-#     deletePost(id: $id)
-# }
-
-# mutation createPost($input: CreatePostInput!) {
-#     createPost(input: $input) {
-#         id
-#     }
-# }
-
-# mutation updatePost($id: ID!, $input: UpdatePostInput!) {
-#     updatePost(id: $id, input: $input) {
-#         id
-#     }
-# }
-
-# mutation createLabel($input: CreateLabelInput!) {
-#     createLabel(input: $input) {
-#         id
-#         name
-#     }
-# }
-
 mutation updateGuildConfig($id: ID!, $input: UpdateGuildConfigInput!) {
     updateGuildConfig(id: $id, input: $input) {
+        id
+    }
+}
+
+mutation updateGuildAdminConfig($id: ID!, $input: UpdateGuildAdminConfigInput!) {
+    updateGuildAdminConfig(id: $id, input: $input) {
         id
     }
 }

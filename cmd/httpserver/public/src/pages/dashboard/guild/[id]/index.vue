@@ -5,57 +5,163 @@ meta:
 </route>
 
 <template>
-  <FeedbackAlert v-if="error" status="error">{{ error }}</FeedbackAlert>
+  <FeedbackAlert v-if="error" type="error">{{ error }}</FeedbackAlert>
   <div v-else>
-    <div class="md:flex md:items-center md:justify-between md:space-x-5">
-      <div class="flex items-start space-x-5">
-        <div class="shrink-0">
-          <div class="relative">
-            <GuildIcon
-              :guild="guild"
-              class="w-16 h-16 text-4xl border-2 border-solid"
-              :class="enabled ? 'border-balance-500' : 'border-dnd-400'"
-              size="2xl"
-            />
-          </div>
-        </div>
+    <GuildHeader :guild="guild" @toggle-enabled="toggleEnabled" />
 
-        <div class="pt-1.5">
-          <h1 class="text-2xl font-bold text-white">Guild: {{ guild.name }}</h1>
-          <span class="rounded badge badge-info">joined: {{ joinedAt }}</span>
-        </div>
+    <ContainerSettings
+      title="Guild Configuration"
+      description="This configuration will change how Spectrograph will interact with your guild."
+      class="mt-12"
+    >
+      <!-- contact email -->
+      <div class="col-span-2 lg:col-span-1 form-control">
+        <label class="label">
+          <span class="label-text text-secondary">Contact email</span>
+        </label>
+        <input
+          v-model="guild.guildConfig.contactEmail"
+          type="email"
+          placeholder="Contact email"
+          class="w-full rounded input input-bordered"
+        />
       </div>
-      <div
-        class="flex flex-col-reverse mt-6 space-y-4 space-y-reverse justify-stretch sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
-      >
+
+      <!-- channel match rule -->
+      <div class="col-span-2 lg:col-span-1 form-control">
+        <label class="label">
+          <span class="label-text text-secondary">Channel match rule</span>
+          <a
+            class="label-text-alt link link-primary"
+            href="https://github.com/google/re2/wiki/Syntax"
+            target="_blank"
+          >
+            how-to
+          </a>
+        </label>
+        <input
+          v-model="guild.guildConfig.regexMatch"
+          type="text"
+          placeholder="default: '^.* +$'"
+          class="w-full rounded input input-bordered"
+        />
+      </div>
+
+      <!-- maximum clones -->
+      <div class="col-span-2 lg:col-span-1 form-control">
+        <label class="label">
+          <span class="label-text text-secondary">Maximum allowed clones</span>
+        </label>
+        <input
+          v-model="guild.guildConfig.defaultMaxClones"
+          type="number"
+          min="0"
+          placeholder=""
+          class="w-full rounded input input-bordered"
+        />
+        <label class="label">
+          <span class="text-xs label-text">Set to 0 for max allowed</span>
+        </label>
+      </div>
+
+      <template #actions>
+        <div class="italic text-chat-300">last updated: {{ configUpdatedAt }}</div>
+
         <button
-          class="h-10 min-h-0 rounded btn"
-          :class="guild.guildConfig?.enabled ? 'btn-error' : 'btn-success'"
+          class="h-10 min-h-0 rounded btn btn-accent"
           :disabled="!guild.guildAdminConfig.enabled"
-          @click="toggleEnabled"
+          @click="updateConfig"
         >
-          <i-fas-circle-xmark v-if="guild.guildConfig?.enabled" class="h-4 mr-2" />
-          <i-fas-circle-check v-else class="h-4 mr-2" />
-          {{ guild.guildConfig?.enabled ? "Disable" : "Enable" }}
+          <i-fas-circle-check class="h-4 mr-2" />
+          Save
         </button>
+      </template>
+    </ContainerSettings>
+
+    <ContainerSettings
+      v-if="state.base.self?.admin"
+      title="Admin Configuration"
+      description="Administrative configuration which has the potential to override user-level configs."
+      class="mt-12"
+    >
+      <!-- admin: maximum clones -->
+      <div class="col-span-2 lg:col-span-1 form-control">
+        <label class="label">
+          <span class="label-text text-secondary">Maximum allowed clones</span>
+        </label>
+        <input
+          v-model="guild.guildAdminConfig.defaultMaxClones"
+          type="number"
+          min="0"
+          placeholder=""
+          class="w-full rounded input input-bordered"
+        />
+        <label class="label">
+          <span class="text-xs label-text">Set to 0 for max allowed</span>
+        </label>
       </div>
-    </div>
 
-    <FeedbackAlert v-if="!guild.guildAdminConfig.enabled" status="error" class="my-6">
-      {{
-        `Guild has been disabled by an administrator${
-          guild.guildAdminConfig.comment ? ": " + guild.guildAdminConfig.comment : ""
-        }`
-      }}
-    </FeedbackAlert>
+      <!-- admin: maximum channels -->
+      <div class="col-span-2 lg:col-span-1 form-control">
+        <label class="label">
+          <span class="label-text text-secondary">Maximum allowed channels</span>
+        </label>
+        <input
+          v-model="guild.guildAdminConfig.defaultMaxChannels"
+          type="number"
+          min="0"
+          placeholder=""
+          class="w-full rounded input input-bordered"
+        />
+        <label class="label">
+          <span class="text-xs label-text">Set to 0 for max allowed</span>
+        </label>
+      </div>
 
-    <div class="mt-5 border-4 border-gray-200 border-dashed rounded-lg h-96" />
+      <!-- admin: comment -->
+      <div class="col-span-2 form-control">
+        <label class="label">
+          <span class="label-text text-secondary">Administrative comment</span>
+        </label>
+        <textarea
+          v-model="guild.guildAdminConfig.comment"
+          class="w-full h-24 rounded input input-bordered"
+        />
+        <label class="label">
+          <span class="text-xs label-text">May be visible to the user</span>
+        </label>
+      </div>
+
+      <template #actions>
+        <div class="italic text-chat-300">last updated: {{ adminConfigUpdatedAt }}</div>
+
+        <div class="space-x-3">
+          <button
+            class="h-10 min-h-0 rounded btn"
+            :class="guild.guildAdminConfig?.enabled ? 'btn-error' : 'btn-success'"
+            @click="toggleAdminEnabled"
+          >
+            <i-fas-circle-xmark v-if="guild.guildAdminConfig?.enabled" class="h-4 mr-2" />
+            <i-fas-circle-check v-else class="h-4 mr-2" />
+            {{ guild.guildAdminConfig?.enabled ? "Disable (admin)" : "Enable (admin)" }}
+          </button>
+          <button class="h-10 min-h-0 rounded btn btn-accent" @click="updateAdminConfig">
+            <i-fas-circle-check class="h-4 mr-2" />
+            Save
+          </button>
+        </div>
+      </template>
+    </ContainerSettings>
   </div>
 </template>
 
 <script setup lang="ts" async>
 import { useTimeAgo } from "@vueuse/core"
-import { useGetGuildQuery, useUpdateGuildConfigMutation } from "@/lib/api"
+import {
+  useGetGuildQuery,
+  useUpdateGuildConfigMutation,
+  useUpdateGuildAdminConfigMutation,
+} from "@/lib/api"
 import type { Guild } from "@/lib/api"
 
 const state = useState()
@@ -67,16 +173,62 @@ const {
   executeQuery: refetch,
 } = await useGetGuildQuery({ variables: { id: route.params.id } })
 const guild = computed(() => data?.value.node as Guild)
-const joinedAt = useTimeAgo(guild.value.joinedAt)
-const enabled = computed(() => guild.value.guildConfig?.enabled && guild.value.guildAdminConfig?.enabled)
 
 const config = useUpdateGuildConfigMutation()
+const configUpdatedAt = useTimeAgo(computed(() => guild.value.guildConfig.updateTime))
 
 function toggleEnabled() {
   config
     .executeMutation({
       id: guild.value.guildConfig.id,
       input: { enabled: !guild.value.guildConfig.enabled },
+    })
+    .then(() => {
+      refetch()
+      state.fetchBase()
+    })
+}
+
+function updateConfig() {
+  config
+    .executeMutation({
+      id: guild.value.guildConfig.id,
+      input: {
+        contactEmail: guild.value.guildConfig.contactEmail,
+        regexMatch: guild.value.guildConfig.regexMatch,
+        defaultMaxClones: guild.value.guildConfig.defaultMaxClones,
+      },
+    })
+    .then(() => {
+      refetch()
+      state.fetchBase()
+    })
+}
+
+const adminconfig = useUpdateGuildAdminConfigMutation()
+const adminConfigUpdatedAt = useTimeAgo(computed(() => guild.value.guildAdminConfig.updateTime))
+
+function toggleAdminEnabled() {
+  adminconfig
+    .executeMutation({
+      id: guild.value.guildAdminConfig.id,
+      input: { enabled: !guild.value.guildAdminConfig.enabled },
+    })
+    .then(() => {
+      refetch()
+      state.fetchBase()
+    })
+}
+
+function updateAdminConfig() {
+  adminconfig
+    .executeMutation({
+      id: guild.value.guildAdminConfig.id,
+      input: {
+        defaultMaxChannels: guild.value.guildAdminConfig.defaultMaxChannels,
+        defaultMaxClones: guild.value.guildAdminConfig.defaultMaxClones,
+        comment: guild.value.guildAdminConfig.comment,
+      },
     })
     .then(() => {
       refetch()

@@ -1,33 +1,24 @@
 <template>
   <div
-    class="p-4 rounded-md"
+    class="flex flex-row items-center justify-start rounded alert"
     :class="{
-      'bg-online-600': props.status === 'success',
-      'bg-discord-500': props.status === 'info',
-      'bg-idle-600': props.status === 'warning',
-      'bg-dnd-700': props.status === 'error',
+      'alert-success': props.type === 'success',
+      'alert-info': props.type === 'info',
+      'alert-warning': props.type === 'warning',
+      'alert-error': props.type === 'error',
     }"
   >
-    <div class="flex">
-      <div class="shrink-0">
-        <i-fas-circle-check v-if="props.status === 'success'" class="w-5 h-5 text-white" />
-        <i-fas-circle-info v-if="props.status === 'info'" class="w-5 h-5 text-white" />
-        <i-fas-triangle-exclamation v-if="props.status === 'warning'" class="w-5 h-5 text-white" />
-        <i-fas-circle-xmark v-if="props.status === 'error'" class="w-5 h-5 text-white" />
-      </div>
-      <div class="ml-3">
-        <h3 v-if="props.title" class="font-medium text-white text-md">{{ props.title }}</h3>
-        <slot />
-      </div>
-    </div>
+    <i-fas-circle-check v-if="props.type === 'success'" class="w-5 h-5 text-white" />
+    <i-fas-circle-info v-if="props.type === 'info'" class="w-5 h-5 text-white" />
+    <i-fas-triangle-exclamation v-if="props.type === 'warning'" class="w-5 h-5 text-white" />
+    <i-fas-circle-xmark v-if="props.type === 'error'" class="w-5 h-5 text-white" />
+
+    <span class="!mt-0"><slot /></span>
   </div>
 </template>
 
 <script setup lang="ts">
 const props = defineProps<{
-  status: "success" | "error" | "warning" | "info"
-  title?: string
+  type: "success" | "error" | "warning" | "info"
 }>()
 </script>
-
-<style scoped></style>

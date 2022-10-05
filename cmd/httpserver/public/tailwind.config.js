@@ -22,6 +22,9 @@ module.exports = {
         900: "#17181a",
       },
       chat: {
+        200: "#cdcecf",
+        300: "#afb0b2",
+        400: "#727479",
         500: "#36393f",
         600: "#313339",
         700: "#292b2f",
@@ -131,7 +134,7 @@ module.exports = {
     },
     extend: {},
   },
-  plugins: [require("@tailwindcss/forms"), require("daisyui")],
+  plugins: [require("daisyui"), require("@tailwindcss/forms")],
   daisyui: {
     themes: [
       {
@@ -144,8 +147,8 @@ module.exports = {
           "accent-focus": "#33a68f",
           neutral: "#1c1d20",
           "neutral-focus": "#17181a",
-          "base-100": "#2f3136",
-          "base-200": "#232529",
+          "base-100": "#232529",
+          "base-200": "#1c1d20",
           "base-300": "#17181a",
           info: "#7289da",
           "info-focus": "#677bc4",
