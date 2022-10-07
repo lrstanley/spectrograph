@@ -18,18 +18,17 @@ import (
 	"github.com/lrstanley/spectrograph/internal/ent/guildevent"
 )
 
-const flushInterval = 10 * time.Second
-
 type event struct {
 	guild *ent.Guild
 	event *ent.GuildEvent
 }
 
 type EventStream struct {
-	logger   log.Interface
-	db       *ent.Client
-	gc       *cache.Cache[string, *ent.Guild]
-	workerCh chan *event
+	logger        log.Interface
+	db            *ent.Client
+	gc            *cache.Cache[string, *ent.Guild]
+	workerCh      chan *event
+	flushInterval time.Duration
 
 	// Internally used for chaining.
 	base *EventStream
@@ -46,7 +45,7 @@ type EventStream struct {
 //
 // When the context provided to the event stream is cancelled, the event stream
 // will close its worker and any pending events will be dropped (too lazy to bother).
-func NewEventStream(ctx context.Context, l log.Interface, db *ent.Client) *EventStream {
+func NewEventStream(ctx context.Context, l log.Interface, db *ent.Client, flushInterval time.Duration) *EventStream {
 	es := &EventStream{
 		logger: l,
 		db:     db,
@@ -59,7 +58,8 @@ func NewEventStream(ctx context.Context, l log.Interface, db *ent.Client) *Event
 
 			return g, true
 		}),
-		workerCh: make(chan *event, 100),
+		workerCh:      make(chan *event, 100),
+		flushInterval: flushInterval,
 	}
 
 	// Spin up worker to send events to the database.
@@ -69,7 +69,7 @@ func NewEventStream(ctx context.Context, l log.Interface, db *ent.Client) *Event
 }
 
 func (es *EventStream) worker(ctx context.Context) {
-	ticker := time.NewTicker(flushInterval)
+	ticker := time.NewTicker(es.flushInterval)
 	defer ticker.Stop()
 
 	for {

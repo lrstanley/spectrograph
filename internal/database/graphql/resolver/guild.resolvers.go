@@ -7,10 +7,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/apex/log"
+	"github.com/lrstanley/spectrograph/internal/database"
 	"github.com/lrstanley/spectrograph/internal/database/graphql/gqlhandler"
 	"github.com/lrstanley/spectrograph/internal/ent"
-	"github.com/lrstanley/spectrograph/internal/ent/guildevent"
 )
 
 // UpdateGuildConfig is the resolver for the updateGuildConfig field.
@@ -25,56 +24,12 @@ func (r *mutationResolver) UpdateGuildAdminConfig(ctx context.Context, id int, i
 
 // GuildEventAdded is the resolver for the guildEventAdded field.
 func (r *subscriptionResolver) GuildEventAdded(ctx context.Context, input ent.GuildEventWhereInput) (<-chan *ent.GuildEvent, error) {
-	db := ent.FromContext(ctx)
-
 	q, err := input.P()
 	if err != nil {
 		return nil, err
 	}
 
-	ch := make(chan *ent.GuildEvent)
-	oldestTimestamp := time.Now().Add(-(time.Hour * 2))
-	lastEventID := 0
-
-	fn := func() error {
-		events, err := db.GuildEvent.Query().
-			Where(
-				guildevent.And(q, guildevent.IDGT(lastEventID), guildevent.CreateTimeGT(oldestTimestamp)),
-			).All(ctx) // .Order(ent.Asc(guildevent.FieldCreateTime))
-		if err != nil {
-			return err
-		}
-
-		for _, event := range events {
-			lastEventID = event.ID
-			ch <- event
-		}
-
-		return nil
-	}
-
-	timer := time.NewTimer(4 * time.Second)
-	go func() {
-		if err = fn(); err != nil {
-			log.FromContext(ctx).WithError(err).Error("failed to query guild events")
-			return
-		}
-
-		for {
-			select {
-			case <-ctx.Done():
-				log.FromContext(ctx).Info("closing guild event subscription")
-				return
-			case <-timer.C:
-				if err = fn(); err != nil {
-					log.FromContext(ctx).WithError(err).Error("failed to query guild events")
-					return
-				}
-			}
-		}
-	}()
-
-	return ch, nil
+	return database.NewGuildEventStream(ctx, q, 3*time.Second, 2*time.Hour), nil
 }
 
 // Subscription returns gqlhandler.SubscriptionResolver implementation.

@@ -62,7 +62,7 @@ func New(ctx context.Context, config models.ConfigWorker, auth models.ConfigDisc
 		"src":       "worker",
 	})
 
-	es := guildlogger.NewEventStream(ctx, logger, db)
+	es := guildlogger.NewEventStream(ctx, logger, db, config.EventFlushInterval)
 
 	w := &Worker{
 		ctx:         ctx,

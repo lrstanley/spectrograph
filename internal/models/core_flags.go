@@ -4,6 +4,8 @@
 
 package models
 
+import "time"
+
 type Flags struct {
 	HTTP          ConfigHTTP     `group:"HTTP Server options"    namespace:"http"     env-namespace:"HTTP"`
 	Database      ConfigDatabase `group:"Database options"       namespace:"database" env-namespace:"DATABASE"`
@@ -36,7 +38,8 @@ type ConfigDiscord struct {
 type ConfigWorker struct {
 	// https://discord.com/developers/docs/topics/gateway#sharding
 	// Note: Shard ID 0 will be the only one to receive DMs.
-	ShardIDs  []uint `env:"SHARD_ID"   long:"shard-id"   default:"0"     env-delim:"," description:"shard ID of this specific worker (from 0)"`
-	NumShards uint   `env:"NUM_SHARDS" long:"num-shards" default:"1"     description:"number of total shards"`
-	BotToken  string `env:"BOT_TOKEN"  long:"bot-token"  required:"true" description:"Discord bot token"`
+	ShardIDs           []uint        `env:"SHARD_ID"             long:"shard-id"   default:"0" env-delim:"," description:"shard ID of this specific worker (from 0)"`
+	NumShards          uint          `env:"NUM_SHARDS"           long:"num-shards" default:"1"            description:"number of total shards"`
+	BotToken           string        `env:"BOT_TOKEN"            long:"bot-token"  required:"true"        description:"Discord bot token"`
+	EventFlushInterval time.Duration `env:"EVENT_FLUSH_INTERVAL" long:"event-flush-interval" default:"5s" description:"how often to flush events to the database"`
 }
