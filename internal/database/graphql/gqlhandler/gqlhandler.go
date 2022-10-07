@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -40,6 +41,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -167,6 +169,10 @@ type ComplexityRoot struct {
 		Users             func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.UserOrder, where *ent.UserWhereInput) int
 	}
 
+	Subscription struct {
+		GuildEventAdded func(childComplexity int, input ent.GuildEventWhereInput) int
+	}
+
 	User struct {
 		Admin         func(childComplexity int) int
 		AvatarHash    func(childComplexity int) int
@@ -215,6 +221,9 @@ type QueryResolver interface {
 	Guildevents(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildEventWhereInput) (*ent.GuildEventConnection, error)
 	Users(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.UserOrder, where *ent.UserWhereInput) (*ent.UserConnection, error)
 	Self(ctx context.Context) (*ent.User, error)
+}
+type SubscriptionResolver interface {
+	GuildEventAdded(ctx context.Context, input ent.GuildEventWhereInput) (<-chan *ent.GuildEvent, error)
 }
 
 type executableSchema struct {
@@ -814,6 +823,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Users(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["orderBy"].(*ent.UserOrder), args["where"].(*ent.UserWhereInput)), true
 
+	case "Subscription.guildEventAdded":
+		if e.complexity.Subscription.GuildEventAdded == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_guildEventAdded_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.GuildEventAdded(childComplexity, args["input"].(ent.GuildEventWhereInput)), true
+
 	case "User.admin":
 		if e.complexity.User.Admin == nil {
 			break
@@ -1032,6 +1053,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next(ctx)
+
+			if data == nil {
+				return nil
+			}
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
@@ -2106,6 +2144,10 @@ input UserWhereInput {
     updateGuildConfig(id: ID!, input: UpdateGuildConfigInput!): GuildConfig!
     updateGuildAdminConfig(id: ID!, input: UpdateGuildAdminConfigInput!): GuildAdminConfig!
 }
+
+type Subscription {
+    guildEventAdded(input: GuildEventWhereInput!): GuildEvent!
+}
 `, BuiltIn: false},
 	{Name: "../schema/user.gql", Input: `extend type Query {
     self: User
@@ -2541,6 +2583,21 @@ func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["where"] = arg5
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_guildEventAdded_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 ent.GuildEventWhereInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNGuildEventWhereInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -6566,6 +6623,91 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_guildEventAdded(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	fc, err := ec.fieldContext_Subscription_guildEventAdded(ctx, field)
+	if err != nil {
+		return nil
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().GuildEventAdded(rctx, fc.Args["input"].(ent.GuildEventWhereInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func(ctx context.Context) graphql.Marshaler {
+		select {
+		case res, ok := <-resTmp.(<-chan *ent.GuildEvent):
+			if !ok {
+				return nil
+			}
+			return graphql.WriterFunc(func(w io.Writer) {
+				w.Write([]byte{'{'})
+				graphql.MarshalString(field.Alias).MarshalGQL(w)
+				w.Write([]byte{':'})
+				ec.marshalNGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEvent(ctx, field.Selections, res).MarshalGQL(w)
+				w.Write([]byte{'}'})
+			})
+		case <-ctx.Done():
+			return nil
+		}
+	}
+}
+
+func (ec *executionContext) fieldContext_Subscription_guildEventAdded(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_GuildEvent_id(ctx, field)
+			case "createTime":
+				return ec.fieldContext_GuildEvent_createTime(ctx, field)
+			case "updateTime":
+				return ec.fieldContext_GuildEvent_updateTime(ctx, field)
+			case "type":
+				return ec.fieldContext_GuildEvent_type(ctx, field)
+			case "message":
+				return ec.fieldContext_GuildEvent_message(ctx, field)
+			case "metadata":
+				return ec.fieldContext_GuildEvent_metadata(ctx, field)
+			case "guild":
+				return ec.fieldContext_GuildEvent_guild(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GuildEvent", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Subscription_guildEventAdded_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
@@ -14959,6 +15101,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "guildEventAdded":
+		return ec._Subscription_guildEventAdded(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
+}
+
 var userImplementors = []string{"User", "Node"}
 
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *ent.User) graphql.Marshaler {
@@ -15600,6 +15762,10 @@ func (ec *executionContext) marshalNGuildConnection2ᚖgithubᚗcomᚋlrstanley�
 	return ec._GuildConnection(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNGuildEvent2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEvent(ctx context.Context, sel ast.SelectionSet, v ent.GuildEvent) graphql.Marshaler {
+	return ec._GuildEvent(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEvent(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEvent) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -15632,6 +15798,11 @@ func (ec *executionContext) unmarshalNGuildEventType2githubᚗcomᚋlrstanleyᚋ
 
 func (ec *executionContext) marshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx context.Context, sel ast.SelectionSet, v guildevent.Type) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) unmarshalNGuildEventWhereInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx context.Context, v interface{}) (ent.GuildEventWhereInput, error) {
+	res, err := ec.unmarshalInputGuildEventWhereInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx context.Context, v interface{}) (*ent.GuildEventWhereInput, error) {

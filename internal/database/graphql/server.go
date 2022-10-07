@@ -67,6 +67,7 @@ func New(db *ent.Client, cli *clix.CLI[models.Flags]) *handler.Server {
 	srv.AddTransport(transport.GET{})
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.MultipartForm{})
+	srv.AddTransport(transport.Websocket{})
 
 	srv.SetQueryCache(lru.New(512))
 	srv.Use(extension.FixedComplexityLimit(100))
