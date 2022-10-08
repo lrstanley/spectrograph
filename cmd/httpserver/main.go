@@ -42,7 +42,12 @@ func main() {
 		logger.WithError(err).Fatal("failed to create worker")
 	}
 
-	if err := chix.RunCtx(ctx, httpServer(ctx), w.Run); err != nil {
+	if err := chix.RunCtx(
+		ctx,
+		httpServer(ctx),
+		w.Run,
+		database.CronGuildEvents,
+	); err != nil {
 		logger.WithError(err).Fatal("shutting down")
 	}
 }
