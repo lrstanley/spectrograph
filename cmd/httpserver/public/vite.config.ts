@@ -7,6 +7,7 @@ import Components from "unplugin-vue-components/vite"
 import { VueRouterAutoImports } from "unplugin-vue-router"
 import VueRouter from "unplugin-vue-router/vite"
 import { defineConfig } from "vite"
+import codegen from "vite-plugin-graphql-codegen"
 import Layouts from "vite-plugin-vue-layouts"
 import Vue from "@vitejs/plugin-vue"
 
@@ -18,6 +19,29 @@ export default defineConfig({
   },
   publicDir: `${path.resolve(__dirname, "src")}/assets`,
   plugins: [
+    codegen({
+      enableWatcher: false,
+      config: {
+        errorsOnly: true,
+        schema: "./../../../internal/database/graphql/schema/*.gql",
+        documents: "./src/lib/api/*.gql",
+        generates: {
+          "./src/lib/api/graphql.ts": {
+            plugins: ["typescript", "typescript-operations", "typescript-vue-urql"],
+            config: {
+              preResolveTypes: true,
+              nonOptionalTypename: true,
+              skipTypeNameForRoot: true,
+              useTypeImports: true,
+              inputMaybeValue: "T | Ref<T> | ComputedRef<T>",
+            },
+            hooks: {
+              afterOneFileWrite: ["pnpm exec prettier --write"],
+            },
+          },
+        },
+      },
+    }),
     VueRouter({
       routesFolder: "src/pages",
       routeBlockLang: "yaml",
