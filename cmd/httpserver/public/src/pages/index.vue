@@ -294,37 +294,12 @@ meta:
       </div>
     </main>
 
-    <footer>
-      <div class="px-4 py-12 mx-auto overflow-hidden max-w-7xl sm:px-6 lg:px-8">
-        <nav class="flex flex-wrap justify-center -mx-5 -my-2" aria-label="Footer">
-          <div v-for="item in mainLinks" :key="item.name" class="px-5 py-2">
-            <a :href="item.href" class="text-base text-gray-400 hover:text-gray-600">{{ item.name }}</a>
-          </div>
-        </nav>
-
-        <div class="flex justify-center mt-8 space-x-6">
-          <a
-            v-for="item in socialLinks"
-            :key="item.name"
-            :href="item.href"
-            class="text-gray-400 hover:text-gray-500"
-          >
-            <span class="sr-only">{{ item.name }}</span>
-            <component :is="item.icon" class="w-6 h-6" aria-hidden="true" />
-          </a>
-        </div>
-        <p class="mt-8 text-base text-center text-gray-400">
-          <a href="https://liam.sh/" target="_blank">
-            &copy; {{ new Date().getFullYear() }} Spectrograph
-          </a>
-        </p>
-      </div>
-    </footer>
+    <CoreFooter full-size />
   </div>
 </template>
 
 <script setup lang="ts">
-import { headerLinks, mainLinks, socialLinks } from "@/lib/core/navigation"
+import { headerLinks } from "@/lib/core/navigation"
 
 const state = useState()
 

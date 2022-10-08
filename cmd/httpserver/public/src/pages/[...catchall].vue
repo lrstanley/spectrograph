@@ -59,24 +59,7 @@ meta:
             </a>
           </div>
 
-          <div class="py-4 mt-8 text-center border-t border-channel-600 md:flex md:justify-between">
-            <p class="text-base text-gray-400">
-              <a href="https://liam.sh/" target="_blank">
-                &copy; {{ new Date().getFullYear() }} Spectrograph
-              </a>
-            </p>
-            <div class="flex justify-center mt-6 space-x-8 md:mt-0">
-              <a
-                v-for="link in socialLinks"
-                :key="link.name"
-                :href="link.href"
-                class="inline-flex text-gray-400 hover:text-gray-500"
-              >
-                <span class="sr-only">{{ link.name }}</span>
-                <component :is="link.icon" class="w-6 h-6" aria-hidden="true" />
-              </a>
-            </div>
-          </div>
+          <CoreFooter class="border-t border-channel-600" />
         </div>
       </div>
     </main>
@@ -84,5 +67,5 @@ meta:
 </template>
 
 <script setup lang="ts">
-import { mainLinks, socialLinks } from "@/lib/core/navigation"
+import { mainLinks } from "@/lib/core/navigation"
 </script>
