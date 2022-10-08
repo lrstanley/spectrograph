@@ -8,8 +8,7 @@ meta:
   <FeedbackAlert v-if="error" type="error">{{ error }}</FeedbackAlert>
   <div v-else>
     <GuildHeader :guild="guild" @toggle-enabled="toggleEnabled" />
-
-    <GuildEvents :guild="guild" class="mt-10 max-h-32" />
+    <GuildEvents :guild="guild" class="mt-10 max-h-64" />
 
     <ContainerSettings
       title="Guild Configuration"

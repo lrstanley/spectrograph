@@ -15,16 +15,17 @@
       </thead>
       <tbody class="max-h-32">
         <tr v-for="event in guildEvents" :key="event.id">
-          <td class="pl-4 sm:pl-6">
+          <td class="pl-4 sm:pl-6 text-chat-300">
             {{ useTimeAgo(event.createTime).value }}
           </td>
           <td
             :class="{
-              'text-discord-500': event.type === GuildEventType.Info,
+              'text-bravery-500': event.type === GuildEventType.Info,
               'text-idle-500': event.type === GuildEventType.Warning,
               'text-dnd-500': event.type === GuildEventType.Error,
               'text-nitro-500': event.type === GuildEventType.Debug,
             }"
+            class="font-semibold"
           >
             {{ event.type }}
           </td>
@@ -47,6 +48,8 @@ import { useTimeAgo } from "@vueuse/core"
 import { useGuildEventStreamSubscription, GuildEventType } from "@/lib/api"
 import type { Guild, GuildEventStreamSubscription } from "@/lib/api"
 
+const state = useState()
+
 const props = defineProps<{
   guild: Guild
 }>()
@@ -55,7 +58,12 @@ const eventStream = useGuildEventStreamSubscription(
   {
     variables: {
       guildID: props.guild.id,
-      types: [GuildEventType.Debug, GuildEventType.Error, GuildEventType.Warning, GuildEventType.Info],
+      types: [
+        ...(state.base.self?.admin ? [GuildEventType.Debug] : []),
+        GuildEventType.Error,
+        GuildEventType.Warning,
+        GuildEventType.Info,
+      ],
     },
   },
   (

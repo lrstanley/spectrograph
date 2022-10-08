@@ -51,10 +51,6 @@ body {
   @apply font-bold text-transparent bg-clip-text;
 }
 
-.icon {
-  @apply inline align-middle;
-}
-
 .stepped-enter-active,
 .stepped-leave-active {
   @apply transition-opacity duration-300 transform;
@@ -74,6 +70,22 @@ body {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+:where(.table :first-child) :where(:first-child) :where(th, td):first-child {
+  border-top-left-radius: var(--rounded-box);
+}
+
+:where(.table :first-child) :where(:first-child) :where(th, td):last-child {
+  border-top-right-radius: var(--rounded-box);
+}
+
+:where(.table :last-child) :where(:last-child) :where(th, td):last-child {
+  border-bottom-right-radius: var(--rounded-box);
+}
+
+:where(.table :last-child) :where(:last-child) :where(th, td):first-child {
+  border-bottom-left-radius: var(--rounded-box);
 }
 
 *::-webkit-scrollbar {

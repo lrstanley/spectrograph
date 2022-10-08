@@ -28,9 +28,11 @@ export interface Link {
 }
 
 export interface DashboardLink extends Link {
+  guild?: Guild
   isChild?: boolean
   hasStatus?: boolean
   status?: LinkStatus
+  hover?: boolean
 }
 
 export enum LinkStatus {
@@ -66,7 +68,7 @@ export const mainLinks: Link[] = [
   },
 ]
 
-function guildLink(guild: Guild): DashboardLink {
+export function guildLink(guild: Guild): DashboardLink {
   const status = guild.joinedAt
     ? (guild.guildConfig?.enabled && guild.guildAdminConfig?.enabled && LinkStatus.Healthy) ||
       LinkStatus.Unhealthy
@@ -87,6 +89,7 @@ function guildLink(guild: Guild): DashboardLink {
   }
 
   return {
+    guild: guild,
     name: guild.name,
     description: `View ${guild.name}'s dashboard`,
     to: to,
