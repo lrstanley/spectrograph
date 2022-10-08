@@ -5,8 +5,7 @@
  */
 
 import { defineStore } from "pinia"
-import { BaseDocument } from "@/lib/api"
-import { client } from "@/lib/api/client"
+import { BaseDocument, client } from "@/lib/api"
 import { useStorage } from "@vueuse/core"
 
 import type { CombinedError } from "@urql/vue"

@@ -2,7 +2,7 @@ schema: ../../../internal/database/graphql/schema/*.gql
 documents: ./src/lib/api/*.gql
 overwrite: true
 generates:
-  ./src/lib/api/index.ts:
+  ./src/lib/api/graphql.ts:
     plugins:
       - typescript
       - typescript-operations

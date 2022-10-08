@@ -7,13 +7,13 @@
 import "@/css/main.css"
 import { createPinia } from "pinia"
 import { createApp } from "vue"
-import { client } from "@/lib/api/client"
+import { RouterView } from "vue-router/auto"
+import { client } from "@/lib/api"
 import router from "@/lib/core/router"
-import App from "@/main.vue"
 import urql from "@urql/vue"
 import { MotionPlugin } from "@vueuse/motion"
 
-const app = createApp(App)
+const app = createApp(RouterView)
 
 app.use(urql, client)
 app.use(createPinia())

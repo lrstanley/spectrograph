@@ -20,7 +20,7 @@
         "node_modules",
         "dist",
         ".git",
-        "./src/lib/api/index.ts",
+        "./src/lib/api/graphql.ts",
         "./src/*.config.js",
     ],
 }

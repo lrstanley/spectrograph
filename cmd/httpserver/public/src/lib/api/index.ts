@@ -8,6 +8,8 @@ import { loadingBar } from "@/lib/core/status"
 import { retryExchange } from "@urql/exchange-retry"
 import { cacheExchange, createClient, dedupExchange, fetchExchange } from "@urql/vue"
 
+export * from "@/lib/api/graphql"
+
 function fetchWithTimeout(url: RequestInfo, opts: RequestInit): Promise<Response> {
   loadingBar.value = true
   const controller = new AbortController()
