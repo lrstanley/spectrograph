@@ -4,9 +4,12 @@
  * the LICENSE file.
  */
 
+import { createClient as createWSClient } from "graphql-ws"
 import { loadingBar } from "@/lib/core/status"
 import { retryExchange } from "@urql/exchange-retry"
-import { cacheExchange, createClient, dedupExchange, fetchExchange } from "@urql/vue"
+import {
+  cacheExchange, createClient, dedupExchange, fetchExchange, subscriptionExchange
+} from "@urql/vue"
 
 export * from "@/lib/api/graphql"
 
@@ -34,6 +37,11 @@ function fetchWithTimeout(url: RequestInfo, opts: RequestInit): Promise<Response
   return promise
 }
 
+export const wsClient = createWSClient({
+  url: `${window.location.protocol == "https" ? "wss" : "ws"}://${window.location.host}/-/graphql`,
+  keepAlive: 10000,
+})
+
 export const client = createClient({
   url: "/-/graphql",
   requestPolicy: "cache-and-network",
@@ -49,5 +57,17 @@ export const client = createClient({
       retryIf: (err) => (err && err.networkError ? true : false),
     }),
     fetchExchange,
+    subscriptionExchange({
+      forwardSubscription(operation) {
+        return {
+          subscribe: (sink) => {
+            const dispose = wsClient.subscribe(operation, sink)
+            return {
+              unsubscribe: dispose,
+            }
+          },
+        }
+      },
+    }),
   ],
 })

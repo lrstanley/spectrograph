@@ -6,7 +6,10 @@
           <slot />
         </div>
       </div>
-      <div class="flex flex-row items-center justify-between flex-1 px-6 py-3 bg-chat-700">
+      <div
+        v-if="!!$slots.actions"
+        class="flex flex-row items-center justify-between flex-1 px-6 py-3 bg-chat-700"
+      >
         <slot name="actions" />
       </div>
     </div>

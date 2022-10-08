@@ -52,8 +52,8 @@ func (w *Worker) routeEvent(sess disgord.Session, event any, guildID disgord.Sno
 }
 
 func (w *Worker) eventWatcher(sess disgord.Session, guildID disgord.Snowflake, events <-chan *updateEvent) {
-	w.es.GuildID(guildID.String()).Debug("starting event watcher")
-	defer w.es.GuildID(guildID.String()).Debug("closing event watcher")
+	w.es.GuildID(guildID.String()).Info("worker has connect to guild")
+	defer w.es.GuildID(guildID.String()).Info("worker has disconnected from guild")
 
 	var event *updateEvent
 	var ok bool
@@ -84,7 +84,7 @@ func (w *Worker) eventWatcher(sess disgord.Session, guildID disgord.Snowflake, e
 }
 
 func (w *Worker) processUpdateWorker(sess disgord.Session, guildID disgord.Snowflake, event *updateEvent) {
-	w.es.Guild(event.guild).WithField("type", fmt.Sprintf("%T", event.event)).Debug("processing event")
+	w.es.Guild(event.guild).WithField("type", fmt.Sprintf("%T", event.event)).Info("processing event")
 
 	config, adminconfig, err := w.dbGetSettings(guildID.String())
 	if err != nil {
@@ -93,7 +93,7 @@ func (w *Worker) processUpdateWorker(sess disgord.Session, guildID disgord.Snowf
 	}
 
 	if !config.Enabled || !adminconfig.Enabled {
-		w.es.Guild(event.guild).Debug("dropping event, guild disabled by config")
+		w.es.Guild(event.guild).WithField("type", fmt.Sprintf("%T", event.event)).Info("dropping event, guild disabled by config")
 		return
 	}
 

@@ -9,6 +9,8 @@ meta:
   <div v-else>
     <GuildHeader :guild="guild" @toggle-enabled="toggleEnabled" />
 
+    <GuildEvents :guild="guild" class="mt-10 max-h-32" />
+
     <ContainerSettings
       title="Guild Configuration"
       description="This configuration will change how Spectrograph will interact with your guild."
@@ -161,6 +163,7 @@ import {
   useGetGuildQuery,
   useUpdateGuildConfigMutation,
   useUpdateGuildAdminConfigMutation,
+  GuildEventType,
 } from "@/lib/api"
 import type { Guild } from "@/lib/api"
 

@@ -162,6 +162,7 @@ module.exports = {
           "--rounded-box": "0.25rem",
           "--rounded-btn": "0.25rem",
           "--rounded-badge": "0.25rem",
+          "--tab-radius": "0.25rem",
         },
       },
     ],

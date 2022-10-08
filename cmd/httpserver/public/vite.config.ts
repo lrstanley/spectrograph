@@ -117,6 +117,7 @@ export default defineConfig({
       "^/(-|security\\.txt|robots\\.txt)(/.*|$)": {
         target: "http://localhost:8080",
         xfwd: true,
+        ws: true,
       },
     },
   },

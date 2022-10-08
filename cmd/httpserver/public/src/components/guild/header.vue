@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <FeedbackAlert v-if="!guild.guildAdminConfig.enabled" type="error">
+  <FeedbackAlert v-if="!guild.guildAdminConfig.enabled" type="error" class="mt-10">
     Guild has been disabled by an administrator
     <span v-if="guild.guildAdminConfig.comment" class="rounded badge">
       reason: {{ guild.guildAdminConfig.comment }}

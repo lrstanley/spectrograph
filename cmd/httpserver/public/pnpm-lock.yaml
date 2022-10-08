@@ -36,6 +36,7 @@ specifiers:
   eslint-plugin-vue: ^9.6.0
   graphql: ^16.6.0
   graphql-tag: ^2.12.6
+  graphql-ws: ^5.11.2
   nprogress: ^0.2.0
   pinia: ^2.0.22
   postcss: ^8.4.17
@@ -79,6 +80,7 @@ dependencies:
   daisyui: 2.31.0_k7ljftzyj3ikpu2zaahgjfs5um
   graphql: 16.6.0
   graphql-tag: 2.12.6_graphql@16.6.0
+  graphql-ws: 5.11.2_graphql@16.6.0
   nprogress: 0.2.0
   pinia: 2.0.22_bfjwoga25wxjazzogo7o372nwq
   postcss: 8.4.17
@@ -1236,7 +1238,7 @@ packages:
       dset: 3.1.2
       extract-files: 11.0.0
       graphql: 16.6.0
-      graphql-ws: 5.9.1_graphql@16.6.0
+      graphql-ws: 5.11.2_graphql@16.6.0
       isomorphic-ws: 5.0.0_ws@8.8.1
       meros: 1.2.0_@types+node@18.8.3
       tslib: 2.4.0
@@ -3516,8 +3518,8 @@ packages:
       tslib: 2.4.0
     dev: false
 
-  /graphql-ws/5.9.1_graphql@16.6.0:
-    resolution: {integrity: sha512-mL/SWGBwIT9Meq0NlfS55yXXTOeWPMbK7bZBEZhFu46bcGk1coTx2Sdtzxdk+9yHWngD+Fk1PZDWaAutQa9tpw==}
+  /graphql-ws/5.11.2_graphql@16.6.0:
+    resolution: {integrity: sha512-4EiZ3/UXYcjm+xFGP544/yW1+DVI8ZpKASFbzrV5EDTFWJp0ZvLl4Dy2fSZAzz9imKp5pZMIcjB0x/H69Pv/6w==}
     engines: {node: '>=10'}
     peerDependencies:
       graphql: '>=0.11 <=16'

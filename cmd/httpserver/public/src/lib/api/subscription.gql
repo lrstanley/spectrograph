@@ -1,0 +1,9 @@
+subscription guildEventStream($guildID: ID!, $types: [GuildEventType!]!) {
+    guildEventAdded(input: { hasGuildWith: [{ id: $guildID }], typeIn: $types }) {
+        id
+        createTime
+        type
+        message
+        metadata
+    }
+}
