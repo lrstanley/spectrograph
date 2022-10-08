@@ -68,7 +68,7 @@ meta:
         <div class="italic text-chat-300">last updated: {{ configUpdatedAt }}</div>
 
         <button
-          class="h-10 min-h-0 rounded btn btn-accent"
+          class="h-10 min-h-0 btn btn-accent"
           :disabled="!guild.guildAdminConfig.enabled"
           @click="updateConfig"
         >
@@ -137,7 +137,7 @@ meta:
 
         <div class="space-x-3">
           <button
-            class="h-10 min-h-0 rounded btn"
+            class="h-10 min-h-0 btn"
             :class="guild.guildAdminConfig?.enabled ? 'btn-error' : 'btn-success'"
             @click="toggleAdminEnabled"
           >
@@ -145,7 +145,7 @@ meta:
             <i-fas-circle-check v-else class="h-4 mr-2" />
             {{ guild.guildAdminConfig?.enabled ? "Disable (admin)" : "Enable (admin)" }}
           </button>
-          <button class="h-10 min-h-0 rounded btn btn-accent" @click="updateAdminConfig">
+          <button class="h-10 min-h-0 btn btn-accent" @click="updateAdminConfig">
             <i-fas-circle-check class="h-4 mr-2" />
             Save
           </button>

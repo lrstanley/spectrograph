@@ -43,7 +43,7 @@ meta:
           </div>
           <div class="hidden md:flex md:items-center md:space-x-6">
             <router-link
-              class="h-10 min-h-0 rounded btn bg-gradient-to-r from-nitro-700/80 to-bravery-700/80 hover:from-nitro-600/80 hover:to-bravery-600/80"
+              class="h-10 min-h-0 btn bg-gradient-to-r from-nitro-700/80 to-bravery-700/80 hover:from-nitro-600/80 hover:to-bravery-600/80"
               to="/dashboard"
             >
               {{ state.base.self ? "Go to Dashboard" : "Login" }}
@@ -93,7 +93,7 @@ meta:
               </div>
               <div class="px-5 mt-6">
                 <router-link
-                  class="h-10 min-h-0 rounded btn-block btn bg-gradient-to-r from-nitro-700/80 to-bravery-700/80 hover:from-nitro-600/80 hover:to-bravery-600/80"
+                  class="h-10 min-h-0 btn-block btn bg-gradient-to-r from-nitro-700/80 to-bravery-700/80 hover:from-nitro-600/80 hover:to-bravery-600/80"
                   to="/dashboard"
                 >
                   {{ state.base.self ? "Go to Dashboard" : "Login" }}
@@ -125,11 +125,11 @@ meta:
                   on occupancy, <span class="text-dnd-400">so you don't have to</span>.
                 </p>
                 <div class="flex flex-col flex-auto w-full gap-2 mt-10 lg:flex-row sm:mt-12">
-                  <a class="h-10 min-h-0 rounded btn btn-primary" href="#more-info">
+                  <a class="h-10 min-h-0 btn btn-primary" href="#more-info">
                     <i-fas-circle-info class="h-8 mr-2" />
                     More information
                   </a>
-                  <a class="h-10 min-h-0 rounded btn btn-secondary" href="/-/invite">
+                  <a class="h-10 min-h-0 btn btn-secondary" href="/-/invite">
                     <i-fas-circle-plus class="h-8 mr-2" />
                     Add to your server
                   </a>

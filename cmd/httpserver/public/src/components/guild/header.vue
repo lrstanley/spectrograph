@@ -14,14 +14,14 @@
 
       <div class="pt-1.5">
         <h1 class="text-2xl font-bold text-white">Guild: {{ guild.name }}</h1>
-        <span class="rounded badge badge-info">joined: {{ joinedAt }}</span>
+        <span class="badge badge-info">joined: {{ joinedAt }}</span>
       </div>
     </div>
     <div
       class="flex flex-col-reverse mt-6 space-y-4 space-y-reverse justify-stretch sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
     >
       <button
-        class="h-10 min-h-0 rounded btn"
+        class="h-10 min-h-0 btn"
         :class="guild.guildConfig?.enabled ? 'btn-error' : 'btn-success'"
         :disabled="!guild.guildAdminConfig.enabled"
         @click="emit('toggleEnabled')"

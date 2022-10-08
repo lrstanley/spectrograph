@@ -158,6 +158,10 @@ module.exports = {
           "warning-focus": "#bc7d14",
           error: "#b43535",
           "error-focus": "#902b2b",
+
+          "--rounded-box": "0.25rem",
+          "--rounded-btn": "0.25rem",
+          "--rounded-badge": "0.25rem",
         },
       },
     ],
