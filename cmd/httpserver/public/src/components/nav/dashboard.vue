@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { dashboardLinks, LinkStatus } from "@/lib/core/navigation"
+import { dashboardLinks } from "@/lib/core/navigation"
 
 const state = useState()
 </script>

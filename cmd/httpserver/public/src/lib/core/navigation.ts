@@ -5,9 +5,10 @@
  */
 import { h } from "vue"
 import GuildIcon from "@/components/guild/icon.vue"
+import { LinkStatus } from "@/lib/core/types"
 
-import type { Component, ComputedRef } from "vue"
-import type { RouteNamedMap } from "vue-router/auto/routes"
+import type { Link, DashboardLink } from "@/lib/core/types"
+import type { ComputedRef } from "vue"
 import type { RouteLocationNormalized } from "vue-router/auto"
 import type { Guild } from "@/lib/api"
 
@@ -19,52 +20,30 @@ export const headerLinks = [
   { name: "Service Health", href: "#", current: false },
 ]
 
-export interface Link {
-  name: string
-  description: string
-  href?: string
-  to?: keyof RouteNamedMap | RouteLocationNormalized
-  icon: Component
-}
-
-export interface DashboardLink extends Link {
-  guild?: Guild
-  isChild?: boolean
-  hasStatus?: boolean
-  status?: LinkStatus
-  hover?: boolean
-}
-
-export enum LinkStatus {
-  Healthy = "healthy",
-  Unhealthy = "unhealthy",
-  NotJoined = "not-joined",
-}
-
 export const mainLinks: Link[] = [
   {
     name: "Documentation",
     description: "Our documentation includes guides on proper setup of Spectrograph",
     href: "#",
-    icon: IconFasBook,
+    icon: IFasBook,
   },
   {
     name: "Service Health",
     description: "Health of all components of the platform",
     to: "/info/service-health",
-    icon: IconFasHeartPulse,
+    icon: IFasHeartPulse,
   },
   {
     name: "Privacy",
-    description: "Spetrograph's Privacy Policy",
+    description: "Spectrograph's Privacy Policy",
     to: "/info/privacy",
-    icon: IconFasFingerprint,
+    icon: IFasFingerprint,
   },
   {
     name: "Terms",
     description: "Spectrograph's Terms of Service",
     to: "/info/terms",
-    icon: IconFasBuildingColumns,
+    icon: IFasBuildingColumns,
   },
 ]
 
@@ -109,29 +88,50 @@ export const dashboardLinks: ComputedRef<DashboardLink[]> = computed(() => {
       to: {
         name: "/dashboard/",
       } as RouteLocationNormalized<"/dashboard/">,
-      icon: IconFasHouse,
+      icon: IFasHouse,
     },
     ...guilds.map(guildLink),
     {
       name: "Service Health",
       description: "Health of all components of the platform",
       to: "/info/service-health",
-      icon: IconFasHeartPulse,
+      icon: IFasHeartPulse,
     },
   ]
 })
+
+export const adminDashboardLinks: DashboardLink[] = [
+  {
+    name: "Guilds",
+    description: "List all guilds",
+    to: "/dashboard/admin/guilds",
+    icon: IFasServer,
+  },
+  {
+    name: "Guild Events",
+    description: "List all guild events",
+    to: "/dashboard/admin/events",
+    icon: IFasClock,
+  },
+  {
+    name: "Users",
+    description: "List all users",
+    to: "/dashboard/admin/users",
+    icon: IFasUsers,
+  },
+]
 
 export const socialLinks: Link[] = [
   {
     name: "Discord",
     description: "Join our Discord server!",
     href: "https://liam.sh/chat",
-    icon: IconFabDiscord,
+    icon: IFabDiscord,
   },
   {
     name: "GitHub",
     description: "Authors Github profile",
     href: "https://github.com/lrstanley",
-    icon: IconFabGithub,
+    icon: IFabGithub,
   },
 ]

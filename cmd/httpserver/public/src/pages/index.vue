@@ -307,37 +307,37 @@ const features = [
   {
     name: "Auto-scaling magic",
     description: "Let us auto-scale your voice channels as your community scales.",
-    icon: IconEmojiSparkles,
+    icon: IEmojiSparkles,
   },
   {
     name: "Easy as 1, 2, 3",
     description: "Actually, just 1, because we'll auto-scale to 2 and 3.",
-    icon: IconEmojiHotBeverage,
+    icon: IEmojiHotBeverage,
   },
   {
     name: "Keep your channels clean",
     description: "Too many empty channels? No problem. We'll yeet them, we're good at that.",
-    icon: IconEmojiBroom,
+    icon: IEmojiBroom,
   },
   {
     name: "Synchronize all the things",
     description: "All channels are synced (perms, user limit, etc), because we know you'll forget.",
-    icon: IconEmojiCounterclockwiseArrowsButton,
+    icon: IEmojiCounterclockwiseArrowsButton,
   },
   {
     name: "Perfect for game servers",
     description: "Limit channels to the size of a game party, so you can try-hard even harder.",
-    icon: IconEmojiAlienMonster,
+    icon: IEmojiAlienMonster,
   },
   {
     name: "Customizable regex matching",
     description: "Use regex to match your weird channel names. We won't judge, but we will say RTFM.",
-    icon: IconEmojiExplodingHead,
+    icon: IEmojiExplodingHead,
   },
   {
     name: "Few required permissions",
     description: "We're not the FBI or the chinese government. We don't need all those things.",
-    icon: IconEmojiManGesturingNo,
+    icon: IEmojiManGesturingNo,
   },
 ]
 </script>

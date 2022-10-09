@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { LinkStatus } from "@/lib/core/navigation"
+import { LinkStatus } from "@/lib/core/types"
 
 const props = withDefaults(
   defineProps<{

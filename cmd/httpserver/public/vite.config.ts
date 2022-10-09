@@ -11,6 +11,17 @@ import codegen from "vite-plugin-graphql-codegen"
 import Layouts from "vite-plugin-vue-layouts"
 import Vue from "@vitejs/plugin-vue"
 
+const icons = IconsResolver({
+  componentPrefix: "i",
+  enabledCollections: ["fa6-solid", "fa6-regular", "fa6-brands", "twemoji"],
+  alias: {
+    fas: "fa6-solid",
+    far: "fa6-regular",
+    fab: "fa6-brands",
+    emoji: "twemoji",
+  },
+})
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -56,19 +67,8 @@ export default defineConfig({
       dts: true,
       directives: true,
       directoryAsNamespace: true,
-      resolvers: [
-        HeadlessUiResolver(),
-        IconsResolver({
-          componentPrefix: "i",
-          enabledCollections: ["fa6-solid", "fa6-regular", "fa6-brands", "twemoji"],
-          alias: {
-            fas: "fa6-solid",
-            far: "fa6-regular",
-            fab: "fa6-brands",
-            emoji: "twemoji",
-          },
-        }),
-      ],
+      importPathTransform: (path) => path.replace(/.*\/src\//, "@/"),
+      resolvers: [HeadlessUiResolver(), icons],
     }),
     AutoImport({
       dts: true,
@@ -80,18 +80,7 @@ export default defineConfig({
         },
         VueRouterAutoImports,
       ],
-      resolvers: [
-        IconsResolver({
-          componentPrefix: "icon",
-          enabledCollections: ["fa6-solid", "fa6-regular", "fa6-brands", "twemoji"],
-          alias: {
-            fas: "fa6-solid",
-            far: "fa6-regular",
-            fab: "fa6-brands",
-            emoji: "twemoji",
-          },
-        }),
-      ],
+      resolvers: [icons],
       eslintrc: {
         enabled: true,
       },

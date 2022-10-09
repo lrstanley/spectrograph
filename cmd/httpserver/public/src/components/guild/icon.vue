@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { LinkStatus } from "@/lib/core/navigation"
+import { LinkStatus } from "@/lib/core/types"
 import type { Guild } from "@/lib/api"
 
 const props = withDefaults(

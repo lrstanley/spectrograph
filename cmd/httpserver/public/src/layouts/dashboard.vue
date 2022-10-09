@@ -43,16 +43,17 @@
                 </div>
               </TransitionChild>
 
-              <SidebarDashboard class="flex flex-col flex-1 overflow-y-auto" />
+              <NavDashboard class="flex flex-col flex-1 overflow-y-auto" />
             </DialogPanel>
           </TransitionChild>
+
           <!-- Force sidebar to shrink to fit close icon -->
           <div class="w-14 shrink-0" />
         </div>
       </Dialog>
     </TransitionRoot>
 
-    <SidebarDashboard class="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col" />
+    <NavDashboard class="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col" />
 
     <div class="flex flex-col flex-1 md:pl-64">
       <div class="sticky top-0 z-10 pt-1 pl-1 bg-channel-500 sm:pl-3 sm:pt-3 md:hidden">
