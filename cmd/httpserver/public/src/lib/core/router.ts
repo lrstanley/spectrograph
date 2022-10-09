@@ -29,11 +29,22 @@ const router = createRouter({
   extendRoutes(routes) {
     return routes.map((r) =>
       recurseRoute(r, (route) => {
-        if (route.path.startsWith("/admin") || route.path.startsWith("/dashboard")) {
+        if (route.path.startsWith("/dashboard")) {
           route = {
             ...route,
             meta: {
               auth: true,
+              ...route.meta,
+            },
+          }
+        }
+
+        if (route.path.startsWith("/admin")) {
+          route = {
+            ...route,
+            meta: {
+              auth: true,
+              admin: true,
               ...route.meta,
             },
           }
@@ -66,10 +77,15 @@ router.beforeEach(async (to, from, next) => {
   if (
     error !== null &&
     !error.graphQLErrors?.some((e) => e.path?.includes("self")) &&
-    to.name !== "catchall"
+    to.name !== "/error"
   ) {
-    console.log(error)
-    next({ name: "catchall", params: { catchall: error.name } })
+    next({
+      name: "/error",
+      query: {
+        code: error.response.status,
+        e: error.networkError ? error.networkError.message : error.message,
+      },
+    })
     return
   }
 
@@ -92,12 +108,6 @@ router.afterEach((to) => {
     if (args.length > 2) {
       args = args.slice(0, 2)
     }
-
-    // for (let i = 0; i < args.length; i++) {
-    //   if (args[i] == "p") {
-    //     args[i] = "Posts"
-    //   }
-    // }
 
     title = titleCase(args.reverse().join(" · ").replace(/-/g, " "))
 
