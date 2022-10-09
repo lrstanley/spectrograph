@@ -74,6 +74,11 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
+  if (to.meta.admin == true && !state.base.self?.admin) {
+    next({ name: "/error", query: { code: "403" } })
+    return
+  }
+
   if (
     error !== null &&
     !error.graphQLErrors?.some((e) => e.path?.includes("self")) &&

@@ -13,21 +13,26 @@
         </a>
 
         <nav class="flex flex-col flex-auto px-4 mt-5 space-y-2 md:space-y-1">
-          <template v-for="item in dashboardLinks" :key="item.name">
+          <template v-for="group in groups" :key="group.id">
+            <div v-if="group.title" class="pt-5">
+              <span class="px-3 text-sm font-bold text-idle-500">{{ group.title }}</span>
+            </div>
             <router-link
-              :to="item.to || item.href"
+              v-for="link in group.links"
+              :key="link.name"
+              :to="link.to || link.href"
               active-class="text-white bg-channel-900/50"
               class="flex items-center p-3 text-lg font-medium transition-all duration-100 ease-in rounded text-channel-300 hover:bg-channel-900/50 hover:text-white group md:py-2 md:text-sm"
-              :class="item.isChild ? 'ml-3' : ''"
+              :class="link.isChild ? 'ml-3' : ''"
             >
               <component
-                :is="item.icon"
+                :is="link.icon"
                 class="w-5 h-5 mr-3 text-gray-400 shrink-0 group-hover:text-gray-300"
                 aria-hidden="true"
               />
-              {{ item.name }}
+              {{ link.name }}
 
-              <GuildStatus v-if="item.hasStatus" class="pl-1 ml-auto" :status="item.status" />
+              <GuildStatus v-if="link.hasStatus" class="pl-1 ml-auto" :status="link.status" />
             </router-link>
           </template>
         </nav>
@@ -58,7 +63,23 @@
 </template>
 
 <script setup lang="ts">
-import { dashboardLinks } from "@/lib/core/navigation"
+import { dashboardLinks, adminDashboardLinks } from "@/lib/core/navigation"
+import type { DashboardLink } from "@/lib/core/types"
 
 const state = useState()
+
+interface Group {
+  id: string
+  title?: string
+  links: DashboardLink[]
+}
+
+const groups = computed(() => {
+  return [
+    { id: "user-links", links: dashboardLinks.value },
+    ...(state.base.self?.admin
+      ? [{ id: "admin-links", title: "ADMIN", links: adminDashboardLinks }]
+      : []),
+  ] as Group[]
+})
 </script>

@@ -104,19 +104,19 @@ export const adminDashboardLinks: DashboardLink[] = [
   {
     name: "Guilds",
     description: "List all guilds",
-    to: "/dashboard/admin/guilds",
+    to: "/admin/guilds",
     icon: IFasServer,
   },
   {
     name: "Guild Events",
     description: "List all guild events",
-    to: "/dashboard/admin/events",
+    to: "/admin/events",
     icon: IFasClock,
   },
   {
     name: "Users",
     description: "List all users",
-    to: "/dashboard/admin/users",
+    to: "/admin/users",
     icon: IFasUsers,
   },
 ]
