@@ -6,7 +6,7 @@ meta:
 
 <template>
   <div class="p-2">
-    <DataTable v-model="table" v-motion-fade>
+    <DataTable v-model="table">
       <template v-if="data?.users.pageInfo.hasNextPage || data?.users.pageInfo.hasPreviousPage" #footer>
         <CorePagination v-model="table.cursor.value" :page-info="data?.users.pageInfo" class="ml-auto" />
       </template>

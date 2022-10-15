@@ -6,7 +6,7 @@ meta:
 
 <template>
   <div class="p-2">
-    <DataTable v-model="table" v-motion-fade>
+    <DataTable v-model="table">
       <template
         v-if="data?.guilds.pageInfo.hasNextPage || data?.guilds.pageInfo.hasPreviousPage"
         #footer

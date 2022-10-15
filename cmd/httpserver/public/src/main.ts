@@ -11,12 +11,10 @@ import { RouterView } from "vue-router/auto"
 import { client } from "@/lib/api"
 import router from "@/lib/core/router"
 import urql from "@urql/vue"
-import { MotionPlugin } from "@vueuse/motion"
 
 const app = createApp(RouterView)
 
 app.use(urql, client)
 app.use(createPinia())
 app.use(router)
-app.use(MotionPlugin)
 app.mount("#app")
