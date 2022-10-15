@@ -1,16 +1,20 @@
 <template>
-  <n-button-group>
-    <n-button ghost :disabled="!page?.hasPreviousPage" @click="cursor = 'b.' + page?.startCursor">
-      <template #icon>
-        <n-icon><i-mdi-chevron-left /></n-icon>
-      </template>
-    </n-button>
-    <n-button ghost :disabled="!page?.hasNextPage" @click="cursor = 'a.' + page?.endCursor">
-      <template #icon>
-        <n-icon><i-mdi-chevron-right /></n-icon>
-      </template>
-    </n-button>
-  </n-button-group>
+  <div class="btn-group btn-group-vertical lg:btn-group-horizontal">
+    <button
+      class="rounded-sm btn btn-sm btn-primary"
+      :disabled="!page?.hasPreviousPage"
+      @click="cursor = 'b.' + page?.startCursor"
+    >
+      Previous
+    </button>
+    <button
+      class="rounded-sm btn btn-sm btn-primary"
+      :disabled="!page?.hasNextPage"
+      @click="cursor = 'a.' + page?.endCursor"
+    >
+      Next
+    </button>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -23,10 +27,6 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:modelValue"])
 
-const cursor = computed({
-  get: () => props.modelValue,
-  set: (val) => emit("update:modelValue", val),
-})
-
-const page = computed(() => props.pageInfo || null)
+const cursor = useVModel(props, "modelValue", emit)
+const page = computed(() => props.pageInfo)
 </script>

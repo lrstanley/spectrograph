@@ -27,6 +27,7 @@
   --color-servers: #2f3136;
 
   scrollbar-gutter: stable;
+  scrollbar-color: var(--color-bravery) var(--color-servers) !important;
   scrollbar-width: thin;
 }
 
@@ -98,10 +99,10 @@ body {
   border: 3px solid transparent;
   -webkit-background-clip: content-box;
   background-clip: content-box;
-  @apply rounded-md bg-discord-500;
+  @apply rounded-md bg-bravery-500;
 }
 *::-webkit-scrollbar-thumb:hover {
-  @apply rounded-md bg-discord-800;
+  @apply rounded-md bg-bravery-600;
 }
 *::-webkit-scrollbar-thumb:window-inactive {
   @apply bg-channel-300;

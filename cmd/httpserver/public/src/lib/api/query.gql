@@ -71,3 +71,93 @@ query getGuild($id: ID!) {
         }
     }
 }
+
+query getAllGuilds(
+    $first: Int = null
+    $last: Int = null
+    $before: Cursor = null
+    $after: Cursor = null
+    $order: OrderDirection = ASC
+    $orderBy: GuildOrderField = NAME
+    $where: GuildWhereInput
+) {
+    guilds(
+        first: $first
+        last: $last
+        before: $before
+        after: $after
+        where: $where
+        orderBy: { direction: $order, field: $orderBy }
+    ) {
+        edges {
+            node {
+                id
+                iconURL
+                guildID
+                name
+                joinedAt
+                memberCount
+                large
+
+                guildConfig {
+                    enabled
+                    defaultMaxClones
+                    contactEmail
+                }
+
+                guildAdminConfig {
+                    enabled
+                    defaultMaxChannels
+                    defaultMaxClones
+                }
+            }
+        }
+
+        pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+        }
+    }
+}
+
+query getAllUsers(
+    $first: Int = null
+    $last: Int = null
+    $before: Cursor = null
+    $after: Cursor = null
+    $order: OrderDirection = ASC
+    $orderBy: UserOrderField = USERNAME
+    $where: UserWhereInput
+) {
+    users(
+        first: $first
+        last: $last
+        before: $before
+        after: $after
+        where: $where
+        orderBy: { direction: $order, field: $orderBy }
+    ) {
+        edges {
+            node {
+                id
+                admin
+                avatarURL
+                discriminator
+                username
+                email
+                locale
+                mfaEnabled
+                verified
+            }
+        }
+
+        pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+        }
+    }
+}

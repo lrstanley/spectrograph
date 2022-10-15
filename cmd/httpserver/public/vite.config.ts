@@ -31,7 +31,7 @@ export default defineConfig({
   publicDir: `${path.resolve(__dirname, "src")}/assets`,
   plugins: [
     codegen({
-      enableWatcher: false,
+      enableWatcher: true,
       config: {
         errorsOnly: true,
         schema: "./../../../internal/database/graphql/schema/*.gql",
