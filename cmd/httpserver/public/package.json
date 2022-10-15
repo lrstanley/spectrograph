@@ -17,7 +17,6 @@
     "@iconify-json/fa6-solid": "^1.1.7",
     "@iconify-json/twemoji": "^1.1.5",
     "@tailwindcss/forms": "^0.5.3",
-    "@tanstack/vue-table": "^8.5.15",
     "@types/node": "18.8.0",
     "@urql/exchange-retry": "^1.0.0",
     "@urql/vue": "^1.0.2",
