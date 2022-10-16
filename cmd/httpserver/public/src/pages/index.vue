@@ -41,7 +41,10 @@ meta:
               class="max-w-2xl px-4 mx-auto mb-0 sm:mb-16 lg:mb-0 sm:max-w-md md:px-6 lg:max-w-none lg:px-0"
             >
               <img
+                alt="Image of a Discord client"
                 class="w-full lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-auto lg:max-w-none"
+                width="1256"
+                height="856"
                 :src="imgDiscord"
               />
             </div>
@@ -85,7 +88,12 @@ meta:
             </div>
 
             <div class="relative mt-10 -mx-4 lg:col-start-1 lg:mt-0">
-              <img class="relative mx-auto rounded-md" width="225" :src="imgExampleOld" />
+              <img
+                alt="Image of many discord channels"
+                class="relative mx-auto rounded-md"
+                width="225"
+                :src="imgExampleOld"
+              />
             </div>
           </div>
 
@@ -155,7 +163,12 @@ meta:
             </div>
 
             <div class="relative mt-10 -mx-4 lg:mt-0" aria-hidden="true">
-              <img class="relative mx-auto rounded-md" width="300" :src="imgExampleNew" />
+              <img
+                alt="Image of Spectrograph dynamically creating channels"
+                class="relative mx-auto rounded-md"
+                width="300"
+                :src="imgExampleNew"
+              />
             </div>
           </div>
         </div>
@@ -193,9 +206,9 @@ meta:
 </template>
 
 <script setup lang="ts">
-import imgDiscord from "@/assets/img/discord.png"
-import imgExampleOld from "@/assets/img/example-old.png"
-import imgExampleNew from "@/assets/img/example-new.png"
+import imgDiscord from "@/assets/img/discord.png?format=webp&imagetools"
+import imgExampleOld from "@/assets/img/example-old.png?format=webp&imagetools"
+import imgExampleNew from "@/assets/img/example-new.png?format=webp&imagetools"
 const features = [
   {
     name: "Auto-scaling magic",

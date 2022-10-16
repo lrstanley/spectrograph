@@ -16,4 +16,5 @@ internal/graphql/gqlhandler
 cmd/httpserver/public/src/lib/api/graphql.ts
 dist
 .eslintrc-auto-import.json
-*.d.ts
+**/*.d.ts
+!**/vue.d.ts

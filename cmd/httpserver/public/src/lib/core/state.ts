@@ -39,7 +39,11 @@ export const useState = defineStore("state", {
         .query<BaseQuery>(BaseDocument, {}, { requestPolicy: "network-only" })
         .toPromise()
         .then((resp) => {
-          Object.assign(this.base, resp.data)
+          if (this.base === null) {
+            this.base = resp.data
+          } else {
+            Object.assign(this.base, resp.data)
+          }
 
           if (resp.error !== null) {
             error = resp.error

@@ -42,6 +42,7 @@
           <div class="flex items-center">
             <div>
               <img
+                alt="User avatar"
                 class="inline-block w-12 h-12 rounded-full md:h-9 md:w-9"
                 :src="state.base.self.avatarURL"
               />
@@ -63,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import imgLogo from "@/assets/img/mic.png"
+import imgLogo from "@/assets/img/mic.png?format=webp&imagetools"
 import { dashboardLinks, adminDashboardLinks } from "@/lib/core/navigation"
 import type { DashboardLink } from "@/lib/core/types"
 

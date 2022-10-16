@@ -11,7 +11,7 @@ meta:
         class="relative block w-full px-16 py-6 text-center transition-all duration-200 ease-in-out border border-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-bravery-500 bg-chat-700 hover:bg-chat-800/70"
         :href="'/-/invite/' + guild?.guildID"
       >
-        <img :src="guild?.iconURL" class="w-16 h-16 mx-auto rounded-full" />
+        <img alt="Guild icon" :src="guild?.iconURL" class="w-16 h-16 mx-auto rounded-full" />
         <span class="block mt-2 text-lg font-medium text-white">
           Invite Spectrograph to {{ guild?.name }}
         </span>

@@ -2,7 +2,7 @@
   <div class="flex flex-col flex-auto">
     <main class="w-full px-6 mx-auto max-w-7xl md:px-8">
       <div class="pt-8 shrink-0">
-        <img class="w-auto h-20 mx-auto" src="/img/mic-with-bg.png" />
+        <img alt="Spectrograph logo" class="w-auto h-20 mx-auto" :src="imgMicWithBg" />
       </div>
 
       <div class="max-w-xl py-8 mx-auto">
@@ -71,5 +71,6 @@
 </template>
 
 <script setup lang="ts">
+import imgMicWithBg from "@/assets/img/mic-with-bg.png?format=webp&imagetools"
 import { mainLinks } from "@/lib/core/navigation"
 </script>

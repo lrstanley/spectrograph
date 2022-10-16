@@ -7,6 +7,7 @@ import Components from "unplugin-vue-components/vite"
 import { VueRouterAutoImports } from "unplugin-vue-router"
 import VueRouter from "unplugin-vue-router/vite"
 import { defineConfig } from "vite"
+import { imagetools } from "vite-imagetools"
 import codegen from "vite-plugin-graphql-codegen"
 import Layouts from "vite-plugin-vue-layouts"
 import Vue from "@vitejs/plugin-vue"
@@ -89,6 +90,7 @@ export default defineConfig({
       autoInstall: true,
       defaultClass: "icon",
     }),
+    imagetools(),
   ],
   base: "/",
   build: {
