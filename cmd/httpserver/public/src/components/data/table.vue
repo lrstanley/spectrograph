@@ -1,9 +1,9 @@
 <template>
   <div class="rounded bg-base-200">
-    <table class="table w-full table-compact">
+    <table class="table w-full table-auto table-compact">
       <thead>
         <tr>
-          <th v-for="col in table.columns" :key="col.id" :colSpan="1" class="first:pl-5">
+          <th v-for="col in table.columns" :key="col.id" class="first:pl-5">
             <div :class="col.canSort() ? 'cursor-pointer select-none flex' : ''" @click="col.toggleSort">
               <span>{{ col.header }}</span>
 
@@ -20,7 +20,7 @@
               </span>
             </div>
 
-            <div v-if="table.isFiltered()" :class="table.canFilter() ? '' : 'invisible'">
+            <div v-if="table.canFilter()" :class="table.canFilter() ? '' : 'invisible'">
               <select
                 v-if="col.type === 'boolean'"
                 v-model="col.filterValue.value"
@@ -52,6 +52,7 @@
               'text-dnd-400 font-bold': cell.column.type === 'boolean' && !cell.value,
               'text-online-400 font-bold': cell.column.type === 'boolean' && cell.value,
             }"
+            :title="cell.value"
           >
             <component :is="cell.render()" />
           </td>
@@ -74,10 +75,10 @@
 
 <script setup lang="ts">
 import { OrderDirection } from "@/lib/api"
-import type { Table } from "@/lib/util/table"
+import type { CoreTable } from "@/lib/util"
 
 const props = defineProps<{
-  modelValue: Table<any, any, any>
+  modelValue: CoreTable<any, any, any>
 }>()
 
 const table = computed(() => props.modelValue)

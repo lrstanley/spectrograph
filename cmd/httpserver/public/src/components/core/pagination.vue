@@ -5,7 +5,7 @@
       :disabled="!page?.hasPreviousPage"
       @click="cursor = 'b.' + page?.startCursor"
     >
-      Previous
+      Prev
     </button>
     <button
       class="rounded-sm btn btn-sm btn-primary"

@@ -7,3 +7,20 @@ subscription guildEventStream($guildID: ID!, $types: [GuildEventType!]!) {
         metadata
     }
 }
+
+subscription allGuildEventStream($types: [GuildEventType!]!) {
+    guildEventAdded(input: { typeIn: $types }) {
+        id
+        createTime
+        type
+        message
+        metadata
+
+        guild {
+            id
+            iconURL
+            guildID
+            name
+        }
+    }
+}

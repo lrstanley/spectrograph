@@ -168,4 +168,9 @@ module.exports = {
     ],
     logs: true,
   },
+  safelist: [
+    "flex items-center gap-2", // guild icon in tables
+    "text-bravery-500 text-idle-500 text-dnd-500 text-nitro-500", // status in tables
+    "flex-col badge badge-secondary", // metadata in tables
+  ],
 }

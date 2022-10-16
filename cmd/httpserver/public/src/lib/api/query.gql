@@ -161,3 +161,46 @@ query getAllUsers(
         }
     }
 }
+
+query getAllGuildEvents(
+    $first: Int = null
+    $last: Int = null
+    $before: Cursor = null
+    $after: Cursor = null
+    $order: OrderDirection = DESC
+    $orderBy: GuildEventOrderField = CREATED_AT
+    $where: GuildEventWhereInput
+) {
+    guildevents(
+        first: $first
+        last: $last
+        before: $before
+        after: $after
+        where: $where
+        orderBy: { direction: $order, field: $orderBy }
+    ) {
+        edges {
+            node {
+                id
+                createTime
+                message
+                metadata
+                type
+
+                guild {
+                    id
+                    iconURL
+                    guildID
+                    name
+                }
+            }
+        }
+
+        pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+        }
+    }
+}
