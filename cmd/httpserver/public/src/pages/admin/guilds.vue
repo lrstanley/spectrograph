@@ -27,6 +27,8 @@ import { CoreTable } from "@/lib/util"
 import { GuildOrderField, useGetAllGuildsQuery } from "@/lib/api"
 import type { Guild, GuildWhereInput } from "@/lib/api"
 
+const router = useRouter()
+
 const table = new CoreTable<Guild, GuildOrderField, GuildWhereInput>(
   [
     {
@@ -35,6 +37,12 @@ const table = new CoreTable<Guild, GuildOrderField, GuildWhereInput>(
       field: "name",
       sortField: GuildOrderField.Name,
       type: "text",
+      clickFn: (data, event) => {
+        if (data.joinedAt === null) return
+
+        router.push({ name: "/dashboard/guild/[id]/", params: { id: data.id } })
+        event.preventDefault()
+      },
       filterFn: (val: string) => ({ nameContainsFold: val }),
       renderFn: (value, data) =>
         h("div", { class: "flex items-center gap-2" }, [

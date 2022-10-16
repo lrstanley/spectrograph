@@ -25,6 +25,7 @@ export interface ColumnDef<T extends IDType, OrderField, WhereInput extends Reco
   accessorFn?: (data: T) => any
   filterFn?: (value: any) => WhereInput
   renderFn?: (value: any, data: T) => Component
+  clickFn?: (data: T, event: MouseEvent) => void
 }
 
 export interface ColumnState<T extends IDType, OrderField, WhereInput extends Record<string, any>>
@@ -32,8 +33,8 @@ export interface ColumnState<T extends IDType, OrderField, WhereInput extends Re
   filterValue: Ref<any>
   filterValueDebounced: Readonly<Ref<any>>
 
+  canClick(): boolean
   canFilter(): boolean
-
   canSort(): boolean
   isSorted(): OrderDirection | boolean
   toggleSort(): void
@@ -107,6 +108,7 @@ export class CoreTable<T extends IDType, OrderField, WhereInput extends Record<s
         ...col,
         filterValue: newRef,
         filterValueDebounced: refDebounced(newRef, 250),
+        canClick: () => !!col.clickFn,
         canFilter: () => !!col.filterFn,
         canSort: () => !!col.sortField,
         isSorted: () =>

@@ -28,6 +28,8 @@ import { CoreTable } from "@/lib/util"
 import { GuildEventType, GuildEventOrderField, useGetAllGuildEventsQuery } from "@/lib/api"
 import type { GuildEvent, GuildEventWhereInput } from "@/lib/api"
 
+const router = useRouter()
+
 const table = new CoreTable<GuildEvent, GuildEventOrderField, GuildEventWhereInput>(
   [
     {
@@ -35,6 +37,10 @@ const table = new CoreTable<GuildEvent, GuildEventOrderField, GuildEventWhereInp
       header: "Guild",
       accessorFn: (e) => e.guild.name,
       type: "text",
+      clickFn: (data, event) => {
+        router.push({ name: "/dashboard/guild/[id]/", params: { id: data.guild.id } })
+        event.preventDefault()
+      },
       filterFn: (val: string) =>
         val === null
           ? null
