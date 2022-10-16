@@ -15,7 +15,7 @@ meta:
 </template>
 
 <script setup lang="ts">
-import { CoreTable } from "@/lib/util/table"
+import { CoreTable } from "@/lib/util"
 import { UserOrderField, useGetAllUsersQuery } from "@/lib/api"
 import type { User, UserWhereInput } from "@/lib/api"
 
@@ -71,7 +71,7 @@ const table = new CoreTable<User, UserOrderField, UserWhereInput>(
       filterFn: (val: boolean) => (val !== null ? { admin: val } : null),
     },
   ],
-  20
+  15
 )
 
 const { data } = useGetAllUsersQuery({

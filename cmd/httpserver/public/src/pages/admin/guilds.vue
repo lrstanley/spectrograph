@@ -23,7 +23,7 @@ meta:
 
 <script setup lang="ts">
 import GuildIcon from "@/components/guild/icon.vue"
-import { CoreTable } from "@/lib/util/table"
+import { CoreTable } from "@/lib/util"
 import { GuildOrderField, useGetAllGuildsQuery } from "@/lib/api"
 import type { Guild, GuildWhereInput } from "@/lib/api"
 
@@ -75,7 +75,7 @@ const table = new CoreTable<Guild, GuildOrderField, GuildWhereInput>(
       filterFn: (val: boolean) => (val !== null ? { hasGuildAdminConfigWith: { enabled: val } } : null),
     },
   ],
-  2
+  15
 )
 
 const { data } = useGetAllGuildsQuery({
