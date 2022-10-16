@@ -33,7 +33,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 	path = append([]string(nil), path...)
 	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
 		switch field.Name {
-		case "guildConfig", "guild_config":
+		case "guildConfig":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -43,7 +43,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 				return err
 			}
 			gu.withGuildConfig = query
-		case "guildAdminConfig", "guild_admin_config":
+		case "guildAdminConfig":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -53,7 +53,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 				return err
 			}
 			gu.withGuildAdminConfig = query
-		case "guildEvents", "guild_events":
+		case "guildEvents":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -382,6 +382,28 @@ func newGuildEventPaginateArgs(rv map[string]interface{}) *guildeventPaginateArg
 	if v := rv[beforeField]; v != nil {
 		args.before = v.(*Cursor)
 	}
+	if v, ok := rv[orderByField]; ok {
+		switch v := v.(type) {
+		case map[string]interface{}:
+			var (
+				err1, err2 error
+				order      = &GuildEventOrder{Field: &GuildEventOrderField{}}
+			)
+			if d, ok := v[directionField]; ok {
+				err1 = order.Direction.UnmarshalGQL(d)
+			}
+			if f, ok := v[fieldField]; ok {
+				err2 = order.Field.UnmarshalGQL(f)
+			}
+			if err1 == nil && err2 == nil {
+				args.opts = append(args.opts, WithGuildEventOrder(order))
+			}
+		case *GuildEventOrder:
+			if v != nil {
+				args.opts = append(args.opts, WithGuildEventOrder(v))
+			}
+		}
+	}
 	if v, ok := rv[whereField].(*GuildEventWhereInput); ok {
 		args.opts = append(args.opts, WithGuildEventFilter(v.Filter))
 	}
@@ -404,7 +426,7 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 	path = append([]string(nil), path...)
 	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
 		switch field.Name {
-		case "userGuilds", "user_guilds":
+		case "userGuilds":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)

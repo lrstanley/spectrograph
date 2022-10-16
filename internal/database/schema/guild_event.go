@@ -36,7 +36,8 @@ func (GuildEvent) Fields() []ent.Field {
 
 func (GuildEvent) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		mixin.AnnotateFields(mixin.CreateTime{}, entgql.OrderField("CREATED_AT")),
+		mixin.AnnotateFields(mixin.UpdateTime{}, entgql.OrderField("UPDATED_AT")),
 	}
 }
 

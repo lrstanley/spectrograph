@@ -454,11 +454,14 @@ func (gcq *GuildConfigQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (gcq *GuildConfigQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := gcq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := gcq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (gcq *GuildConfigQuery) querySpec() *sqlgraph.QuerySpec {

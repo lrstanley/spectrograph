@@ -46,9 +46,10 @@ func (r *queryResolver) Guildconfigs(ctx context.Context, after *ent.Cursor, fir
 }
 
 // Guildevents is the resolver for the guildevents field.
-func (r *queryResolver) Guildevents(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildEventWhereInput) (*ent.GuildEventConnection, error) {
+func (r *queryResolver) Guildevents(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildEventOrder, where *ent.GuildEventWhereInput) (*ent.GuildEventConnection, error) {
 	return ent.FromContext(ctx).GuildEvent.Query().Paginate(
 		ctx, after, first, before, last,
+		ent.WithGuildEventOrder(orderBy),
 		ent.WithGuildEventFilter(where.Filter),
 	)
 }

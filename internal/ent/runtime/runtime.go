@@ -239,6 +239,8 @@ func init() {
 	}
 	guildeventMixinFields0 := guildeventMixin[0].Fields()
 	_ = guildeventMixinFields0
+	guildeventMixinFields1 := guildeventMixin[1].Fields()
+	_ = guildeventMixinFields1
 	guildeventFields := schema.GuildEvent{}.Fields()
 	_ = guildeventFields
 	// guildeventDescCreateTime is the schema descriptor for create_time field.
@@ -246,7 +248,7 @@ func init() {
 	// guildevent.DefaultCreateTime holds the default value on creation for the create_time field.
 	guildevent.DefaultCreateTime = guildeventDescCreateTime.Default.(func() time.Time)
 	// guildeventDescUpdateTime is the schema descriptor for update_time field.
-	guildeventDescUpdateTime := guildeventMixinFields0[1].Descriptor()
+	guildeventDescUpdateTime := guildeventMixinFields1[0].Descriptor()
 	// guildevent.DefaultUpdateTime holds the default value on creation for the update_time field.
 	guildevent.DefaultUpdateTime = guildeventDescUpdateTime.Default.(func() time.Time)
 	// guildevent.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
@@ -330,6 +332,6 @@ func init() {
 }
 
 const (
-	Version = "v0.11.3-0.20220830071904-3b1b75b9d7a9"           // Version of ent codegen.
-	Sum     = "h1:dxyBYasfOuLgAT0IuqSXNgDDJ9ra5C+Jc8a6VqVywWo=" // Sum of ent codegen.
+	Version = "v0.11.4-0.20221001062602-1029a2d3ba2a"           // Version of ent codegen.
+	Sum     = "h1:T28WZZUdeJb7DQVQNnZkr3pasIdDrDVC41eQIV0hvTU=" // Sum of ent codegen.
 )

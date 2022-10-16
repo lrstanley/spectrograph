@@ -1196,6 +1196,63 @@ func (ge *GuildEventQuery) Paginate(
 	return conn, nil
 }
 
+var (
+	// GuildEventOrderFieldCreateTime orders GuildEvent by create_time.
+	GuildEventOrderFieldCreateTime = &GuildEventOrderField{
+		field: guildevent.FieldCreateTime,
+		toCursor: func(ge *GuildEvent) Cursor {
+			return Cursor{
+				ID:    ge.ID,
+				Value: ge.CreateTime,
+			}
+		},
+	}
+	// GuildEventOrderFieldUpdateTime orders GuildEvent by update_time.
+	GuildEventOrderFieldUpdateTime = &GuildEventOrderField{
+		field: guildevent.FieldUpdateTime,
+		toCursor: func(ge *GuildEvent) Cursor {
+			return Cursor{
+				ID:    ge.ID,
+				Value: ge.UpdateTime,
+			}
+		},
+	}
+)
+
+// String implement fmt.Stringer interface.
+func (f GuildEventOrderField) String() string {
+	var str string
+	switch f.field {
+	case guildevent.FieldCreateTime:
+		str = "CREATED_AT"
+	case guildevent.FieldUpdateTime:
+		str = "UPDATED_AT"
+	}
+	return str
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (f GuildEventOrderField) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(f.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (f *GuildEventOrderField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("GuildEventOrderField %T must be a string", v)
+	}
+	switch str {
+	case "CREATED_AT":
+		*f = *GuildEventOrderFieldCreateTime
+	case "UPDATED_AT":
+		*f = *GuildEventOrderFieldUpdateTime
+	default:
+		return fmt.Errorf("%s is not a valid GuildEventOrderField", str)
+	}
+	return nil
+}
+
 // GuildEventOrderField defines the ordering field of GuildEvent.
 type GuildEventOrderField struct {
 	field    string

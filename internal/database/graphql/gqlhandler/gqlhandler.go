@@ -161,7 +161,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Guildadminconfigs func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildAdminConfigWhereInput) int
 		Guildconfigs      func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildConfigWhereInput) int
-		Guildevents       func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildEventWhereInput) int
+		Guildevents       func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildEventOrder, where *ent.GuildEventWhereInput) int
 		Guilds            func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildOrder, where *ent.GuildWhereInput) int
 		Node              func(childComplexity int, id int) int
 		Nodes             func(childComplexity int, ids []int) int
@@ -218,7 +218,7 @@ type QueryResolver interface {
 	Guilds(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildOrder, where *ent.GuildWhereInput) (*ent.GuildConnection, error)
 	Guildadminconfigs(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildAdminConfigWhereInput) (*ent.GuildAdminConfigConnection, error)
 	Guildconfigs(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildConfigWhereInput) (*ent.GuildConfigConnection, error)
-	Guildevents(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildEventWhereInput) (*ent.GuildEventConnection, error)
+	Guildevents(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildEventOrder, where *ent.GuildEventWhereInput) (*ent.GuildEventConnection, error)
 	Users(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.UserOrder, where *ent.UserWhereInput) (*ent.UserConnection, error)
 	Self(ctx context.Context) (*ent.User, error)
 }
@@ -766,7 +766,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Guildevents(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["where"].(*ent.GuildEventWhereInput)), true
+		return e.complexity.Query.Guildevents(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["orderBy"].(*ent.GuildEventOrder), args["where"].(*ent.GuildEventWhereInput)), true
 
 	case "Query.guilds":
 		if e.complexity.Query.Guilds == nil {
@@ -1018,6 +1018,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputGuildAdminConfigWhereInput,
 		ec.unmarshalInputGuildConfigWhereInput,
+		ec.unmarshalInputGuildEventOrder,
 		ec.unmarshalInputGuildEventWhereInput,
 		ec.unmarshalInputGuildOrder,
 		ec.unmarshalInputGuildWhereInput,
@@ -1102,10 +1103,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema/core.gql", Input: `scalar Time
-scalar Map
-scalar Any
-scalar Uint64
+	{Name: "../schema/core.gql", Input: `scalar Any
 
 # stub that other mutations should extend.
 type Mutation {
@@ -1440,6 +1438,18 @@ type GuildEventEdge {
   """A cursor for use in pagination."""
   cursor: Cursor!
 }
+"""Ordering options for GuildEvent connections"""
+input GuildEventOrder {
+  """The ordering direction."""
+  direction: OrderDirection! = ASC
+  """The field by which to order GuildEvents."""
+  field: GuildEventOrderField!
+}
+"""Properties by which GuildEvent connections can be ordered."""
+enum GuildEventOrderField {
+  CREATED_AT
+  UPDATED_AT
+}
 """GuildEventType is enum for the field type"""
 enum GuildEventType @goModel(model: "github.com/lrstanley/spectrograph/internal/ent/guildevent.Type") {
   INFO
@@ -1693,6 +1703,8 @@ input GuildWhereInput {
   hasAdmins: Boolean
   hasAdminsWith: [UserWhereInput!]
 }
+"""The builtin Map type"""
+scalar Map
 """
 An object with an ID.
 Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
@@ -1797,6 +1809,9 @@ type Query {
     """Returns the last _n_ elements from the list."""
     last: Int
 
+    """Ordering options for GuildEvents returned from the connection."""
+    orderBy: GuildEventOrder
+
     """Filtering options for GuildEvents returned from the connection."""
     where: GuildEventWhereInput
   ): GuildEventConnection!
@@ -1820,6 +1835,10 @@ type Query {
     where: UserWhereInput
   ): UserConnection!
 }
+"""The builtin Time type"""
+scalar Time
+"""The builtin Uint64 type"""
+scalar Uint64
 """
 UpdateGuildAdminConfigInput is used for update GuildAdminConfig object.
 Input was generated by ent.
@@ -2424,15 +2443,24 @@ func (ec *executionContext) field_Query_guildevents_args(ctx context.Context, ra
 		}
 	}
 	args["last"] = arg3
-	var arg4 *ent.GuildEventWhereInput
-	if tmp, ok := rawArgs["where"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg4, err = ec.unmarshalOGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx, tmp)
+	var arg4 *ent.GuildEventOrder
+	if tmp, ok := rawArgs["orderBy"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("orderBy"))
+		arg4, err = ec.unmarshalOGuildEventOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventOrder(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["where"] = arg4
+	args["orderBy"] = arg4
+	var arg5 *ent.GuildEventWhereInput
+	if tmp, ok := rawArgs["where"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
+		arg5, err = ec.unmarshalOGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["where"] = arg5
 	return args, nil
 }
 
@@ -6305,7 +6333,7 @@ func (ec *executionContext) _Query_guildevents(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Guildevents(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["where"].(*ent.GuildEventWhereInput))
+		return ec.resolvers.Query().Guildevents(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["orderBy"].(*ent.GuildEventOrder), fc.Args["where"].(*ent.GuildEventWhereInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10739,6 +10767,46 @@ func (ec *executionContext) unmarshalInputGuildConfigWhereInput(ctx context.Cont
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasGuildWith"))
 			it.HasGuildWith, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGuildEventOrder(ctx context.Context, obj interface{}) (ent.GuildEventOrder, error) {
+	var it ent.GuildEventOrder
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	if _, present := asMap["direction"]; !present {
+		asMap["direction"] = "ASC"
+	}
+
+	fieldsInOrder := [...]string{"direction", "field"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "direction":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
+			it.Direction, err = ec.unmarshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐOrderDirection(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "field":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
+			it.Field, err = ec.unmarshalNGuildEventOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventOrderField(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -15790,6 +15858,22 @@ func (ec *executionContext) marshalNGuildEventConnection2ᚖgithubᚗcomᚋlrsta
 	return ec._GuildEventConnection(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNGuildEventOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventOrderField(ctx context.Context, v interface{}) (*ent.GuildEventOrderField, error) {
+	var res = new(ent.GuildEventOrderField)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNGuildEventOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventOrderField(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEventOrderField) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return v
+}
+
 func (ec *executionContext) unmarshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx context.Context, v interface{}) (guildevent.Type, error) {
 	var res guildevent.Type
 	err := res.UnmarshalGQL(v)
@@ -16651,6 +16735,14 @@ func (ec *executionContext) marshalOGuildEventEdge2ᚖgithubᚗcomᚋlrstanley�
 		return graphql.Null
 	}
 	return ec._GuildEventEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOGuildEventOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventOrder(ctx context.Context, v interface{}) (*ent.GuildEventOrder, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputGuildEventOrder(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOGuildEventType2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐTypeᚄ(ctx context.Context, v interface{}) ([]guildevent.Type, error) {

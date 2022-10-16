@@ -28,8 +28,12 @@ func (gu *Guild) GuildAdminConfig(ctx context.Context) (*GuildAdminConfig, error
 	return result, MaskNotFound(err)
 }
 
-func (gu *Guild) GuildEvents(ctx context.Context) ([]*GuildEvent, error) {
-	result, err := gu.NamedGuildEvents(graphql.GetFieldContext(ctx).Field.Alias)
+func (gu *Guild) GuildEvents(ctx context.Context) (result []*GuildEvent, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = gu.NamedGuildEvents(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = gu.Edges.GuildEventsOrErr()
+	}
 	if IsNotLoaded(err) {
 		result, err = gu.QueryGuildEvents().All(ctx)
 	}

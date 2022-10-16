@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/lrstanley/spectrograph/internal/ent/guild"
 	"github.com/lrstanley/spectrograph/internal/ent/guildadminconfig"
@@ -51,6 +52,12 @@ func (gu *GuildUpdate) SetName(s string) *GuildUpdate {
 // SetFeatures sets the "features" field.
 func (gu *GuildUpdate) SetFeatures(s []string) *GuildUpdate {
 	gu.mutation.SetFeatures(s)
+	return gu
+}
+
+// AppendFeatures appends s to the "features" field.
+func (gu *GuildUpdate) AppendFeatures(s []string) *GuildUpdate {
+	gu.mutation.AppendFeatures(s)
 	return gu
 }
 
@@ -486,6 +493,11 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: guild.FieldFeatures,
 		})
 	}
+	if value, ok := gu.mutation.AppendedFeatures(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, guild.FieldFeatures, value)
+		})
+	}
 	if gu.mutation.FeaturesCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -816,6 +828,12 @@ func (guo *GuildUpdateOne) SetName(s string) *GuildUpdateOne {
 // SetFeatures sets the "features" field.
 func (guo *GuildUpdateOne) SetFeatures(s []string) *GuildUpdateOne {
 	guo.mutation.SetFeatures(s)
+	return guo
+}
+
+// AppendFeatures appends s to the "features" field.
+func (guo *GuildUpdateOne) AppendFeatures(s []string) *GuildUpdateOne {
+	guo.mutation.AppendFeatures(s)
 	return guo
 }
 
@@ -1279,6 +1297,11 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Type:   field.TypeJSON,
 			Value:  value,
 			Column: guild.FieldFeatures,
+		})
+	}
+	if value, ok := guo.mutation.AppendedFeatures(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, guild.FieldFeatures, value)
 		})
 	}
 	if guo.mutation.FeaturesCleared() {

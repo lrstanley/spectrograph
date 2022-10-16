@@ -50,6 +50,7 @@ type GuildMutation struct {
 	guild_id                  *string
 	name                      *string
 	features                  *[]string
+	appendfeatures            []string
 	icon_hash                 *string
 	icon_url                  *string
 	joined_at                 *time.Time
@@ -321,6 +322,7 @@ func (m *GuildMutation) ResetName() {
 // SetFeatures sets the "features" field.
 func (m *GuildMutation) SetFeatures(s []string) {
 	m.features = &s
+	m.appendfeatures = nil
 }
 
 // Features returns the value of the "features" field in the mutation.
@@ -349,9 +351,23 @@ func (m *GuildMutation) OldFeatures(ctx context.Context) (v []string, err error)
 	return oldValue.Features, nil
 }
 
+// AppendFeatures adds s to the "features" field.
+func (m *GuildMutation) AppendFeatures(s []string) {
+	m.appendfeatures = append(m.appendfeatures, s...)
+}
+
+// AppendedFeatures returns the list of values that were appended to the "features" field in this mutation.
+func (m *GuildMutation) AppendedFeatures() ([]string, bool) {
+	if len(m.appendfeatures) == 0 {
+		return nil, false
+	}
+	return m.appendfeatures, true
+}
+
 // ClearFeatures clears the value of the "features" field.
 func (m *GuildMutation) ClearFeatures() {
 	m.features = nil
+	m.appendfeatures = nil
 	m.clearedFields[guild.FieldFeatures] = struct{}{}
 }
 
@@ -364,6 +380,7 @@ func (m *GuildMutation) FeaturesCleared() bool {
 // ResetFeatures resets all changes to the "features" field.
 func (m *GuildMutation) ResetFeatures() {
 	m.features = nil
+	m.appendfeatures = nil
 	delete(m.clearedFields, guild.FieldFeatures)
 }
 
