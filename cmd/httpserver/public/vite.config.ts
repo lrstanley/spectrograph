@@ -9,8 +9,10 @@ import VueRouter from "unplugin-vue-router/vite"
 import { defineConfig } from "vite"
 import { imagetools } from "vite-imagetools"
 import codegen from "vite-plugin-graphql-codegen"
+import Markdown from "vite-plugin-md"
 import Layouts from "vite-plugin-vue-layouts"
 import Vue from "@vitejs/plugin-vue"
+import link from "@yankeeinlondon/link-builder"
 
 const icons = IconsResolver({
   componentPrefix: "i",
@@ -57,9 +59,24 @@ export default defineConfig({
     VueRouter({
       routesFolder: "src/pages",
       routeBlockLang: "yaml",
+      extensions: [".vue", ".md"],
       logs: true,
     }),
-    Vue({}),
+    Vue({
+      include: [/\.vue$/, /\.md$/],
+    }),
+    Markdown({
+      markdownItOptions: {
+        html: true,
+        linkify: true,
+        typographer: false,
+      },
+      markdownItSetup(md) {
+        md.use(require("markdown-it-anchor"))
+      },
+      builders: [link()],
+      wrapperClasses: "prose max-w-none",
+    }),
     Layouts({
       layoutsDirs: "src/layouts",
       defaultLayout: "default",

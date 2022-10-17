@@ -2,7 +2,7 @@ const colors = require("tailwindcss/colors")
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./index.html", "./src/**/*.{vue,html,js,ts}"],
+  content: ["./index.html", "./src/**/*.{vue,html,js,ts,md}"],
   theme: {
     colors: {
       transparent: "transparent",
@@ -134,7 +134,7 @@ module.exports = {
     },
     extend: {},
   },
-  plugins: [require("daisyui"), require("@tailwindcss/forms")],
+  plugins: [require("daisyui"), require("@tailwindcss/forms"), require("@tailwindcss/typography")],
   daisyui: {
     themes: [
       {
@@ -172,5 +172,6 @@ module.exports = {
     "flex items-center gap-2", // guild icon in tables
     "text-bravery-500 text-idle-500 text-dnd-500 text-nitro-500", // status in tables
     "flex-col badge badge-secondary", // metadata in tables
+    "prose max-w-none", // markdown
   ],
 }

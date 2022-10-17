@@ -73,6 +73,42 @@ body {
   opacity: 0;
 }
 
+.prose table {
+  @apply table table-compact table-zebra;
+}
+
+.prose a {
+  @apply link link-primary;
+}
+
+.prose a.external-link {
+  @apply link link-accent;
+}
+
+.prose a.insecure {
+  @apply link text-dnd-400 hover:text-dnd-500;
+}
+
+.prose pre {
+  @apply whitespace-pre-wrap;
+}
+
+.prose h1 {
+  @apply inline-block text-gradient bg-gradient-to-br from-nitro-500 to-dnd-400;
+}
+
+.prose h2 {
+  @apply inline-block mt-5 text-gradient bg-gradient-to-br from-balance-500 via-bravery-500 to-nitro-500;
+}
+
+.prose h3 {
+  @apply inline-block mt-3 text-gradient bg-gradient-to-br from-discord-500 to-balance-500;
+}
+
+.prose h4 {
+  @apply text-nitro-600;
+}
+
 :where(.table :first-child) :where(:first-child) :where(th, td):first-child {
   border-top-left-radius: var(--rounded-box);
 }

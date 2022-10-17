@@ -33,7 +33,6 @@ const props = defineProps<{
 
 const active = ref(false)
 
-console.log(props.href.substring(1))
 const { stop } = useIntersectionObserver(
   document.getElementById(props.href.substring(1)),
   ([{ isIntersecting }], observerElement) => {
