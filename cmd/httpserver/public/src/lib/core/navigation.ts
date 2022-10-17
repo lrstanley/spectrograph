@@ -14,10 +14,25 @@ import type { Guild } from "@/lib/api"
 
 const state = useState()
 
-export const headerLinks = [
-  { name: "Features", href: "/#more-info", current: true },
-  { name: "Documentation", href: "#", current: false },
-  { name: "Service Health", href: "#", current: false },
+export const headerLinks: Link[] = [
+  {
+    name: "Features",
+    description: "Features provided by Spectrograph",
+    href: "/#more-info",
+    icon: IEmojiSparkles,
+  },
+  {
+    name: "Documentation",
+    description: "Our documentation includes guides on proper setup of Spectrograph",
+    href: "#",
+    icon: IFasBook,
+  },
+  {
+    name: "Service Health",
+    description: "Health of all components of the platform",
+    to: "/info/service-health",
+    icon: IFasHeartPulse,
+  },
 ]
 
 export const mainLinks: Link[] = [
@@ -91,6 +106,12 @@ export const dashboardLinks: ComputedRef<DashboardLink[]> = computed(() => {
       icon: IFasHouse,
     },
     ...guilds.map(guildLink),
+    {
+      name: "Documentation",
+      description: "Our documentation includes guides on proper setup of Spectrograph",
+      href: "#",
+      icon: IFasBook,
+    },
     {
       name: "Service Health",
       description: "Health of all components of the platform",

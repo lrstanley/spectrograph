@@ -97,7 +97,7 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 
-router.afterEach((to) => {
+router.afterEach((to, from) => {
   const state = useState()
 
   let title: string
@@ -131,8 +131,10 @@ router.afterEach((to) => {
     if (location.hash && !to.meta.disableAnchor) {
       const el = document.getElementById(location.hash.slice(1))
       if (el) {
-        el.scrollIntoView()
+        el.scrollIntoView({ behavior: "smooth" })
       }
+    } else if (from.name !== undefined && !to.meta.disableAnchor) {
+      window.scrollTo(0, 0)
     }
   })
   return
