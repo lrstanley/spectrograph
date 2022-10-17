@@ -7,5 +7,6 @@
 export * from "@/lib/util/equal"
 export * from "@/lib/util/pagination"
 export * from "@/lib/util/sorter"
-export * from "@/lib/util/textcase"
 export * from "@/lib/util/table"
+export * from "@/lib/util/textcase"
+export * from "@/lib/util/toc"
