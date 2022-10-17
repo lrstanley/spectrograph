@@ -19,21 +19,23 @@
       </transition>
     </Popover>
 
-    <main>
-      <router-view v-slot="{ Component, route }">
-        <transition name="fade" mode="out-in" appear>
-          <Suspense>
-            <component :is="Component" :key="route.path" />
+    <slot>
+      <main>
+        <router-view v-slot="{ Component, route }">
+          <transition name="fade" mode="out-in" appear>
+            <Suspense>
+              <component :is="Component" :key="route.path" />
 
-            <template #fallback>
-              <div class="flex flex-col h-full gap-4 mx-auto place-content-center">
-                <i-fas-circle-notch class="h-12 text-4xl align-middle animate-spin text-discord-500" />
-              </div>
-            </template>
-          </Suspense>
-        </transition>
-      </router-view>
-    </main>
+              <template #fallback>
+                <div class="flex flex-col h-full gap-4 mx-auto place-content-center">
+                  <i-fas-circle-notch class="h-12 text-4xl align-middle animate-spin text-discord-500" />
+                </div>
+              </template>
+            </Suspense>
+          </transition>
+        </router-view>
+      </main>
+    </slot>
 
     <CoreFooter full-size />
   </div>
