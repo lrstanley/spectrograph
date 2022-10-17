@@ -4,7 +4,7 @@
       <table class="table w-full table-auto table-compact">
         <thead>
           <tr>
-            <th v-for="col in table.columns" :key="col.id" class="first:pl-5">
+            <th v-for="col in table.columns" :key="col.id" class="first:pl-5 last:pr-5">
               <div
                 :class="col.canSort() ? 'cursor-pointer select-none flex' : ''"
                 @click="col.toggleSort"
@@ -51,7 +51,7 @@
             <td
               v-for="cell in row.cells.value"
               :key="cell.column.field"
-              class="transition-colors duration-100 ease-linear first:pl-5 hover:bg-base-200"
+              class="transition-colors duration-100 ease-linear first:pl-5 last:pr-5 hover:bg-base-200"
               :class="{
                 'text-dnd-400 font-bold': cell.column.type === 'boolean' && !cell.value,
                 'text-online-400 font-bold': cell.column.type === 'boolean' && cell.value,
