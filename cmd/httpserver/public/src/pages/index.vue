@@ -41,8 +41,9 @@ meta:
               class="max-w-2xl px-4 mx-auto mb-0 sm:mb-16 lg:mb-0 sm:max-w-md md:px-6 lg:max-w-none lg:px-0"
             >
               <img
+                loading="lazy"
                 alt="Image of a Discord client"
-                class="w-full lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-auto lg:max-w-none"
+                class="w-full transition-all duration-100 lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-auto lg:max-w-none"
                 width="1256"
                 height="856"
                 :src="imgDiscord"
@@ -89,6 +90,7 @@ meta:
 
             <div class="relative mt-10 -mx-4 lg:col-start-1 lg:mt-0">
               <img
+                loading="lazy"
                 alt="Image of many discord channels"
                 class="relative mx-auto rounded-md"
                 width="225"
@@ -164,6 +166,7 @@ meta:
 
             <div class="relative mt-10 -mx-4 lg:mt-0" aria-hidden="true">
               <img
+                loading="lazy"
                 alt="Image of Spectrograph dynamically creating channels"
                 class="relative mx-auto rounded-md"
                 width="300"

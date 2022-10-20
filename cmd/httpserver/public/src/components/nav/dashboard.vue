@@ -4,7 +4,7 @@
     <div class="flex flex-col flex-auto min-h-0 bg-channel-500">
       <div class="flex flex-col flex-auto pt-5 pb-4 overflow-y-auto">
         <a href="#" class="inline-flex items-center px-4 shrink-0">
-          <img class="h-14 w-14 md:h-12 md:w-12" :src="imgLogo" />
+          <img loading="eager" class="h-14 w-14 md:h-12 md:w-12" :src="imgLogo" />
           <router-link to="/">
             <h2 class="text-3xl md:text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
               Spectrograph

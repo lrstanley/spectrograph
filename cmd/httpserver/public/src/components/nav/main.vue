@@ -3,7 +3,7 @@
     <div class="flex flex-col flex-1 md:flex-row" :class="props.isPanel ? '' : 'items-center'">
       <div class="flex items-center justify-between w-full md:w-auto">
         <a href="#" class="inline-flex items-center">
-          <img alt="Spectrograph logo" class="w-12 h-12 animate-pulse" :src="imgLogo" />
+          <img loading="eager" alt="Spectrograph logo" class="w-12 h-12 animate-pulse" :src="imgLogo" />
           <router-link to="/">
             <h2 class="text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
               Spectrograph
