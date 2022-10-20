@@ -37,18 +37,14 @@ meta:
             </div>
           </div>
           <div class="mt-12 -mb-16 sm:-mb-48 lg:relative lg:m-0">
-            <div
-              class="max-w-2xl px-4 mx-auto mb-0 sm:mb-16 lg:mb-0 sm:max-w-md md:px-6 lg:max-w-none lg:px-0"
-            >
-              <img
-                loading="lazy"
-                alt="Image of a Discord client"
-                class="w-full transition-all duration-100 lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-auto lg:max-w-none"
-                width="1256"
-                height="856"
-                :src="imgDiscord"
-              />
-            </div>
+            <img
+              v-if="imgDiscord"
+              alt="Image of a Discord client"
+              class="w-full transition duration-300 ease-in-out lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-auto lg:max-w-none animate-fade-in-right lg:hover:scale-105"
+              width="1256"
+              height="856"
+              :src="imgDiscord"
+            />
           </div>
         </div>
       </div>
@@ -92,7 +88,7 @@ meta:
               <img
                 loading="lazy"
                 alt="Image of many discord channels"
-                class="relative mx-auto rounded-md"
+                class="relative mx-auto transition duration-300 ease-in-out rounded-md md:hover:scale-105"
                 width="225"
                 :src="imgExampleOld"
               />
@@ -168,7 +164,7 @@ meta:
               <img
                 loading="lazy"
                 alt="Image of Spectrograph dynamically creating channels"
-                class="relative mx-auto rounded-md"
+                class="relative mx-auto transition duration-300 ease-in-out rounded-md md:hover:scale-105"
                 width="300"
                 :src="imgExampleNew"
               />

@@ -125,6 +125,28 @@ body {
   border-bottom-left-radius: var(--rounded-box);
 }
 
+@keyframes fadeInRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(50%, 0, 0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-fade-in-right {
+  animation: fadeInRight 0.4s, pulse 2s cubic-bezier(0.4, 0, 0.6, 1) 1s infinite;
+}
+
 img:-moz-loading {
   visibility: hidden;
 }
