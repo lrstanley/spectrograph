@@ -21,7 +21,9 @@ const (
 
 func CronGuildEvents(ctx context.Context) error {
 	logger := log.FromContext(ctx).WithField("src", "db-cron-guild-events")
-	db := ent.FromContext(privacy.DecisionContext(ctx, privacy.Allow))
+	ctx = privacy.DecisionContext(ctx, privacy.Allow)
+
+	db := ent.FromContext(ctx)
 	if db == nil {
 		return errors.New("database not found in context")
 	}
