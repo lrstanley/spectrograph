@@ -37,10 +37,14 @@
                   <span
                     class="rounded-sm focus-within:ring-2 focus-within:ring-bravery-500 focus-within:ring-offset-2"
                   >
-                    <a href="#" class="focus:outline-none">
+                    <component
+                      :is="link.to ? 'router-link' : 'a'"
+                      v-bind="link.to ? { to: link.to } : { href: link.href }"
+                      class="focus:outline-none"
+                    >
                       <span class="absolute inset-0" aria-hidden="true" />
                       {{ link.name }}
-                    </a>
+                    </component>
                   </span>
                 </h3>
                 <p class="text-base text-white">{{ link.description ?? "---" }}</p>
@@ -51,8 +55,8 @@
             </li>
           </ul>
           <div class="mt-8">
-            <a
-              href="/"
+            <router-link
+              to="/"
               class="inline-flex text-base font-medium text-bravery-600 hover:text-bravery-500"
             >
               <div class="self-center shrink-0">
@@ -60,7 +64,7 @@
               </div>
 
               Or go back home
-            </a>
+            </router-link>
           </div>
 
           <CoreFooter class="border-t border-channel-600" />

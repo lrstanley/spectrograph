@@ -14,6 +14,11 @@ import type { Guild } from "@/lib/api"
 
 const state = useState()
 
+const urls = {
+  documentation: "https://docs.spectrograph.app",
+  serviceHealth: "https://status.spectrograph.app",
+}
+
 export const headerLinks: Link[] = [
   {
     name: "Features",
@@ -24,13 +29,13 @@ export const headerLinks: Link[] = [
   {
     name: "Documentation",
     description: "Our documentation includes guides on proper setup of Spectrograph",
-    href: "https://docs.spectrograph.app",
+    href: urls.documentation,
     icon: IFasBook,
   },
   {
     name: "Service Health",
     description: "Health of all components of the platform",
-    to: "/info/service-health",
+    href: urls.serviceHealth,
     icon: IFasHeartPulse,
   },
 ]
@@ -39,13 +44,13 @@ export const mainLinks: Link[] = [
   {
     name: "Documentation",
     description: "Our documentation includes guides on proper setup of Spectrograph",
-    href: "https://docs.spectrograph.app",
+    href: urls.documentation,
     icon: IFasBook,
   },
   {
     name: "Service Health",
     description: "Health of all components of the platform",
-    to: "/info/service-health",
+    href: urls.serviceHealth,
     icon: IFasHeartPulse,
   },
   {
@@ -109,13 +114,13 @@ export const dashboardLinks: ComputedRef<DashboardLink[]> = computed(() => {
     {
       name: "Documentation",
       description: "Our documentation includes guides on proper setup of Spectrograph",
-      href: "https://docs.spectrograph.app",
+      href: urls.documentation,
       icon: IFasBook,
     },
     {
       name: "Service Health",
       description: "Health of all components of the platform",
-      to: "/info/service-health",
+      href: urls.serviceHealth,
       icon: IFasHeartPulse,
     },
   ]
