@@ -7,6 +7,7 @@ query base {
         username
         discriminator
         avatarURL
+        email
 
         # 200 is the current Discord guild limit.
         userGuilds(first: 200, orderBy: { direction: DESC, field: NAME }) {
@@ -122,6 +123,54 @@ query getAllGuilds(
     }
 }
 
+query getUser($id: ID!) {
+    node(id: $id) {
+        ... on User {
+            id
+            createTime
+            updateTime
+            admin
+            avatarURL
+            discriminator
+            username
+            email
+            locale
+            mfaEnabled
+            verified
+
+            banned
+            banReason
+            bannedBy {
+                id
+                username
+                discriminator
+                avatarURL
+            }
+
+            # 200 is the current Discord guild limit.
+            userGuilds(first: 200, orderBy: { direction: DESC, field: NAME }) {
+                edges {
+                    node {
+                        id
+                        guildID
+                        name
+                        iconURL
+                        joinedAt
+
+                        guildConfig {
+                            enabled
+                        }
+
+                        guildAdminConfig {
+                            enabled
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 query getAllUsers(
     $first: Int = null
     $last: Int = null
@@ -150,6 +199,14 @@ query getAllUsers(
                 locale
                 mfaEnabled
                 verified
+
+                banned
+                bannedBy {
+                    id
+                    username
+                    discriminator
+                    avatarURL
+                }
             }
         }
 

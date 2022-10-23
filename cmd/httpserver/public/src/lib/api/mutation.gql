@@ -9,3 +9,11 @@ mutation updateGuildAdminConfig($id: ID!, $input: UpdateGuildAdminConfigInput!) 
         id
     }
 }
+
+mutation banUser($id: ID!, $reason: String!) {
+    banUser(id: $id, reason: $reason)
+}
+
+mutation unbanUser($id: ID!) {
+    unbanUser(id: $id)
+}

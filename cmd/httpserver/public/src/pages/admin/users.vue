@@ -19,6 +19,8 @@ import { CoreTable } from "@/lib/util"
 import { UserOrderField, useGetAllUsersQuery } from "@/lib/api"
 import type { User, UserWhereInput } from "@/lib/api"
 
+const router = useRouter()
+
 const table = new CoreTable<User, UserOrderField, UserWhereInput>(
   [
     {
@@ -27,10 +29,14 @@ const table = new CoreTable<User, UserOrderField, UserWhereInput>(
       accessorFn: (user) => `${user.username}#${user.discriminator}`,
       sortField: UserOrderField.Username,
       type: "text",
+      clickFn: (data, event) => {
+        router.push({ name: "/dashboard/user/[id]", params: { id: data.id } })
+        event.preventDefault()
+      },
       filterFn: (val: string) => ({ usernameContainsFold: val }),
       renderFn: (value, user) =>
         h("div", { class: "flex items-center gap-2" }, [
-          h("img", { src: user.avatarURL, style: "height: 20px; width: 20px" }),
+          h("img", { src: user.avatarURL, class: "rounded-full", style: "height: 20px; width: 20px" }),
           h("div", {}, value),
         ]),
     },
@@ -69,6 +75,41 @@ const table = new CoreTable<User, UserOrderField, UserWhereInput>(
       field: "admin",
       type: "boolean",
       filterFn: (val: boolean) => (val !== null ? { admin: val } : null),
+    },
+    {
+      id: "banned",
+      header: "Banned",
+      field: "banned",
+      type: "boolean",
+      filterFn: (val: boolean) => (val !== null ? { banned: val } : null),
+    },
+    {
+      id: "bannedby",
+      header: "Banned By",
+      accessorFn: (user) =>
+        user.bannedBy ? `${user.bannedBy.username}#${user.bannedBy.discriminator}` : "",
+      type: "text",
+      clickFn: (data, event) => {
+        if (!data.bannedBy) return
+        router.push({ name: "/dashboard/user/[id]", params: { id: data.bannedBy.id } })
+        event.preventDefault()
+      },
+      filterFn: (val: string) => (val ? { hasBannedByWith: { usernameContainsFold: val } } : null),
+      renderFn: (value, user) =>
+        h(
+          "div",
+          { class: "flex items-center gap-2" },
+          user.bannedBy
+            ? [
+                h("img", {
+                  src: user.bannedBy.avatarURL,
+                  class: "rounded-full",
+                  style: "height: 20px; width: 20px",
+                }),
+                h("div", {}, value),
+              ]
+            : []
+        ),
     },
   ],
   15
