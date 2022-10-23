@@ -120,6 +120,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldUpdateTime:    {Type: field.TypeTime, Column: user.FieldUpdateTime},
 			user.FieldUserID:        {Type: field.TypeString, Column: user.FieldUserID},
 			user.FieldAdmin:         {Type: field.TypeBool, Column: user.FieldAdmin},
+			user.FieldBanned:        {Type: field.TypeBool, Column: user.FieldBanned},
+			user.FieldBanReason:     {Type: field.TypeString, Column: user.FieldBanReason},
 			user.FieldUsername:      {Type: field.TypeString, Column: user.FieldUsername},
 			user.FieldDiscriminator: {Type: field.TypeString, Column: user.FieldDiscriminator},
 			user.FieldEmail:         {Type: field.TypeString, Column: user.FieldEmail},
@@ -230,6 +232,30 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"User",
 		"Guild",
+	)
+	graph.MustAddE(
+		"banned_users",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BannedUsersTable,
+			Columns: []string{user.BannedUsersColumn},
+			Bidi:    true,
+		},
+		"User",
+		"User",
+	)
+	graph.MustAddE(
+		"banned_by",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BannedByTable,
+			Columns: []string{user.BannedByColumn},
+			Bidi:    false,
+		},
+		"User",
+		"User",
 	)
 	return graph
 }()
@@ -708,6 +734,16 @@ func (f *UserFilter) WhereAdmin(p entql.BoolP) {
 	f.Where(p.Field(user.FieldAdmin))
 }
 
+// WhereBanned applies the entql bool predicate on the banned field.
+func (f *UserFilter) WhereBanned(p entql.BoolP) {
+	f.Where(p.Field(user.FieldBanned))
+}
+
+// WhereBanReason applies the entql string predicate on the ban_reason field.
+func (f *UserFilter) WhereBanReason(p entql.StringP) {
+	f.Where(p.Field(user.FieldBanReason))
+}
+
 // WhereUsername applies the entql string predicate on the username field.
 func (f *UserFilter) WhereUsername(p entql.StringP) {
 	f.Where(p.Field(user.FieldUsername))
@@ -781,6 +817,34 @@ func (f *UserFilter) WhereHasUserGuilds() {
 // WhereHasUserGuildsWith applies a predicate to check if query has an edge user_guilds with a given conditions (other predicates).
 func (f *UserFilter) WhereHasUserGuildsWith(preds ...predicate.Guild) {
 	f.Where(entql.HasEdgeWith("user_guilds", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasBannedUsers applies a predicate to check if query has an edge banned_users.
+func (f *UserFilter) WhereHasBannedUsers() {
+	f.Where(entql.HasEdge("banned_users"))
+}
+
+// WhereHasBannedUsersWith applies a predicate to check if query has an edge banned_users with a given conditions (other predicates).
+func (f *UserFilter) WhereHasBannedUsersWith(preds ...predicate.User) {
+	f.Where(entql.HasEdgeWith("banned_users", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasBannedBy applies a predicate to check if query has an edge banned_by.
+func (f *UserFilter) WhereHasBannedBy() {
+	f.Where(entql.HasEdge("banned_by"))
+}
+
+// WhereHasBannedByWith applies a predicate to check if query has an edge banned_by with a given conditions (other predicates).
+func (f *UserFilter) WhereHasBannedByWith(preds ...predicate.User) {
+	f.Where(entql.HasEdgeWith("banned_by", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)
 		}

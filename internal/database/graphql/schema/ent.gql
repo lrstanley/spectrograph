@@ -772,6 +772,10 @@ type User implements Node {
   userID: String!
   """Whether or not the user is a spectrograph admin."""
   admin: Boolean
+  """Whether or not the user is banned from using the service."""
+  banned: Boolean
+  """Reason for the user being banned (if any)."""
+  banReason: String
   """The users username, not unique across the platform."""
   username: String!
   """The users 4-digit discord-tag."""
@@ -817,6 +821,8 @@ type User implements Node {
     """Filtering options for Guilds returned from the connection."""
     where: GuildWhereInput
   ): GuildConnection!
+  bannedUsers: [User!]
+  bannedBy: User
 }
 """A connection to a list of items."""
 type UserConnection {
@@ -901,6 +907,27 @@ input UserWhereInput {
   adminNEQ: Boolean
   adminIsNil: Boolean
   adminNotNil: Boolean
+  """banned field predicates"""
+  banned: Boolean
+  bannedNEQ: Boolean
+  bannedIsNil: Boolean
+  bannedNotNil: Boolean
+  """ban_reason field predicates"""
+  banReason: String
+  banReasonNEQ: String
+  banReasonIn: [String!]
+  banReasonNotIn: [String!]
+  banReasonGT: String
+  banReasonGTE: String
+  banReasonLT: String
+  banReasonLTE: String
+  banReasonContains: String
+  banReasonHasPrefix: String
+  banReasonHasSuffix: String
+  banReasonIsNil: Boolean
+  banReasonNotNil: Boolean
+  banReasonEqualFold: String
+  banReasonContainsFold: String
   """username field predicates"""
   username: String
   usernameNEQ: String
@@ -1045,4 +1072,10 @@ input UserWhereInput {
   """user_guilds edge predicates"""
   hasUserGuilds: Boolean
   hasUserGuildsWith: [GuildWhereInput!]
+  """banned_users edge predicates"""
+  hasBannedUsers: Boolean
+  hasBannedUsersWith: [UserWhereInput!]
+  """banned_by edge predicates"""
+  hasBannedBy: Boolean
+  hasBannedByWith: [UserWhereInput!]
 }

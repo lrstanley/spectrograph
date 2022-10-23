@@ -3716,36 +3716,43 @@ func (m *GuildEventMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	create_time        *time.Time
-	update_time        *time.Time
-	user_id            *string
-	admin              *bool
-	username           *string
-	discriminator      *string
-	email              *string
-	avatar_hash        *string
-	avatar_url         *string
-	locale             *string
-	bot                *bool
-	system             *bool
-	mfa_enabled        *bool
-	verified           *bool
-	flags              *uint64
-	addflags           *int64
-	premium_type       *int
-	addpremium_type    *int
-	public_flags       *uint64
-	addpublic_flags    *int64
-	clearedFields      map[string]struct{}
-	user_guilds        map[int]struct{}
-	removeduser_guilds map[int]struct{}
-	cleareduser_guilds bool
-	done               bool
-	oldValue           func(context.Context) (*User, error)
-	predicates         []predicate.User
+	op                  Op
+	typ                 string
+	id                  *int
+	create_time         *time.Time
+	update_time         *time.Time
+	user_id             *string
+	admin               *bool
+	banned              *bool
+	ban_reason          *string
+	username            *string
+	discriminator       *string
+	email               *string
+	avatar_hash         *string
+	avatar_url          *string
+	locale              *string
+	bot                 *bool
+	system              *bool
+	mfa_enabled         *bool
+	verified            *bool
+	flags               *uint64
+	addflags            *int64
+	premium_type        *int
+	addpremium_type     *int
+	public_flags        *uint64
+	addpublic_flags     *int64
+	clearedFields       map[string]struct{}
+	user_guilds         map[int]struct{}
+	removeduser_guilds  map[int]struct{}
+	cleareduser_guilds  bool
+	banned_users        map[int]struct{}
+	removedbanned_users map[int]struct{}
+	clearedbanned_users bool
+	banned_by           *int
+	clearedbanned_by    bool
+	done                bool
+	oldValue            func(context.Context) (*User, error)
+	predicates          []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -4001,6 +4008,104 @@ func (m *UserMutation) AdminCleared() bool {
 func (m *UserMutation) ResetAdmin() {
 	m.admin = nil
 	delete(m.clearedFields, user.FieldAdmin)
+}
+
+// SetBanned sets the "banned" field.
+func (m *UserMutation) SetBanned(b bool) {
+	m.banned = &b
+}
+
+// Banned returns the value of the "banned" field in the mutation.
+func (m *UserMutation) Banned() (r bool, exists bool) {
+	v := m.banned
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBanned returns the old "banned" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldBanned(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBanned is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBanned requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBanned: %w", err)
+	}
+	return oldValue.Banned, nil
+}
+
+// ClearBanned clears the value of the "banned" field.
+func (m *UserMutation) ClearBanned() {
+	m.banned = nil
+	m.clearedFields[user.FieldBanned] = struct{}{}
+}
+
+// BannedCleared returns if the "banned" field was cleared in this mutation.
+func (m *UserMutation) BannedCleared() bool {
+	_, ok := m.clearedFields[user.FieldBanned]
+	return ok
+}
+
+// ResetBanned resets all changes to the "banned" field.
+func (m *UserMutation) ResetBanned() {
+	m.banned = nil
+	delete(m.clearedFields, user.FieldBanned)
+}
+
+// SetBanReason sets the "ban_reason" field.
+func (m *UserMutation) SetBanReason(s string) {
+	m.ban_reason = &s
+}
+
+// BanReason returns the value of the "ban_reason" field in the mutation.
+func (m *UserMutation) BanReason() (r string, exists bool) {
+	v := m.ban_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBanReason returns the old "ban_reason" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldBanReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBanReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBanReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBanReason: %w", err)
+	}
+	return oldValue.BanReason, nil
+}
+
+// ClearBanReason clears the value of the "ban_reason" field.
+func (m *UserMutation) ClearBanReason() {
+	m.ban_reason = nil
+	m.clearedFields[user.FieldBanReason] = struct{}{}
+}
+
+// BanReasonCleared returns if the "ban_reason" field was cleared in this mutation.
+func (m *UserMutation) BanReasonCleared() bool {
+	_, ok := m.clearedFields[user.FieldBanReason]
+	return ok
+}
+
+// ResetBanReason resets all changes to the "ban_reason" field.
+func (m *UserMutation) ResetBanReason() {
+	m.ban_reason = nil
+	delete(m.clearedFields, user.FieldBanReason)
 }
 
 // SetUsername sets the "username" field.
@@ -4705,6 +4810,99 @@ func (m *UserMutation) ResetUserGuilds() {
 	m.removeduser_guilds = nil
 }
 
+// AddBannedUserIDs adds the "banned_users" edge to the User entity by ids.
+func (m *UserMutation) AddBannedUserIDs(ids ...int) {
+	if m.banned_users == nil {
+		m.banned_users = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.banned_users[ids[i]] = struct{}{}
+	}
+}
+
+// ClearBannedUsers clears the "banned_users" edge to the User entity.
+func (m *UserMutation) ClearBannedUsers() {
+	m.clearedbanned_users = true
+}
+
+// BannedUsersCleared reports if the "banned_users" edge to the User entity was cleared.
+func (m *UserMutation) BannedUsersCleared() bool {
+	return m.clearedbanned_users
+}
+
+// RemoveBannedUserIDs removes the "banned_users" edge to the User entity by IDs.
+func (m *UserMutation) RemoveBannedUserIDs(ids ...int) {
+	if m.removedbanned_users == nil {
+		m.removedbanned_users = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.banned_users, ids[i])
+		m.removedbanned_users[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedBannedUsers returns the removed IDs of the "banned_users" edge to the User entity.
+func (m *UserMutation) RemovedBannedUsersIDs() (ids []int) {
+	for id := range m.removedbanned_users {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// BannedUsersIDs returns the "banned_users" edge IDs in the mutation.
+func (m *UserMutation) BannedUsersIDs() (ids []int) {
+	for id := range m.banned_users {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetBannedUsers resets all changes to the "banned_users" edge.
+func (m *UserMutation) ResetBannedUsers() {
+	m.banned_users = nil
+	m.clearedbanned_users = false
+	m.removedbanned_users = nil
+}
+
+// SetBannedByID sets the "banned_by" edge to the User entity by id.
+func (m *UserMutation) SetBannedByID(id int) {
+	m.banned_by = &id
+}
+
+// ClearBannedBy clears the "banned_by" edge to the User entity.
+func (m *UserMutation) ClearBannedBy() {
+	m.clearedbanned_by = true
+}
+
+// BannedByCleared reports if the "banned_by" edge to the User entity was cleared.
+func (m *UserMutation) BannedByCleared() bool {
+	return m.clearedbanned_by
+}
+
+// BannedByID returns the "banned_by" edge ID in the mutation.
+func (m *UserMutation) BannedByID() (id int, exists bool) {
+	if m.banned_by != nil {
+		return *m.banned_by, true
+	}
+	return
+}
+
+// BannedByIDs returns the "banned_by" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// BannedByID instead. It exists only for internal usage by the builders.
+func (m *UserMutation) BannedByIDs() (ids []int) {
+	if id := m.banned_by; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetBannedBy resets all changes to the "banned_by" edge.
+func (m *UserMutation) ResetBannedBy() {
+	m.banned_by = nil
+	m.clearedbanned_by = false
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -4724,7 +4922,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 19)
 	if m.create_time != nil {
 		fields = append(fields, user.FieldCreateTime)
 	}
@@ -4736,6 +4934,12 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.admin != nil {
 		fields = append(fields, user.FieldAdmin)
+	}
+	if m.banned != nil {
+		fields = append(fields, user.FieldBanned)
+	}
+	if m.ban_reason != nil {
+		fields = append(fields, user.FieldBanReason)
 	}
 	if m.username != nil {
 		fields = append(fields, user.FieldUsername)
@@ -4792,6 +4996,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case user.FieldAdmin:
 		return m.Admin()
+	case user.FieldBanned:
+		return m.Banned()
+	case user.FieldBanReason:
+		return m.BanReason()
 	case user.FieldUsername:
 		return m.Username()
 	case user.FieldDiscriminator:
@@ -4835,6 +5043,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUserID(ctx)
 	case user.FieldAdmin:
 		return m.OldAdmin(ctx)
+	case user.FieldBanned:
+		return m.OldBanned(ctx)
+	case user.FieldBanReason:
+		return m.OldBanReason(ctx)
 	case user.FieldUsername:
 		return m.OldUsername(ctx)
 	case user.FieldDiscriminator:
@@ -4897,6 +5109,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAdmin(v)
+		return nil
+	case user.FieldBanned:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBanned(v)
+		return nil
+	case user.FieldBanReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBanReason(v)
 		return nil
 	case user.FieldUsername:
 		v, ok := value.(string)
@@ -5061,6 +5287,12 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldAdmin) {
 		fields = append(fields, user.FieldAdmin)
 	}
+	if m.FieldCleared(user.FieldBanned) {
+		fields = append(fields, user.FieldBanned)
+	}
+	if m.FieldCleared(user.FieldBanReason) {
+		fields = append(fields, user.FieldBanReason)
+	}
 	if m.FieldCleared(user.FieldAvatarHash) {
 		fields = append(fields, user.FieldAvatarHash)
 	}
@@ -5104,6 +5336,12 @@ func (m *UserMutation) ClearField(name string) error {
 	switch name {
 	case user.FieldAdmin:
 		m.ClearAdmin()
+		return nil
+	case user.FieldBanned:
+		m.ClearBanned()
+		return nil
+	case user.FieldBanReason:
+		m.ClearBanReason()
 		return nil
 	case user.FieldAvatarHash:
 		m.ClearAvatarHash()
@@ -5152,6 +5390,12 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldAdmin:
 		m.ResetAdmin()
 		return nil
+	case user.FieldBanned:
+		m.ResetBanned()
+		return nil
+	case user.FieldBanReason:
+		m.ResetBanReason()
+		return nil
 	case user.FieldUsername:
 		m.ResetUsername()
 		return nil
@@ -5197,9 +5441,15 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.user_guilds != nil {
 		edges = append(edges, user.EdgeUserGuilds)
+	}
+	if m.banned_users != nil {
+		edges = append(edges, user.EdgeBannedUsers)
+	}
+	if m.banned_by != nil {
+		edges = append(edges, user.EdgeBannedBy)
 	}
 	return edges
 }
@@ -5214,15 +5464,28 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeBannedUsers:
+		ids := make([]ent.Value, 0, len(m.banned_users))
+		for id := range m.banned_users {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeBannedBy:
+		if id := m.banned_by; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.removeduser_guilds != nil {
 		edges = append(edges, user.EdgeUserGuilds)
+	}
+	if m.removedbanned_users != nil {
+		edges = append(edges, user.EdgeBannedUsers)
 	}
 	return edges
 }
@@ -5237,15 +5500,27 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeBannedUsers:
+		ids := make([]ent.Value, 0, len(m.removedbanned_users))
+		for id := range m.removedbanned_users {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.cleareduser_guilds {
 		edges = append(edges, user.EdgeUserGuilds)
+	}
+	if m.clearedbanned_users {
+		edges = append(edges, user.EdgeBannedUsers)
+	}
+	if m.clearedbanned_by {
+		edges = append(edges, user.EdgeBannedBy)
 	}
 	return edges
 }
@@ -5256,6 +5531,10 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case user.EdgeUserGuilds:
 		return m.cleareduser_guilds
+	case user.EdgeBannedUsers:
+		return m.clearedbanned_users
+	case user.EdgeBannedBy:
+		return m.clearedbanned_by
 	}
 	return false
 }
@@ -5264,6 +5543,9 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
+	case user.EdgeBannedBy:
+		m.ClearBannedBy()
+		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }
@@ -5274,6 +5556,12 @@ func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
 	case user.EdgeUserGuilds:
 		m.ResetUserGuilds()
+		return nil
+	case user.EdgeBannedUsers:
+		m.ResetBannedUsers()
+		return nil
+	case user.EdgeBannedBy:
+		m.ResetBannedBy()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

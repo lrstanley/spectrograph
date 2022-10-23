@@ -412,8 +412,8 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     u.ID,
 		Type:   "User",
-		Fields: make([]*Field, 17),
-		Edges:  make([]*Edge, 1),
+		Fields: make([]*Field, 19),
+		Edges:  make([]*Edge, 3),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(u.CreateTime); err != nil {
@@ -448,10 +448,26 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "admin",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(u.Username); err != nil {
+	if buf, err = json.Marshal(u.Banned); err != nil {
 		return nil, err
 	}
 	node.Fields[4] = &Field{
+		Type:  "bool",
+		Name:  "banned",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.BanReason); err != nil {
+		return nil, err
+	}
+	node.Fields[5] = &Field{
+		Type:  "string",
+		Name:  "ban_reason",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.Username); err != nil {
+		return nil, err
+	}
+	node.Fields[6] = &Field{
 		Type:  "string",
 		Name:  "username",
 		Value: string(buf),
@@ -459,7 +475,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.Discriminator); err != nil {
 		return nil, err
 	}
-	node.Fields[5] = &Field{
+	node.Fields[7] = &Field{
 		Type:  "string",
 		Name:  "discriminator",
 		Value: string(buf),
@@ -467,7 +483,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.Email); err != nil {
 		return nil, err
 	}
-	node.Fields[6] = &Field{
+	node.Fields[8] = &Field{
 		Type:  "string",
 		Name:  "email",
 		Value: string(buf),
@@ -475,7 +491,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.AvatarHash); err != nil {
 		return nil, err
 	}
-	node.Fields[7] = &Field{
+	node.Fields[9] = &Field{
 		Type:  "string",
 		Name:  "avatar_hash",
 		Value: string(buf),
@@ -483,7 +499,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.AvatarURL); err != nil {
 		return nil, err
 	}
-	node.Fields[8] = &Field{
+	node.Fields[10] = &Field{
 		Type:  "string",
 		Name:  "avatar_url",
 		Value: string(buf),
@@ -491,7 +507,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.Locale); err != nil {
 		return nil, err
 	}
-	node.Fields[9] = &Field{
+	node.Fields[11] = &Field{
 		Type:  "string",
 		Name:  "locale",
 		Value: string(buf),
@@ -499,7 +515,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.Bot); err != nil {
 		return nil, err
 	}
-	node.Fields[10] = &Field{
+	node.Fields[12] = &Field{
 		Type:  "bool",
 		Name:  "bot",
 		Value: string(buf),
@@ -507,7 +523,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.System); err != nil {
 		return nil, err
 	}
-	node.Fields[11] = &Field{
+	node.Fields[13] = &Field{
 		Type:  "bool",
 		Name:  "system",
 		Value: string(buf),
@@ -515,7 +531,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.MfaEnabled); err != nil {
 		return nil, err
 	}
-	node.Fields[12] = &Field{
+	node.Fields[14] = &Field{
 		Type:  "bool",
 		Name:  "mfa_enabled",
 		Value: string(buf),
@@ -523,7 +539,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.Verified); err != nil {
 		return nil, err
 	}
-	node.Fields[13] = &Field{
+	node.Fields[15] = &Field{
 		Type:  "bool",
 		Name:  "verified",
 		Value: string(buf),
@@ -531,7 +547,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.Flags); err != nil {
 		return nil, err
 	}
-	node.Fields[14] = &Field{
+	node.Fields[16] = &Field{
 		Type:  "uint64",
 		Name:  "flags",
 		Value: string(buf),
@@ -539,7 +555,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.PremiumType); err != nil {
 		return nil, err
 	}
-	node.Fields[15] = &Field{
+	node.Fields[17] = &Field{
 		Type:  "int",
 		Name:  "premium_type",
 		Value: string(buf),
@@ -547,7 +563,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(u.PublicFlags); err != nil {
 		return nil, err
 	}
-	node.Fields[16] = &Field{
+	node.Fields[18] = &Field{
 		Type:  "uint64",
 		Name:  "public_flags",
 		Value: string(buf),
@@ -559,6 +575,26 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	err = u.QueryUserGuilds().
 		Select(guild.FieldID).
 		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[1] = &Edge{
+		Type: "User",
+		Name: "banned_users",
+	}
+	err = u.QueryBannedUsers().
+		Select(user.FieldID).
+		Scan(ctx, &node.Edges[1].IDs)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[2] = &Edge{
+		Type: "User",
+		Name: "banned_by",
+	}
+	err = u.QueryBannedBy().
+		Select(user.FieldID).
+		Scan(ctx, &node.Edges[2].IDs)
 	if err != nil {
 		return nil, err
 	}

@@ -115,26 +115,37 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeString, Unique: true},
-		{Name: "admin", Type: field.TypeBool, Nullable: true, Default: false},
+		{Name: "admin", Type: field.TypeBool, Nullable: true},
+		{Name: "banned", Type: field.TypeBool, Nullable: true},
+		{Name: "ban_reason", Type: field.TypeString, Nullable: true},
 		{Name: "username", Type: field.TypeString},
 		{Name: "discriminator", Type: field.TypeString, Size: 4},
 		{Name: "email", Type: field.TypeString, Size: 320},
 		{Name: "avatar_hash", Type: field.TypeString, Nullable: true, Size: 2048},
 		{Name: "avatar_url", Type: field.TypeString, Size: 2048},
 		{Name: "locale", Type: field.TypeString, Nullable: true, Size: 10},
-		{Name: "bot", Type: field.TypeBool, Nullable: true, Default: false},
-		{Name: "system", Type: field.TypeBool, Nullable: true, Default: false},
-		{Name: "mfa_enabled", Type: field.TypeBool, Nullable: true, Default: false},
-		{Name: "verified", Type: field.TypeBool, Nullable: true, Default: false},
-		{Name: "flags", Type: field.TypeUint64, Nullable: true, Default: 0},
-		{Name: "premium_type", Type: field.TypeInt, Nullable: true, Default: 0},
-		{Name: "public_flags", Type: field.TypeUint64, Nullable: true, Default: 0},
+		{Name: "bot", Type: field.TypeBool, Nullable: true},
+		{Name: "system", Type: field.TypeBool, Nullable: true},
+		{Name: "mfa_enabled", Type: field.TypeBool, Nullable: true},
+		{Name: "verified", Type: field.TypeBool, Nullable: true},
+		{Name: "flags", Type: field.TypeUint64, Nullable: true},
+		{Name: "premium_type", Type: field.TypeInt, Nullable: true},
+		{Name: "public_flags", Type: field.TypeUint64, Nullable: true},
+		{Name: "user_banned_users", Type: field.TypeInt, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "users_users_banned_users",
+				Columns:    []*schema.Column{UsersColumns[20]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// UserUserGuildsColumns holds the columns for the "user_user_guilds" table.
 	UserUserGuildsColumns = []*schema.Column{
@@ -176,6 +187,7 @@ func init() {
 	GuildAdminConfigsTable.ForeignKeys[0].RefTable = GuildsTable
 	GuildConfigsTable.ForeignKeys[0].RefTable = GuildsTable
 	GuildEventsTable.ForeignKeys[0].RefTable = GuildsTable
+	UsersTable.ForeignKeys[0].RefTable = UsersTable
 	UserUserGuildsTable.ForeignKeys[0].RefTable = UsersTable
 	UserUserGuildsTable.ForeignKeys[1].RefTable = GuildsTable
 }

@@ -25,6 +25,10 @@ const (
 	FieldUserID = "user_id"
 	// FieldAdmin holds the string denoting the admin field in the database.
 	FieldAdmin = "admin"
+	// FieldBanned holds the string denoting the banned field in the database.
+	FieldBanned = "banned"
+	// FieldBanReason holds the string denoting the ban_reason field in the database.
+	FieldBanReason = "ban_reason"
 	// FieldUsername holds the string denoting the username field in the database.
 	FieldUsername = "username"
 	// FieldDiscriminator holds the string denoting the discriminator field in the database.
@@ -53,6 +57,10 @@ const (
 	FieldPublicFlags = "public_flags"
 	// EdgeUserGuilds holds the string denoting the user_guilds edge name in mutations.
 	EdgeUserGuilds = "user_guilds"
+	// EdgeBannedUsers holds the string denoting the banned_users edge name in mutations.
+	EdgeBannedUsers = "banned_users"
+	// EdgeBannedBy holds the string denoting the banned_by edge name in mutations.
+	EdgeBannedBy = "banned_by"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// UserGuildsTable is the table that holds the user_guilds relation/edge. The primary key declared below.
@@ -60,6 +68,14 @@ const (
 	// UserGuildsInverseTable is the table name for the Guild entity.
 	// It exists in this package in order to avoid circular dependency with the "guild" package.
 	UserGuildsInverseTable = "guilds"
+	// BannedUsersTable is the table that holds the banned_users relation/edge.
+	BannedUsersTable = "users"
+	// BannedUsersColumn is the table column denoting the banned_users relation/edge.
+	BannedUsersColumn = "user_banned_users"
+	// BannedByTable is the table that holds the banned_by relation/edge.
+	BannedByTable = "users"
+	// BannedByColumn is the table column denoting the banned_by relation/edge.
+	BannedByColumn = "user_banned_users"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -69,6 +85,8 @@ var Columns = []string{
 	FieldUpdateTime,
 	FieldUserID,
 	FieldAdmin,
+	FieldBanned,
+	FieldBanReason,
 	FieldUsername,
 	FieldDiscriminator,
 	FieldEmail,
@@ -84,6 +102,12 @@ var Columns = []string{
 	FieldPublicFlags,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"user_banned_users",
+}
+
 var (
 	// UserGuildsPrimaryKey and UserGuildsColumn2 are the table columns denoting the
 	// primary key for the user_guilds relation (M2M).
@@ -94,6 +118,11 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -114,8 +143,6 @@ var (
 	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
-	// DefaultAdmin holds the default value on creation for the "admin" field.
-	DefaultAdmin bool
 	// DiscriminatorValidator is a validator for the "discriminator" field. It is called by the builders before save.
 	DiscriminatorValidator func(string) error
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
@@ -126,18 +153,4 @@ var (
 	AvatarURLValidator func(string) error
 	// LocaleValidator is a validator for the "locale" field. It is called by the builders before save.
 	LocaleValidator func(string) error
-	// DefaultBot holds the default value on creation for the "bot" field.
-	DefaultBot bool
-	// DefaultSystem holds the default value on creation for the "system" field.
-	DefaultSystem bool
-	// DefaultMfaEnabled holds the default value on creation for the "mfa_enabled" field.
-	DefaultMfaEnabled bool
-	// DefaultVerified holds the default value on creation for the "verified" field.
-	DefaultVerified bool
-	// DefaultFlags holds the default value on creation for the "flags" field.
-	DefaultFlags uint64
-	// DefaultPremiumType holds the default value on creation for the "premium_type" field.
-	DefaultPremiumType int
-	// DefaultPublicFlags holds the default value on creation for the "public_flags" field.
-	DefaultPublicFlags uint64
 )

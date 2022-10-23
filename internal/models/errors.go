@@ -6,6 +6,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/jackc/pgconn"
@@ -33,6 +34,11 @@ func init() {
 			return http.StatusInternalServerError
 		}
 
+		var e *ErrUserBanned
+		if errors.As(err, &e) {
+			return http.StatusForbidden
+		}
+
 		return 0
 	})
 }
@@ -47,4 +53,12 @@ func unwrapDBError(err error) string {
 
 func IsDatabaseError(err error) bool {
 	return unwrapDBError(err) != ""
+}
+
+type ErrUserBanned struct {
+	User *ent.User
+}
+
+func (e ErrUserBanned) Error() string {
+	return fmt.Sprintf("user is currently banned -- ban reason: %s", e.User.BanReason)
 }

@@ -24,7 +24,9 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("user_id").Unique().Immutable(),
-		field.Bool("admin").Optional().Default(false).Comment("Whether or not the user is a spectrograph admin."),
+		field.Bool("admin").Optional().Comment("Whether or not the user is a spectrograph admin."),
+		field.Bool("banned").Optional().Comment("Whether or not the user is banned from using the service."),
+		field.String("ban_reason").Optional().Comment("Reason for the user being banned (if any)."),
 		field.String("username").Annotations(
 			entgql.OrderField("USERNAME"),
 		).Comment("The users username, not unique across the platform."),
@@ -39,15 +41,15 @@ func (User) Fields() []ent.Field {
 
 		// Additional fields provided by querying discord directly.
 		field.String("locale").Optional().MaxLen(10).Comment("The users chosen language option."),
-		field.Bool("bot").Optional().Default(false).Comment("Whether the user belongs to an OAuth2 application."),
-		field.Bool("system").Optional().Default(false).Comment("Whether the user is an Official Discord System user (part of the urgent message system)."),
-		field.Bool("mfa_enabled").Optional().Default(false).Comment("Whether the user has two factor enabled on their account."),
-		field.Bool("verified").Optional().Default(false).Comment("Whether the email on this account has been verified."),
-		field.Uint64("flags").Optional().Default(0).Annotations(
+		field.Bool("bot").Optional().Comment("Whether the user belongs to an OAuth2 application."),
+		field.Bool("system").Optional().Comment("Whether the user is an Official Discord System user (part of the urgent message system)."),
+		field.Bool("mfa_enabled").Optional().Comment("Whether the user has two factor enabled on their account."),
+		field.Bool("verified").Optional().Comment("Whether the email on this account has been verified."),
+		field.Uint64("flags").Optional().Annotations(
 			entgql.Type("Uint64"),
 		).Comment("The flags on a users account."),
-		field.Int("premium_type").Optional().Default(0).Comment("The type of Nitro subscription on a users account."),
-		field.Uint64("public_flags").Optional().Default(0).Annotations(
+		field.Int("premium_type").Optional().Comment("The type of Nitro subscription on a users account."),
+		field.Uint64("public_flags").Optional().Annotations(
 			entgql.Type("Uint64"),
 		).Comment("The public flags on a users account."),
 	}
@@ -62,10 +64,12 @@ func (User) Mixin() []ent.Mixin {
 func (User) Policy() ent.Policy {
 	return privacy.Policy{
 		Mutation: privacy.MutationPolicy{
+			AllowRoles(models.RoleSystemAdmin),
 			privacy.AlwaysDenyRule(),
 		},
 		Query: privacy.QueryPolicy{
 			AllowRoles(models.RoleSystemAdmin),
+			AllowUserQuerySelf(),
 			privacy.AlwaysDenyRule(),
 		},
 	}
@@ -77,6 +81,8 @@ func (User) Edges() []ent.Edge {
 		edge.To("user_guilds", Guild.Type).Annotations(
 			entgql.RelayConnection(),
 		).Comment("Guilds that the user is either owner or admin of (and thus can add the connection to the bot)."),
+		edge.To("banned_users", User.Type).Comment("Users that were banned by this user."),
+		edge.From("banned_by", User.Type).Unique().Ref("banned_users").Comment("User that banned this user."),
 	}
 }
 

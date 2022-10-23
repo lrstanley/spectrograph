@@ -277,58 +277,26 @@ func init() {
 	user.DefaultUpdateTime = userDescUpdateTime.Default.(func() time.Time)
 	// user.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	user.UpdateDefaultUpdateTime = userDescUpdateTime.UpdateDefault.(func() time.Time)
-	// userDescAdmin is the schema descriptor for admin field.
-	userDescAdmin := userFields[1].Descriptor()
-	// user.DefaultAdmin holds the default value on creation for the admin field.
-	user.DefaultAdmin = userDescAdmin.Default.(bool)
 	// userDescDiscriminator is the schema descriptor for discriminator field.
-	userDescDiscriminator := userFields[3].Descriptor()
+	userDescDiscriminator := userFields[5].Descriptor()
 	// user.DiscriminatorValidator is a validator for the "discriminator" field. It is called by the builders before save.
 	user.DiscriminatorValidator = userDescDiscriminator.Validators[0].(func(string) error)
 	// userDescEmail is the schema descriptor for email field.
-	userDescEmail := userFields[4].Descriptor()
+	userDescEmail := userFields[6].Descriptor()
 	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	user.EmailValidator = userDescEmail.Validators[0].(func(string) error)
 	// userDescAvatarHash is the schema descriptor for avatar_hash field.
-	userDescAvatarHash := userFields[5].Descriptor()
+	userDescAvatarHash := userFields[7].Descriptor()
 	// user.AvatarHashValidator is a validator for the "avatar_hash" field. It is called by the builders before save.
 	user.AvatarHashValidator = userDescAvatarHash.Validators[0].(func(string) error)
 	// userDescAvatarURL is the schema descriptor for avatar_url field.
-	userDescAvatarURL := userFields[6].Descriptor()
+	userDescAvatarURL := userFields[8].Descriptor()
 	// user.AvatarURLValidator is a validator for the "avatar_url" field. It is called by the builders before save.
 	user.AvatarURLValidator = userDescAvatarURL.Validators[0].(func(string) error)
 	// userDescLocale is the schema descriptor for locale field.
-	userDescLocale := userFields[7].Descriptor()
+	userDescLocale := userFields[9].Descriptor()
 	// user.LocaleValidator is a validator for the "locale" field. It is called by the builders before save.
 	user.LocaleValidator = userDescLocale.Validators[0].(func(string) error)
-	// userDescBot is the schema descriptor for bot field.
-	userDescBot := userFields[8].Descriptor()
-	// user.DefaultBot holds the default value on creation for the bot field.
-	user.DefaultBot = userDescBot.Default.(bool)
-	// userDescSystem is the schema descriptor for system field.
-	userDescSystem := userFields[9].Descriptor()
-	// user.DefaultSystem holds the default value on creation for the system field.
-	user.DefaultSystem = userDescSystem.Default.(bool)
-	// userDescMfaEnabled is the schema descriptor for mfa_enabled field.
-	userDescMfaEnabled := userFields[10].Descriptor()
-	// user.DefaultMfaEnabled holds the default value on creation for the mfa_enabled field.
-	user.DefaultMfaEnabled = userDescMfaEnabled.Default.(bool)
-	// userDescVerified is the schema descriptor for verified field.
-	userDescVerified := userFields[11].Descriptor()
-	// user.DefaultVerified holds the default value on creation for the verified field.
-	user.DefaultVerified = userDescVerified.Default.(bool)
-	// userDescFlags is the schema descriptor for flags field.
-	userDescFlags := userFields[12].Descriptor()
-	// user.DefaultFlags holds the default value on creation for the flags field.
-	user.DefaultFlags = userDescFlags.Default.(uint64)
-	// userDescPremiumType is the schema descriptor for premium_type field.
-	userDescPremiumType := userFields[13].Descriptor()
-	// user.DefaultPremiumType holds the default value on creation for the premium_type field.
-	user.DefaultPremiumType = userDescPremiumType.Default.(int)
-	// userDescPublicFlags is the schema descriptor for public_flags field.
-	userDescPublicFlags := userFields[14].Descriptor()
-	// user.DefaultPublicFlags holds the default value on creation for the public_flags field.
-	user.DefaultPublicFlags = userDescPublicFlags.Default.(uint64)
 }
 
 const (

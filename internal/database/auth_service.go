@@ -84,11 +84,12 @@ func (s *authService) set(ctx context.Context, db *ent.Tx, guser *goth.User) (id
 	for _, admin := range s.adminIDs {
 		if admin == duser.ID.String() {
 			userBuilder.SetAdmin(true)
+			break
 		}
 	}
 
 	// Update user.
-	uid, err := userBuilder.OnConflictColumns(user.FieldUserID).Ignore().UpdateNewValues().ID(ctx)
+	uid, err := userBuilder.OnConflictColumns(user.FieldUserID).UpdateNewValues().ID(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("error creating user in db: %w", err)
 	}
@@ -161,6 +162,17 @@ func (s *authService) set(ctx context.Context, db *ent.Tx, guser *goth.User) (id
 		if err != nil {
 			return 0, fmt.Errorf("error removing user from guild (as they no longer have sufficient permission): %w", err)
 		}
+	}
+
+	// Check user status.
+	var u *ent.User
+	u, err = db.User.Get(ctx, uid)
+	if err != nil {
+		return 0, fmt.Errorf("error fetching user status: %w", err)
+	}
+
+	if u.Banned {
+		return 0, &models.ErrUserBanned{User: u}
 	}
 
 	return uid, nil

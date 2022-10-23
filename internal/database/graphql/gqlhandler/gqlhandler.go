@@ -146,7 +146,9 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		BanUser                func(childComplexity int, id int, reason string) int
 		Ping                   func(childComplexity int) int
+		UnbanUser              func(childComplexity int, id int) int
 		UpdateGuildAdminConfig func(childComplexity int, id int, input ent.UpdateGuildAdminConfigInput) int
 		UpdateGuildConfig      func(childComplexity int, id int, input ent.UpdateGuildConfigInput) int
 	}
@@ -177,6 +179,10 @@ type ComplexityRoot struct {
 		Admin         func(childComplexity int) int
 		AvatarHash    func(childComplexity int) int
 		AvatarURL     func(childComplexity int) int
+		BanReason     func(childComplexity int) int
+		Banned        func(childComplexity int) int
+		BannedBy      func(childComplexity int) int
+		BannedUsers   func(childComplexity int) int
 		Bot           func(childComplexity int) int
 		CreateTime    func(childComplexity int) int
 		Discriminator func(childComplexity int) int
@@ -211,6 +217,8 @@ type MutationResolver interface {
 	Ping(ctx context.Context) (*string, error)
 	UpdateGuildConfig(ctx context.Context, id int, input ent.UpdateGuildConfigInput) (*ent.GuildConfig, error)
 	UpdateGuildAdminConfig(ctx context.Context, id int, input ent.UpdateGuildAdminConfigInput) (*ent.GuildAdminConfig, error)
+	BanUser(ctx context.Context, id int, reason string) (bool, error)
+	UnbanUser(ctx context.Context, id int) (bool, error)
 }
 type QueryResolver interface {
 	Node(ctx context.Context, id int) (ent.Noder, error)
@@ -673,12 +681,36 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GuildEventEdge.Node(childComplexity), true
 
+	case "Mutation.banUser":
+		if e.complexity.Mutation.BanUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_banUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.BanUser(childComplexity, args["id"].(int), args["reason"].(string)), true
+
 	case "Mutation.ping":
 		if e.complexity.Mutation.Ping == nil {
 			break
 		}
 
 		return e.complexity.Mutation.Ping(childComplexity), true
+
+	case "Mutation.unbanUser":
+		if e.complexity.Mutation.UnbanUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_unbanUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UnbanUser(childComplexity, args["id"].(int)), true
 
 	case "Mutation.updateGuildAdminConfig":
 		if e.complexity.Mutation.UpdateGuildAdminConfig == nil {
@@ -855,6 +887,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.AvatarURL(childComplexity), true
+
+	case "User.banReason":
+		if e.complexity.User.BanReason == nil {
+			break
+		}
+
+		return e.complexity.User.BanReason(childComplexity), true
+
+	case "User.banned":
+		if e.complexity.User.Banned == nil {
+			break
+		}
+
+		return e.complexity.User.Banned(childComplexity), true
+
+	case "User.bannedBy":
+		if e.complexity.User.BannedBy == nil {
+			break
+		}
+
+		return e.complexity.User.BannedBy(childComplexity), true
+
+	case "User.bannedUsers":
+		if e.complexity.User.BannedUsers == nil {
+			break
+		}
+
+		return e.complexity.User.BannedUsers(childComplexity), true
 
 	case "User.bot":
 		if e.complexity.User.Bot == nil {
@@ -1884,6 +1944,10 @@ type User implements Node {
   userID: String!
   """Whether or not the user is a spectrograph admin."""
   admin: Boolean
+  """Whether or not the user is banned from using the service."""
+  banned: Boolean
+  """Reason for the user being banned (if any)."""
+  banReason: String
   """The users username, not unique across the platform."""
   username: String!
   """The users 4-digit discord-tag."""
@@ -1929,6 +1993,8 @@ type User implements Node {
     """Filtering options for Guilds returned from the connection."""
     where: GuildWhereInput
   ): GuildConnection!
+  bannedUsers: [User!]
+  bannedBy: User
 }
 """A connection to a list of items."""
 type UserConnection {
@@ -2013,6 +2079,27 @@ input UserWhereInput {
   adminNEQ: Boolean
   adminIsNil: Boolean
   adminNotNil: Boolean
+  """banned field predicates"""
+  banned: Boolean
+  bannedNEQ: Boolean
+  bannedIsNil: Boolean
+  bannedNotNil: Boolean
+  """ban_reason field predicates"""
+  banReason: String
+  banReasonNEQ: String
+  banReasonIn: [String!]
+  banReasonNotIn: [String!]
+  banReasonGT: String
+  banReasonGTE: String
+  banReasonLT: String
+  banReasonLTE: String
+  banReasonContains: String
+  banReasonHasPrefix: String
+  banReasonHasSuffix: String
+  banReasonIsNil: Boolean
+  banReasonNotNil: Boolean
+  banReasonEqualFold: String
+  banReasonContainsFold: String
   """username field predicates"""
   username: String
   usernameNEQ: String
@@ -2157,6 +2244,12 @@ input UserWhereInput {
   """user_guilds edge predicates"""
   hasUserGuilds: Boolean
   hasUserGuildsWith: [GuildWhereInput!]
+  """banned_users edge predicates"""
+  hasBannedUsers: Boolean
+  hasBannedUsersWith: [UserWhereInput!]
+  """banned_by edge predicates"""
+  hasBannedBy: Boolean
+  hasBannedByWith: [UserWhereInput!]
 }
 `, BuiltIn: false},
 	{Name: "../schema/guild.gql", Input: `extend type Mutation {
@@ -2170,6 +2263,11 @@ type Subscription {
 `, BuiltIn: false},
 	{Name: "../schema/user.gql", Input: `extend type Query {
     self: User
+}
+
+extend type Mutation {
+    banUser(id: ID!, reason: String!): Boolean!
+    unbanUser(id: ID!): Boolean!
 }
 `, BuiltIn: false},
 }
@@ -2236,6 +2334,45 @@ func (ec *executionContext) field_Guild_admins_args(ctx context.Context, rawArgs
 		}
 	}
 	args["where"] = arg5
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_banUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["reason"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reason"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["reason"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_unbanUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -5853,6 +5990,116 @@ func (ec *executionContext) fieldContext_Mutation_updateGuildAdminConfig(ctx con
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_banUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_banUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().BanUser(rctx, fc.Args["id"].(int), fc.Args["reason"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_banUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_banUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_unbanUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_unbanUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UnbanUser(rctx, fc.Args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_unbanUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_unbanUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *ent.PageInfo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_PageInfo_hasNextPage(ctx, field)
 	if err != nil {
@@ -6491,6 +6738,10 @@ func (ec *executionContext) fieldContext_Query_self(ctx context.Context, field g
 				return ec.fieldContext_User_userID(ctx, field)
 			case "admin":
 				return ec.fieldContext_User_admin(ctx, field)
+			case "banned":
+				return ec.fieldContext_User_banned(ctx, field)
+			case "banReason":
+				return ec.fieldContext_User_banReason(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
 			case "discriminator":
@@ -6519,6 +6770,10 @@ func (ec *executionContext) fieldContext_Query_self(ctx context.Context, field g
 				return ec.fieldContext_User_publicFlags(ctx, field)
 			case "userGuilds":
 				return ec.fieldContext_User_userGuilds(ctx, field)
+			case "bannedUsers":
+				return ec.fieldContext_User_bannedUsers(ctx, field)
+			case "bannedBy":
+				return ec.fieldContext_User_bannedBy(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -6952,6 +7207,88 @@ func (ec *executionContext) fieldContext_User_admin(ctx context.Context, field g
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_banned(ctx context.Context, field graphql.CollectedField, obj *ent.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_banned(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Banned, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalOBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_banned(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_banReason(ctx context.Context, field graphql.CollectedField, obj *ent.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_banReason(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BanReason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_banReason(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7565,6 +7902,184 @@ func (ec *executionContext) fieldContext_User_userGuilds(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _User_bannedUsers(ctx context.Context, field graphql.CollectedField, obj *ent.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_bannedUsers(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BannedUsers(ctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_bannedUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "createTime":
+				return ec.fieldContext_User_createTime(ctx, field)
+			case "updateTime":
+				return ec.fieldContext_User_updateTime(ctx, field)
+			case "userID":
+				return ec.fieldContext_User_userID(ctx, field)
+			case "admin":
+				return ec.fieldContext_User_admin(ctx, field)
+			case "banned":
+				return ec.fieldContext_User_banned(ctx, field)
+			case "banReason":
+				return ec.fieldContext_User_banReason(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
+			case "discriminator":
+				return ec.fieldContext_User_discriminator(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "avatarHash":
+				return ec.fieldContext_User_avatarHash(ctx, field)
+			case "avatarURL":
+				return ec.fieldContext_User_avatarURL(ctx, field)
+			case "locale":
+				return ec.fieldContext_User_locale(ctx, field)
+			case "bot":
+				return ec.fieldContext_User_bot(ctx, field)
+			case "system":
+				return ec.fieldContext_User_system(ctx, field)
+			case "mfaEnabled":
+				return ec.fieldContext_User_mfaEnabled(ctx, field)
+			case "verified":
+				return ec.fieldContext_User_verified(ctx, field)
+			case "flags":
+				return ec.fieldContext_User_flags(ctx, field)
+			case "premiumType":
+				return ec.fieldContext_User_premiumType(ctx, field)
+			case "publicFlags":
+				return ec.fieldContext_User_publicFlags(ctx, field)
+			case "userGuilds":
+				return ec.fieldContext_User_userGuilds(ctx, field)
+			case "bannedUsers":
+				return ec.fieldContext_User_bannedUsers(ctx, field)
+			case "bannedBy":
+				return ec.fieldContext_User_bannedBy(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_bannedBy(ctx context.Context, field graphql.CollectedField, obj *ent.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_bannedBy(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BannedBy(ctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ent.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_bannedBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "createTime":
+				return ec.fieldContext_User_createTime(ctx, field)
+			case "updateTime":
+				return ec.fieldContext_User_updateTime(ctx, field)
+			case "userID":
+				return ec.fieldContext_User_userID(ctx, field)
+			case "admin":
+				return ec.fieldContext_User_admin(ctx, field)
+			case "banned":
+				return ec.fieldContext_User_banned(ctx, field)
+			case "banReason":
+				return ec.fieldContext_User_banReason(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
+			case "discriminator":
+				return ec.fieldContext_User_discriminator(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "avatarHash":
+				return ec.fieldContext_User_avatarHash(ctx, field)
+			case "avatarURL":
+				return ec.fieldContext_User_avatarURL(ctx, field)
+			case "locale":
+				return ec.fieldContext_User_locale(ctx, field)
+			case "bot":
+				return ec.fieldContext_User_bot(ctx, field)
+			case "system":
+				return ec.fieldContext_User_system(ctx, field)
+			case "mfaEnabled":
+				return ec.fieldContext_User_mfaEnabled(ctx, field)
+			case "verified":
+				return ec.fieldContext_User_verified(ctx, field)
+			case "flags":
+				return ec.fieldContext_User_flags(ctx, field)
+			case "premiumType":
+				return ec.fieldContext_User_premiumType(ctx, field)
+			case "publicFlags":
+				return ec.fieldContext_User_publicFlags(ctx, field)
+			case "userGuilds":
+				return ec.fieldContext_User_userGuilds(ctx, field)
+			case "bannedUsers":
+				return ec.fieldContext_User_bannedUsers(ctx, field)
+			case "bannedBy":
+				return ec.fieldContext_User_bannedBy(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UserConnection_edges(ctx context.Context, field graphql.CollectedField, obj *ent.UserConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserConnection_edges(ctx, field)
 	if err != nil {
@@ -7756,6 +8271,10 @@ func (ec *executionContext) fieldContext_UserEdge_node(ctx context.Context, fiel
 				return ec.fieldContext_User_userID(ctx, field)
 			case "admin":
 				return ec.fieldContext_User_admin(ctx, field)
+			case "banned":
+				return ec.fieldContext_User_banned(ctx, field)
+			case "banReason":
+				return ec.fieldContext_User_banReason(ctx, field)
 			case "username":
 				return ec.fieldContext_User_username(ctx, field)
 			case "discriminator":
@@ -7784,6 +8303,10 @@ func (ec *executionContext) fieldContext_UserEdge_node(ctx context.Context, fiel
 				return ec.fieldContext_User_publicFlags(ctx, field)
 			case "userGuilds":
 				return ec.fieldContext_User_userGuilds(ctx, field)
+			case "bannedUsers":
+				return ec.fieldContext_User_bannedUsers(ctx, field)
+			case "bannedBy":
+				return ec.fieldContext_User_bannedBy(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -12719,7 +13242,7 @@ func (ec *executionContext) unmarshalInputUserWhereInput(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "createTime", "createTimeNEQ", "createTimeIn", "createTimeNotIn", "createTimeGT", "createTimeGTE", "createTimeLT", "createTimeLTE", "updateTime", "updateTimeNEQ", "updateTimeIn", "updateTimeNotIn", "updateTimeGT", "updateTimeGTE", "updateTimeLT", "updateTimeLTE", "userID", "userIDNEQ", "userIDIn", "userIDNotIn", "userIDGT", "userIDGTE", "userIDLT", "userIDLTE", "userIDContains", "userIDHasPrefix", "userIDHasSuffix", "userIDEqualFold", "userIDContainsFold", "admin", "adminNEQ", "adminIsNil", "adminNotNil", "username", "usernameNEQ", "usernameIn", "usernameNotIn", "usernameGT", "usernameGTE", "usernameLT", "usernameLTE", "usernameContains", "usernameHasPrefix", "usernameHasSuffix", "usernameEqualFold", "usernameContainsFold", "discriminator", "discriminatorNEQ", "discriminatorIn", "discriminatorNotIn", "discriminatorGT", "discriminatorGTE", "discriminatorLT", "discriminatorLTE", "discriminatorContains", "discriminatorHasPrefix", "discriminatorHasSuffix", "discriminatorEqualFold", "discriminatorContainsFold", "email", "emailNEQ", "emailIn", "emailNotIn", "emailGT", "emailGTE", "emailLT", "emailLTE", "emailContains", "emailHasPrefix", "emailHasSuffix", "emailEqualFold", "emailContainsFold", "avatarHash", "avatarHashNEQ", "avatarHashIn", "avatarHashNotIn", "avatarHashGT", "avatarHashGTE", "avatarHashLT", "avatarHashLTE", "avatarHashContains", "avatarHashHasPrefix", "avatarHashHasSuffix", "avatarHashIsNil", "avatarHashNotNil", "avatarHashEqualFold", "avatarHashContainsFold", "avatarURL", "avatarURLNEQ", "avatarURLIn", "avatarURLNotIn", "avatarURLGT", "avatarURLGTE", "avatarURLLT", "avatarURLLTE", "avatarURLContains", "avatarURLHasPrefix", "avatarURLHasSuffix", "avatarURLEqualFold", "avatarURLContainsFold", "locale", "localeNEQ", "localeIn", "localeNotIn", "localeGT", "localeGTE", "localeLT", "localeLTE", "localeContains", "localeHasPrefix", "localeHasSuffix", "localeIsNil", "localeNotNil", "localeEqualFold", "localeContainsFold", "bot", "botNEQ", "botIsNil", "botNotNil", "system", "systemNEQ", "systemIsNil", "systemNotNil", "mfaEnabled", "mfaEnabledNEQ", "mfaEnabledIsNil", "mfaEnabledNotNil", "verified", "verifiedNEQ", "verifiedIsNil", "verifiedNotNil", "flags", "flagsNEQ", "flagsIn", "flagsNotIn", "flagsGT", "flagsGTE", "flagsLT", "flagsLTE", "flagsIsNil", "flagsNotNil", "premiumType", "premiumTypeNEQ", "premiumTypeIn", "premiumTypeNotIn", "premiumTypeGT", "premiumTypeGTE", "premiumTypeLT", "premiumTypeLTE", "premiumTypeIsNil", "premiumTypeNotNil", "publicFlags", "publicFlagsNEQ", "publicFlagsIn", "publicFlagsNotIn", "publicFlagsGT", "publicFlagsGTE", "publicFlagsLT", "publicFlagsLTE", "publicFlagsIsNil", "publicFlagsNotNil", "hasUserGuilds", "hasUserGuildsWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "createTime", "createTimeNEQ", "createTimeIn", "createTimeNotIn", "createTimeGT", "createTimeGTE", "createTimeLT", "createTimeLTE", "updateTime", "updateTimeNEQ", "updateTimeIn", "updateTimeNotIn", "updateTimeGT", "updateTimeGTE", "updateTimeLT", "updateTimeLTE", "userID", "userIDNEQ", "userIDIn", "userIDNotIn", "userIDGT", "userIDGTE", "userIDLT", "userIDLTE", "userIDContains", "userIDHasPrefix", "userIDHasSuffix", "userIDEqualFold", "userIDContainsFold", "admin", "adminNEQ", "adminIsNil", "adminNotNil", "banned", "bannedNEQ", "bannedIsNil", "bannedNotNil", "banReason", "banReasonNEQ", "banReasonIn", "banReasonNotIn", "banReasonGT", "banReasonGTE", "banReasonLT", "banReasonLTE", "banReasonContains", "banReasonHasPrefix", "banReasonHasSuffix", "banReasonIsNil", "banReasonNotNil", "banReasonEqualFold", "banReasonContainsFold", "username", "usernameNEQ", "usernameIn", "usernameNotIn", "usernameGT", "usernameGTE", "usernameLT", "usernameLTE", "usernameContains", "usernameHasPrefix", "usernameHasSuffix", "usernameEqualFold", "usernameContainsFold", "discriminator", "discriminatorNEQ", "discriminatorIn", "discriminatorNotIn", "discriminatorGT", "discriminatorGTE", "discriminatorLT", "discriminatorLTE", "discriminatorContains", "discriminatorHasPrefix", "discriminatorHasSuffix", "discriminatorEqualFold", "discriminatorContainsFold", "email", "emailNEQ", "emailIn", "emailNotIn", "emailGT", "emailGTE", "emailLT", "emailLTE", "emailContains", "emailHasPrefix", "emailHasSuffix", "emailEqualFold", "emailContainsFold", "avatarHash", "avatarHashNEQ", "avatarHashIn", "avatarHashNotIn", "avatarHashGT", "avatarHashGTE", "avatarHashLT", "avatarHashLTE", "avatarHashContains", "avatarHashHasPrefix", "avatarHashHasSuffix", "avatarHashIsNil", "avatarHashNotNil", "avatarHashEqualFold", "avatarHashContainsFold", "avatarURL", "avatarURLNEQ", "avatarURLIn", "avatarURLNotIn", "avatarURLGT", "avatarURLGTE", "avatarURLLT", "avatarURLLTE", "avatarURLContains", "avatarURLHasPrefix", "avatarURLHasSuffix", "avatarURLEqualFold", "avatarURLContainsFold", "locale", "localeNEQ", "localeIn", "localeNotIn", "localeGT", "localeGTE", "localeLT", "localeLTE", "localeContains", "localeHasPrefix", "localeHasSuffix", "localeIsNil", "localeNotNil", "localeEqualFold", "localeContainsFold", "bot", "botNEQ", "botIsNil", "botNotNil", "system", "systemNEQ", "systemIsNil", "systemNotNil", "mfaEnabled", "mfaEnabledNEQ", "mfaEnabledIsNil", "mfaEnabledNotNil", "verified", "verifiedNEQ", "verifiedIsNil", "verifiedNotNil", "flags", "flagsNEQ", "flagsIn", "flagsNotIn", "flagsGT", "flagsGTE", "flagsLT", "flagsLTE", "flagsIsNil", "flagsNotNil", "premiumType", "premiumTypeNEQ", "premiumTypeIn", "premiumTypeNotIn", "premiumTypeGT", "premiumTypeGTE", "premiumTypeLT", "premiumTypeLTE", "premiumTypeIsNil", "premiumTypeNotNil", "publicFlags", "publicFlagsNEQ", "publicFlagsIn", "publicFlagsNotIn", "publicFlagsGT", "publicFlagsGTE", "publicFlagsLT", "publicFlagsLTE", "publicFlagsIsNil", "publicFlagsNotNil", "hasUserGuilds", "hasUserGuildsWith", "hasBannedUsers", "hasBannedUsersWith", "hasBannedBy", "hasBannedByWith"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -13075,6 +13598,158 @@ func (ec *executionContext) unmarshalInputUserWhereInput(ctx context.Context, ob
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("adminNotNil"))
 			it.AdminNotNil, err = ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banned":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banned"))
+			it.Banned, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "bannedNEQ":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bannedNEQ"))
+			it.BannedNEQ, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "bannedIsNil":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bannedIsNil"))
+			it.BannedIsNil, err = ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "bannedNotNil":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bannedNotNil"))
+			it.BannedNotNil, err = ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReason":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReason"))
+			it.BanReason, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonNEQ":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonNEQ"))
+			it.BanReasonNEQ, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonIn":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonIn"))
+			it.BanReasonIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonNotIn":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonNotIn"))
+			it.BanReasonNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonGT":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonGT"))
+			it.BanReasonGT, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonGTE":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonGTE"))
+			it.BanReasonGTE, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonLT":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonLT"))
+			it.BanReasonLT, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonLTE":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonLTE"))
+			it.BanReasonLTE, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonContains":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonContains"))
+			it.BanReasonContains, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonHasPrefix":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonHasPrefix"))
+			it.BanReasonHasPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonHasSuffix":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonHasSuffix"))
+			it.BanReasonHasSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonIsNil":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonIsNil"))
+			it.BanReasonIsNil, err = ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonNotNil":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonNotNil"))
+			it.BanReasonNotNil, err = ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonEqualFold":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonEqualFold"))
+			it.BanReasonEqualFold, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "banReasonContainsFold":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReasonContainsFold"))
+			it.BanReasonContainsFold, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -14118,6 +14793,38 @@ func (ec *executionContext) unmarshalInputUserWhereInput(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "hasBannedUsers":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasBannedUsers"))
+			it.HasBannedUsers, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "hasBannedUsersWith":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasBannedUsersWith"))
+			it.HasBannedUsersWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "hasBannedBy":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasBannedBy"))
+			it.HasBannedBy, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "hasBannedByWith":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasBannedByWith"))
+			it.HasBannedByWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -14895,6 +15602,24 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "banUser":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_banUser(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "unbanUser":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_unbanUser(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -15231,6 +15956,14 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 
 			out.Values[i] = ec._User_admin(ctx, field, obj)
 
+		case "banned":
+
+			out.Values[i] = ec._User_banned(ctx, field, obj)
+
+		case "banReason":
+
+			out.Values[i] = ec._User_banReason(ctx, field, obj)
+
 		case "username":
 
 			out.Values[i] = ec._User_username(ctx, field, obj)
@@ -15308,6 +16041,40 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "bannedUsers":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_bannedUsers(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "bannedBy":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_bannedBy(ctx, field, obj)
 				return res
 			}
 
@@ -16082,6 +16849,16 @@ func (ec *executionContext) unmarshalNUpdateGuildAdminConfigInput2githubᚗcom�
 func (ec *executionContext) unmarshalNUpdateGuildConfigInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUpdateGuildConfigInput(ctx context.Context, v interface{}) (ent.UpdateGuildConfigInput, error) {
 	res, err := ec.unmarshalInputUpdateGuildConfigInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUser(ctx context.Context, sel ast.SelectionSet, v *ent.User) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNUserConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserConnection(ctx context.Context, sel ast.SelectionSet, v ent.UserConnection) graphql.Marshaler {
@@ -17213,6 +17990,53 @@ func (ec *executionContext) marshalOUint642ᚖuint64(ctx context.Context, sel as
 	}
 	res := graphql.MarshalUint64(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.User) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUser(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUser(ctx context.Context, sel ast.SelectionSet, v *ent.User) graphql.Marshaler {

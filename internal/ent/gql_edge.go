@@ -105,3 +105,23 @@ func (u *User) UserGuilds(
 	}
 	return u.QueryUserGuilds().Paginate(ctx, after, first, before, last, opts...)
 }
+
+func (u *User) BannedUsers(ctx context.Context) (result []*User, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = u.NamedBannedUsers(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = u.Edges.BannedUsersOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = u.QueryBannedUsers().All(ctx)
+	}
+	return result, err
+}
+
+func (u *User) BannedBy(ctx context.Context) (*User, error) {
+	result, err := u.Edges.BannedByOrErr()
+	if IsNotLoaded(err) {
+		result, err = u.QueryBannedBy().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}

@@ -75,6 +75,34 @@ func (uc *UserCreate) SetNillableAdmin(b *bool) *UserCreate {
 	return uc
 }
 
+// SetBanned sets the "banned" field.
+func (uc *UserCreate) SetBanned(b bool) *UserCreate {
+	uc.mutation.SetBanned(b)
+	return uc
+}
+
+// SetNillableBanned sets the "banned" field if the given value is not nil.
+func (uc *UserCreate) SetNillableBanned(b *bool) *UserCreate {
+	if b != nil {
+		uc.SetBanned(*b)
+	}
+	return uc
+}
+
+// SetBanReason sets the "ban_reason" field.
+func (uc *UserCreate) SetBanReason(s string) *UserCreate {
+	uc.mutation.SetBanReason(s)
+	return uc
+}
+
+// SetNillableBanReason sets the "ban_reason" field if the given value is not nil.
+func (uc *UserCreate) SetNillableBanReason(s *string) *UserCreate {
+	if s != nil {
+		uc.SetBanReason(*s)
+	}
+	return uc
+}
+
 // SetUsername sets the "username" field.
 func (uc *UserCreate) SetUsername(s string) *UserCreate {
 	uc.mutation.SetUsername(s)
@@ -240,6 +268,40 @@ func (uc *UserCreate) AddUserGuilds(g ...*Guild) *UserCreate {
 	return uc.AddUserGuildIDs(ids...)
 }
 
+// AddBannedUserIDs adds the "banned_users" edge to the User entity by IDs.
+func (uc *UserCreate) AddBannedUserIDs(ids ...int) *UserCreate {
+	uc.mutation.AddBannedUserIDs(ids...)
+	return uc
+}
+
+// AddBannedUsers adds the "banned_users" edges to the User entity.
+func (uc *UserCreate) AddBannedUsers(u ...*User) *UserCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uc.AddBannedUserIDs(ids...)
+}
+
+// SetBannedByID sets the "banned_by" edge to the User entity by ID.
+func (uc *UserCreate) SetBannedByID(id int) *UserCreate {
+	uc.mutation.SetBannedByID(id)
+	return uc
+}
+
+// SetNillableBannedByID sets the "banned_by" edge to the User entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableBannedByID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetBannedByID(*id)
+	}
+	return uc
+}
+
+// SetBannedBy sets the "banned_by" edge to the User entity.
+func (uc *UserCreate) SetBannedBy(u *User) *UserCreate {
+	return uc.SetBannedByID(u.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -332,38 +394,6 @@ func (uc *UserCreate) defaults() error {
 		}
 		v := user.DefaultUpdateTime()
 		uc.mutation.SetUpdateTime(v)
-	}
-	if _, ok := uc.mutation.Admin(); !ok {
-		v := user.DefaultAdmin
-		uc.mutation.SetAdmin(v)
-	}
-	if _, ok := uc.mutation.Bot(); !ok {
-		v := user.DefaultBot
-		uc.mutation.SetBot(v)
-	}
-	if _, ok := uc.mutation.System(); !ok {
-		v := user.DefaultSystem
-		uc.mutation.SetSystem(v)
-	}
-	if _, ok := uc.mutation.MfaEnabled(); !ok {
-		v := user.DefaultMfaEnabled
-		uc.mutation.SetMfaEnabled(v)
-	}
-	if _, ok := uc.mutation.Verified(); !ok {
-		v := user.DefaultVerified
-		uc.mutation.SetVerified(v)
-	}
-	if _, ok := uc.mutation.Flags(); !ok {
-		v := user.DefaultFlags
-		uc.mutation.SetFlags(v)
-	}
-	if _, ok := uc.mutation.PremiumType(); !ok {
-		v := user.DefaultPremiumType
-		uc.mutation.SetPremiumType(v)
-	}
-	if _, ok := uc.mutation.PublicFlags(); !ok {
-		v := user.DefaultPublicFlags
-		uc.mutation.SetPublicFlags(v)
 	}
 	return nil
 }
@@ -475,6 +505,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldAdmin,
 		})
 		_node.Admin = value
+	}
+	if value, ok := uc.mutation.Banned(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: user.FieldBanned,
+		})
+		_node.Banned = value
+	}
+	if value, ok := uc.mutation.BanReason(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldBanReason,
+		})
+		_node.BanReason = value
 	}
 	if value, ok := uc.mutation.Username(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -599,6 +645,45 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := uc.mutation.BannedUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BannedUsersTable,
+			Columns: []string{user.BannedUsersColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.BannedByIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BannedByTable,
+			Columns: []string{user.BannedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_banned_users = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -678,6 +763,42 @@ func (u *UserUpsert) UpdateAdmin() *UserUpsert {
 // ClearAdmin clears the value of the "admin" field.
 func (u *UserUpsert) ClearAdmin() *UserUpsert {
 	u.SetNull(user.FieldAdmin)
+	return u
+}
+
+// SetBanned sets the "banned" field.
+func (u *UserUpsert) SetBanned(v bool) *UserUpsert {
+	u.Set(user.FieldBanned, v)
+	return u
+}
+
+// UpdateBanned sets the "banned" field to the value that was provided on create.
+func (u *UserUpsert) UpdateBanned() *UserUpsert {
+	u.SetExcluded(user.FieldBanned)
+	return u
+}
+
+// ClearBanned clears the value of the "banned" field.
+func (u *UserUpsert) ClearBanned() *UserUpsert {
+	u.SetNull(user.FieldBanned)
+	return u
+}
+
+// SetBanReason sets the "ban_reason" field.
+func (u *UserUpsert) SetBanReason(v string) *UserUpsert {
+	u.Set(user.FieldBanReason, v)
+	return u
+}
+
+// UpdateBanReason sets the "ban_reason" field to the value that was provided on create.
+func (u *UserUpsert) UpdateBanReason() *UserUpsert {
+	u.SetExcluded(user.FieldBanReason)
+	return u
+}
+
+// ClearBanReason clears the value of the "ban_reason" field.
+func (u *UserUpsert) ClearBanReason() *UserUpsert {
+	u.SetNull(user.FieldBanReason)
 	return u
 }
 
@@ -989,6 +1110,48 @@ func (u *UserUpsertOne) UpdateAdmin() *UserUpsertOne {
 func (u *UserUpsertOne) ClearAdmin() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearAdmin()
+	})
+}
+
+// SetBanned sets the "banned" field.
+func (u *UserUpsertOne) SetBanned(v bool) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetBanned(v)
+	})
+}
+
+// UpdateBanned sets the "banned" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateBanned() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateBanned()
+	})
+}
+
+// ClearBanned clears the value of the "banned" field.
+func (u *UserUpsertOne) ClearBanned() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearBanned()
+	})
+}
+
+// SetBanReason sets the "ban_reason" field.
+func (u *UserUpsertOne) SetBanReason(v string) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetBanReason(v)
+	})
+}
+
+// UpdateBanReason sets the "ban_reason" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateBanReason() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateBanReason()
+	})
+}
+
+// ClearBanReason clears the value of the "ban_reason" field.
+func (u *UserUpsertOne) ClearBanReason() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearBanReason()
 	})
 }
 
@@ -1500,6 +1663,48 @@ func (u *UserUpsertBulk) UpdateAdmin() *UserUpsertBulk {
 func (u *UserUpsertBulk) ClearAdmin() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearAdmin()
+	})
+}
+
+// SetBanned sets the "banned" field.
+func (u *UserUpsertBulk) SetBanned(v bool) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetBanned(v)
+	})
+}
+
+// UpdateBanned sets the "banned" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateBanned() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateBanned()
+	})
+}
+
+// ClearBanned clears the value of the "banned" field.
+func (u *UserUpsertBulk) ClearBanned() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearBanned()
+	})
+}
+
+// SetBanReason sets the "ban_reason" field.
+func (u *UserUpsertBulk) SetBanReason(v string) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetBanReason(v)
+	})
+}
+
+// UpdateBanReason sets the "ban_reason" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateBanReason() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateBanReason()
+	})
+}
+
+// ClearBanReason clears the value of the "ban_reason" field.
+func (u *UserUpsertBulk) ClearBanReason() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearBanReason()
 	})
 }
 

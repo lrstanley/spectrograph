@@ -28,6 +28,10 @@ type User struct {
 	UserID string `json:"user_id,omitempty"`
 	// Whether or not the user is a spectrograph admin.
 	Admin bool `json:"admin,omitempty"`
+	// Whether or not the user is banned from using the service.
+	Banned bool `json:"banned,omitempty"`
+	// Reason for the user being banned (if any).
+	BanReason string `json:"ban_reason,omitempty"`
 	// The users username, not unique across the platform.
 	Username string `json:"username,omitempty"`
 	// The users 4-digit discord-tag.
@@ -56,20 +60,26 @@ type User struct {
 	PublicFlags uint64 `json:"public_flags,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges"`
+	Edges             UserEdges `json:"edges"`
+	user_banned_users *int
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Guilds that the user is either owner or admin of (and thus can add the connection to the bot).
 	UserGuilds []*Guild `json:"user_guilds,omitempty"`
+	// Users that were banned by this user.
+	BannedUsers []*User `json:"banned_users,omitempty"`
+	// User that banned this user.
+	BannedBy *User `json:"banned_by,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
+	totalCount [3]map[string]int
 
-	namedUserGuilds map[string][]*Guild
+	namedUserGuilds  map[string][]*Guild
+	namedBannedUsers map[string][]*User
 }
 
 // UserGuildsOrErr returns the UserGuilds value or an error if the edge
@@ -81,19 +91,43 @@ func (e UserEdges) UserGuildsOrErr() ([]*Guild, error) {
 	return nil, &NotLoadedError{edge: "user_guilds"}
 }
 
+// BannedUsersOrErr returns the BannedUsers value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) BannedUsersOrErr() ([]*User, error) {
+	if e.loadedTypes[1] {
+		return e.BannedUsers, nil
+	}
+	return nil, &NotLoadedError{edge: "banned_users"}
+}
+
+// BannedByOrErr returns the BannedBy value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) BannedByOrErr() (*User, error) {
+	if e.loadedTypes[2] {
+		if e.BannedBy == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.BannedBy, nil
+	}
+	return nil, &NotLoadedError{edge: "banned_by"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldAdmin, user.FieldBot, user.FieldSystem, user.FieldMfaEnabled, user.FieldVerified:
+		case user.FieldAdmin, user.FieldBanned, user.FieldBot, user.FieldSystem, user.FieldMfaEnabled, user.FieldVerified:
 			values[i] = new(sql.NullBool)
 		case user.FieldID, user.FieldFlags, user.FieldPremiumType, user.FieldPublicFlags:
 			values[i] = new(sql.NullInt64)
-		case user.FieldUserID, user.FieldUsername, user.FieldDiscriminator, user.FieldEmail, user.FieldAvatarHash, user.FieldAvatarURL, user.FieldLocale:
+		case user.FieldUserID, user.FieldBanReason, user.FieldUsername, user.FieldDiscriminator, user.FieldEmail, user.FieldAvatarHash, user.FieldAvatarURL, user.FieldLocale:
 			values[i] = new(sql.NullString)
 		case user.FieldCreateTime, user.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
+		case user.ForeignKeys[0]: // user_banned_users
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -138,6 +172,18 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field admin", values[i])
 			} else if value.Valid {
 				u.Admin = value.Bool
+			}
+		case user.FieldBanned:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field banned", values[i])
+			} else if value.Valid {
+				u.Banned = value.Bool
+			}
+		case user.FieldBanReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ban_reason", values[i])
+			} else if value.Valid {
+				u.BanReason = value.String
 			}
 		case user.FieldUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -217,6 +263,13 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.PublicFlags = uint64(value.Int64)
 			}
+		case user.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_banned_users", value)
+			} else if value.Valid {
+				u.user_banned_users = new(int)
+				*u.user_banned_users = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -225,6 +278,16 @@ func (u *User) assignValues(columns []string, values []any) error {
 // QueryUserGuilds queries the "user_guilds" edge of the User entity.
 func (u *User) QueryUserGuilds() *GuildQuery {
 	return (&UserClient{config: u.config}).QueryUserGuilds(u)
+}
+
+// QueryBannedUsers queries the "banned_users" edge of the User entity.
+func (u *User) QueryBannedUsers() *UserQuery {
+	return (&UserClient{config: u.config}).QueryBannedUsers(u)
+}
+
+// QueryBannedBy queries the "banned_by" edge of the User entity.
+func (u *User) QueryBannedBy() *UserQuery {
+	return (&UserClient{config: u.config}).QueryBannedBy(u)
 }
 
 // Update returns a builder for updating this User.
@@ -261,6 +324,12 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("admin=")
 	builder.WriteString(fmt.Sprintf("%v", u.Admin))
+	builder.WriteString(", ")
+	builder.WriteString("banned=")
+	builder.WriteString(fmt.Sprintf("%v", u.Banned))
+	builder.WriteString(", ")
+	builder.WriteString("ban_reason=")
+	builder.WriteString(u.BanReason)
 	builder.WriteString(", ")
 	builder.WriteString("username=")
 	builder.WriteString(u.Username)
@@ -325,6 +394,30 @@ func (u *User) appendNamedUserGuilds(name string, edges ...*Guild) {
 		u.Edges.namedUserGuilds[name] = []*Guild{}
 	} else {
 		u.Edges.namedUserGuilds[name] = append(u.Edges.namedUserGuilds[name], edges...)
+	}
+}
+
+// NamedBannedUsers returns the BannedUsers named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedBannedUsers(name string) ([]*User, error) {
+	if u.Edges.namedBannedUsers == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedBannedUsers[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (u *User) appendNamedBannedUsers(name string, edges ...*User) {
+	if u.Edges.namedBannedUsers == nil {
+		u.Edges.namedBannedUsers = make(map[string][]*User)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedBannedUsers[name] = []*User{}
+	} else {
+		u.Edges.namedBannedUsers[name] = append(u.Edges.namedBannedUsers[name], edges...)
 	}
 }
 

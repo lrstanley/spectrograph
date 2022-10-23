@@ -59,6 +59,46 @@ func (uu *UserUpdate) ClearAdmin() *UserUpdate {
 	return uu
 }
 
+// SetBanned sets the "banned" field.
+func (uu *UserUpdate) SetBanned(b bool) *UserUpdate {
+	uu.mutation.SetBanned(b)
+	return uu
+}
+
+// SetNillableBanned sets the "banned" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableBanned(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetBanned(*b)
+	}
+	return uu
+}
+
+// ClearBanned clears the value of the "banned" field.
+func (uu *UserUpdate) ClearBanned() *UserUpdate {
+	uu.mutation.ClearBanned()
+	return uu
+}
+
+// SetBanReason sets the "ban_reason" field.
+func (uu *UserUpdate) SetBanReason(s string) *UserUpdate {
+	uu.mutation.SetBanReason(s)
+	return uu
+}
+
+// SetNillableBanReason sets the "ban_reason" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableBanReason(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetBanReason(*s)
+	}
+	return uu
+}
+
+// ClearBanReason clears the value of the "ban_reason" field.
+func (uu *UserUpdate) ClearBanReason() *UserUpdate {
+	uu.mutation.ClearBanReason()
+	return uu
+}
+
 // SetUsername sets the "username" field.
 func (uu *UserUpdate) SetUsername(s string) *UserUpdate {
 	uu.mutation.SetUsername(s)
@@ -299,6 +339,40 @@ func (uu *UserUpdate) AddUserGuilds(g ...*Guild) *UserUpdate {
 	return uu.AddUserGuildIDs(ids...)
 }
 
+// AddBannedUserIDs adds the "banned_users" edge to the User entity by IDs.
+func (uu *UserUpdate) AddBannedUserIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddBannedUserIDs(ids...)
+	return uu
+}
+
+// AddBannedUsers adds the "banned_users" edges to the User entity.
+func (uu *UserUpdate) AddBannedUsers(u ...*User) *UserUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.AddBannedUserIDs(ids...)
+}
+
+// SetBannedByID sets the "banned_by" edge to the User entity by ID.
+func (uu *UserUpdate) SetBannedByID(id int) *UserUpdate {
+	uu.mutation.SetBannedByID(id)
+	return uu
+}
+
+// SetNillableBannedByID sets the "banned_by" edge to the User entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillableBannedByID(id *int) *UserUpdate {
+	if id != nil {
+		uu = uu.SetBannedByID(*id)
+	}
+	return uu
+}
+
+// SetBannedBy sets the "banned_by" edge to the User entity.
+func (uu *UserUpdate) SetBannedBy(u *User) *UserUpdate {
+	return uu.SetBannedByID(u.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -323,6 +397,33 @@ func (uu *UserUpdate) RemoveUserGuilds(g ...*Guild) *UserUpdate {
 		ids[i] = g[i].ID
 	}
 	return uu.RemoveUserGuildIDs(ids...)
+}
+
+// ClearBannedUsers clears all "banned_users" edges to the User entity.
+func (uu *UserUpdate) ClearBannedUsers() *UserUpdate {
+	uu.mutation.ClearBannedUsers()
+	return uu
+}
+
+// RemoveBannedUserIDs removes the "banned_users" edge to User entities by IDs.
+func (uu *UserUpdate) RemoveBannedUserIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveBannedUserIDs(ids...)
+	return uu
+}
+
+// RemoveBannedUsers removes "banned_users" edges to User entities.
+func (uu *UserUpdate) RemoveBannedUsers(u ...*User) *UserUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.RemoveBannedUserIDs(ids...)
+}
+
+// ClearBannedBy clears the "banned_by" edge to the User entity.
+func (uu *UserUpdate) ClearBannedBy() *UserUpdate {
+	uu.mutation.ClearBannedBy()
+	return uu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -466,6 +567,32 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Column: user.FieldAdmin,
+		})
+	}
+	if value, ok := uu.mutation.Banned(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: user.FieldBanned,
+		})
+	}
+	if uu.mutation.BannedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: user.FieldBanned,
+		})
+	}
+	if value, ok := uu.mutation.BanReason(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldBanReason,
+		})
+	}
+	if uu.mutation.BanReasonCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldBanReason,
 		})
 	}
 	if value, ok := uu.mutation.Username(); ok {
@@ -688,6 +815,95 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.BannedUsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BannedUsersTable,
+			Columns: []string{user.BannedUsersColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedBannedUsersIDs(); len(nodes) > 0 && !uu.mutation.BannedUsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BannedUsersTable,
+			Columns: []string{user.BannedUsersColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.BannedUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BannedUsersTable,
+			Columns: []string{user.BannedUsersColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.BannedByCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BannedByTable,
+			Columns: []string{user.BannedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.BannedByIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BannedByTable,
+			Columns: []string{user.BannedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -730,6 +946,46 @@ func (uuo *UserUpdateOne) SetNillableAdmin(b *bool) *UserUpdateOne {
 // ClearAdmin clears the value of the "admin" field.
 func (uuo *UserUpdateOne) ClearAdmin() *UserUpdateOne {
 	uuo.mutation.ClearAdmin()
+	return uuo
+}
+
+// SetBanned sets the "banned" field.
+func (uuo *UserUpdateOne) SetBanned(b bool) *UserUpdateOne {
+	uuo.mutation.SetBanned(b)
+	return uuo
+}
+
+// SetNillableBanned sets the "banned" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableBanned(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetBanned(*b)
+	}
+	return uuo
+}
+
+// ClearBanned clears the value of the "banned" field.
+func (uuo *UserUpdateOne) ClearBanned() *UserUpdateOne {
+	uuo.mutation.ClearBanned()
+	return uuo
+}
+
+// SetBanReason sets the "ban_reason" field.
+func (uuo *UserUpdateOne) SetBanReason(s string) *UserUpdateOne {
+	uuo.mutation.SetBanReason(s)
+	return uuo
+}
+
+// SetNillableBanReason sets the "ban_reason" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableBanReason(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetBanReason(*s)
+	}
+	return uuo
+}
+
+// ClearBanReason clears the value of the "ban_reason" field.
+func (uuo *UserUpdateOne) ClearBanReason() *UserUpdateOne {
+	uuo.mutation.ClearBanReason()
 	return uuo
 }
 
@@ -973,6 +1229,40 @@ func (uuo *UserUpdateOne) AddUserGuilds(g ...*Guild) *UserUpdateOne {
 	return uuo.AddUserGuildIDs(ids...)
 }
 
+// AddBannedUserIDs adds the "banned_users" edge to the User entity by IDs.
+func (uuo *UserUpdateOne) AddBannedUserIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddBannedUserIDs(ids...)
+	return uuo
+}
+
+// AddBannedUsers adds the "banned_users" edges to the User entity.
+func (uuo *UserUpdateOne) AddBannedUsers(u ...*User) *UserUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.AddBannedUserIDs(ids...)
+}
+
+// SetBannedByID sets the "banned_by" edge to the User entity by ID.
+func (uuo *UserUpdateOne) SetBannedByID(id int) *UserUpdateOne {
+	uuo.mutation.SetBannedByID(id)
+	return uuo
+}
+
+// SetNillableBannedByID sets the "banned_by" edge to the User entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableBannedByID(id *int) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetBannedByID(*id)
+	}
+	return uuo
+}
+
+// SetBannedBy sets the "banned_by" edge to the User entity.
+func (uuo *UserUpdateOne) SetBannedBy(u *User) *UserUpdateOne {
+	return uuo.SetBannedByID(u.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -997,6 +1287,33 @@ func (uuo *UserUpdateOne) RemoveUserGuilds(g ...*Guild) *UserUpdateOne {
 		ids[i] = g[i].ID
 	}
 	return uuo.RemoveUserGuildIDs(ids...)
+}
+
+// ClearBannedUsers clears all "banned_users" edges to the User entity.
+func (uuo *UserUpdateOne) ClearBannedUsers() *UserUpdateOne {
+	uuo.mutation.ClearBannedUsers()
+	return uuo
+}
+
+// RemoveBannedUserIDs removes the "banned_users" edge to User entities by IDs.
+func (uuo *UserUpdateOne) RemoveBannedUserIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveBannedUserIDs(ids...)
+	return uuo
+}
+
+// RemoveBannedUsers removes "banned_users" edges to User entities.
+func (uuo *UserUpdateOne) RemoveBannedUsers(u ...*User) *UserUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.RemoveBannedUserIDs(ids...)
+}
+
+// ClearBannedBy clears the "banned_by" edge to the User entity.
+func (uuo *UserUpdateOne) ClearBannedBy() *UserUpdateOne {
+	uuo.mutation.ClearBannedBy()
+	return uuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1170,6 +1487,32 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Column: user.FieldAdmin,
+		})
+	}
+	if value, ok := uuo.mutation.Banned(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: user.FieldBanned,
+		})
+	}
+	if uuo.mutation.BannedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: user.FieldBanned,
+		})
+	}
+	if value, ok := uuo.mutation.BanReason(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldBanReason,
+		})
+	}
+	if uuo.mutation.BanReasonCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldBanReason,
 		})
 	}
 	if value, ok := uuo.mutation.Username(); ok {
@@ -1384,6 +1727,95 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: guild.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.BannedUsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BannedUsersTable,
+			Columns: []string{user.BannedUsersColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedBannedUsersIDs(); len(nodes) > 0 && !uuo.mutation.BannedUsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BannedUsersTable,
+			Columns: []string{user.BannedUsersColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.BannedUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BannedUsersTable,
+			Columns: []string{user.BannedUsersColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.BannedByCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BannedByTable,
+			Columns: []string{user.BannedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.BannedByIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BannedByTable,
+			Columns: []string{user.BannedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
 				},
 			},
 		}

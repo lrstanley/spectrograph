@@ -1911,6 +1911,29 @@ type UserWhereInput struct {
 	AdminIsNil  bool  `json:"adminIsNil,omitempty"`
 	AdminNotNil bool  `json:"adminNotNil,omitempty"`
 
+	// "banned" field predicates.
+	Banned       *bool `json:"banned,omitempty"`
+	BannedNEQ    *bool `json:"bannedNEQ,omitempty"`
+	BannedIsNil  bool  `json:"bannedIsNil,omitempty"`
+	BannedNotNil bool  `json:"bannedNotNil,omitempty"`
+
+	// "ban_reason" field predicates.
+	BanReason             *string  `json:"banReason,omitempty"`
+	BanReasonNEQ          *string  `json:"banReasonNEQ,omitempty"`
+	BanReasonIn           []string `json:"banReasonIn,omitempty"`
+	BanReasonNotIn        []string `json:"banReasonNotIn,omitempty"`
+	BanReasonGT           *string  `json:"banReasonGT,omitempty"`
+	BanReasonGTE          *string  `json:"banReasonGTE,omitempty"`
+	BanReasonLT           *string  `json:"banReasonLT,omitempty"`
+	BanReasonLTE          *string  `json:"banReasonLTE,omitempty"`
+	BanReasonContains     *string  `json:"banReasonContains,omitempty"`
+	BanReasonHasPrefix    *string  `json:"banReasonHasPrefix,omitempty"`
+	BanReasonHasSuffix    *string  `json:"banReasonHasSuffix,omitempty"`
+	BanReasonIsNil        bool     `json:"banReasonIsNil,omitempty"`
+	BanReasonNotNil       bool     `json:"banReasonNotNil,omitempty"`
+	BanReasonEqualFold    *string  `json:"banReasonEqualFold,omitempty"`
+	BanReasonContainsFold *string  `json:"banReasonContainsFold,omitempty"`
+
 	// "username" field predicates.
 	Username             *string  `json:"username,omitempty"`
 	UsernameNEQ          *string  `json:"usernameNEQ,omitempty"`
@@ -2068,6 +2091,14 @@ type UserWhereInput struct {
 	// "user_guilds" edge predicates.
 	HasUserGuilds     *bool              `json:"hasUserGuilds,omitempty"`
 	HasUserGuildsWith []*GuildWhereInput `json:"hasUserGuildsWith,omitempty"`
+
+	// "banned_users" edge predicates.
+	HasBannedUsers     *bool             `json:"hasBannedUsers,omitempty"`
+	HasBannedUsersWith []*UserWhereInput `json:"hasBannedUsersWith,omitempty"`
+
+	// "banned_by" edge predicates.
+	HasBannedBy     *bool             `json:"hasBannedBy,omitempty"`
+	HasBannedByWith []*UserWhereInput `json:"hasBannedByWith,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -2263,6 +2294,63 @@ func (i *UserWhereInput) P() (predicate.User, error) {
 	}
 	if i.AdminNotNil {
 		predicates = append(predicates, user.AdminNotNil())
+	}
+	if i.Banned != nil {
+		predicates = append(predicates, user.BannedEQ(*i.Banned))
+	}
+	if i.BannedNEQ != nil {
+		predicates = append(predicates, user.BannedNEQ(*i.BannedNEQ))
+	}
+	if i.BannedIsNil {
+		predicates = append(predicates, user.BannedIsNil())
+	}
+	if i.BannedNotNil {
+		predicates = append(predicates, user.BannedNotNil())
+	}
+	if i.BanReason != nil {
+		predicates = append(predicates, user.BanReasonEQ(*i.BanReason))
+	}
+	if i.BanReasonNEQ != nil {
+		predicates = append(predicates, user.BanReasonNEQ(*i.BanReasonNEQ))
+	}
+	if len(i.BanReasonIn) > 0 {
+		predicates = append(predicates, user.BanReasonIn(i.BanReasonIn...))
+	}
+	if len(i.BanReasonNotIn) > 0 {
+		predicates = append(predicates, user.BanReasonNotIn(i.BanReasonNotIn...))
+	}
+	if i.BanReasonGT != nil {
+		predicates = append(predicates, user.BanReasonGT(*i.BanReasonGT))
+	}
+	if i.BanReasonGTE != nil {
+		predicates = append(predicates, user.BanReasonGTE(*i.BanReasonGTE))
+	}
+	if i.BanReasonLT != nil {
+		predicates = append(predicates, user.BanReasonLT(*i.BanReasonLT))
+	}
+	if i.BanReasonLTE != nil {
+		predicates = append(predicates, user.BanReasonLTE(*i.BanReasonLTE))
+	}
+	if i.BanReasonContains != nil {
+		predicates = append(predicates, user.BanReasonContains(*i.BanReasonContains))
+	}
+	if i.BanReasonHasPrefix != nil {
+		predicates = append(predicates, user.BanReasonHasPrefix(*i.BanReasonHasPrefix))
+	}
+	if i.BanReasonHasSuffix != nil {
+		predicates = append(predicates, user.BanReasonHasSuffix(*i.BanReasonHasSuffix))
+	}
+	if i.BanReasonIsNil {
+		predicates = append(predicates, user.BanReasonIsNil())
+	}
+	if i.BanReasonNotNil {
+		predicates = append(predicates, user.BanReasonNotNil())
+	}
+	if i.BanReasonEqualFold != nil {
+		predicates = append(predicates, user.BanReasonEqualFold(*i.BanReasonEqualFold))
+	}
+	if i.BanReasonContainsFold != nil {
+		predicates = append(predicates, user.BanReasonContainsFold(*i.BanReasonContainsFold))
 	}
 	if i.Username != nil {
 		predicates = append(predicates, user.UsernameEQ(*i.Username))
@@ -2666,6 +2754,42 @@ func (i *UserWhereInput) P() (predicate.User, error) {
 			with = append(with, p)
 		}
 		predicates = append(predicates, user.HasUserGuildsWith(with...))
+	}
+	if i.HasBannedUsers != nil {
+		p := user.HasBannedUsers()
+		if !*i.HasBannedUsers {
+			p = user.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasBannedUsersWith) > 0 {
+		with := make([]predicate.User, 0, len(i.HasBannedUsersWith))
+		for _, w := range i.HasBannedUsersWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasBannedUsersWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, user.HasBannedUsersWith(with...))
+	}
+	if i.HasBannedBy != nil {
+		p := user.HasBannedBy()
+		if !*i.HasBannedBy {
+			p = user.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasBannedByWith) > 0 {
+		with := make([]predicate.User, 0, len(i.HasBannedByWith))
+		for _, w := range i.HasBannedByWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasBannedByWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, user.HasBannedByWith(with...))
 	}
 	switch len(predicates) {
 	case 0:

@@ -24,16 +24,20 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	limit               *int
-	offset              *int
-	unique              *bool
-	order               []OrderFunc
-	fields              []string
-	predicates          []predicate.User
-	withUserGuilds      *GuildQuery
-	modifiers           []func(*sql.Selector)
-	loadTotal           []func(context.Context, []*User) error
-	withNamedUserGuilds map[string]*GuildQuery
+	limit                *int
+	offset               *int
+	unique               *bool
+	order                []OrderFunc
+	fields               []string
+	predicates           []predicate.User
+	withUserGuilds       *GuildQuery
+	withBannedUsers      *UserQuery
+	withBannedBy         *UserQuery
+	withFKs              bool
+	modifiers            []func(*sql.Selector)
+	loadTotal            []func(context.Context, []*User) error
+	withNamedUserGuilds  map[string]*GuildQuery
+	withNamedBannedUsers map[string]*UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -85,6 +89,50 @@ func (uq *UserQuery) QueryUserGuilds() *GuildQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(guild.Table, guild.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.UserGuildsTable, user.UserGuildsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBannedUsers chains the current query on the "banned_users" edge.
+func (uq *UserQuery) QueryBannedUsers() *UserQuery {
+	query := &UserQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.BannedUsersTable, user.BannedUsersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBannedBy chains the current query on the "banned_by" edge.
+func (uq *UserQuery) QueryBannedBy() *UserQuery {
+	query := &UserQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.BannedByTable, user.BannedByColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -268,12 +316,14 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:         uq.config,
-		limit:          uq.limit,
-		offset:         uq.offset,
-		order:          append([]OrderFunc{}, uq.order...),
-		predicates:     append([]predicate.User{}, uq.predicates...),
-		withUserGuilds: uq.withUserGuilds.Clone(),
+		config:          uq.config,
+		limit:           uq.limit,
+		offset:          uq.offset,
+		order:           append([]OrderFunc{}, uq.order...),
+		predicates:      append([]predicate.User{}, uq.predicates...),
+		withUserGuilds:  uq.withUserGuilds.Clone(),
+		withBannedUsers: uq.withBannedUsers.Clone(),
+		withBannedBy:    uq.withBannedBy.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -289,6 +339,28 @@ func (uq *UserQuery) WithUserGuilds(opts ...func(*GuildQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withUserGuilds = query
+	return uq
+}
+
+// WithBannedUsers tells the query-builder to eager-load the nodes that are connected to
+// the "banned_users" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithBannedUsers(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withBannedUsers = query
+	return uq
+}
+
+// WithBannedBy tells the query-builder to eager-load the nodes that are connected to
+// the "banned_by" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithBannedBy(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withBannedBy = query
 	return uq
 }
 
@@ -365,11 +437,20 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, error) {
 	var (
 		nodes       = []*User{}
+		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
 			uq.withUserGuilds != nil,
+			uq.withBannedUsers != nil,
+			uq.withBannedBy != nil,
 		}
 	)
+	if uq.withBannedBy != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*User).scanValues(nil, columns)
 	}
@@ -398,10 +479,30 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	if query := uq.withBannedUsers; query != nil {
+		if err := uq.loadBannedUsers(ctx, query, nodes,
+			func(n *User) { n.Edges.BannedUsers = []*User{} },
+			func(n *User, e *User) { n.Edges.BannedUsers = append(n.Edges.BannedUsers, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withBannedBy; query != nil {
+		if err := uq.loadBannedBy(ctx, query, nodes, nil,
+			func(n *User, e *User) { n.Edges.BannedBy = e }); err != nil {
+			return nil, err
+		}
+	}
 	for name, query := range uq.withNamedUserGuilds {
 		if err := uq.loadUserGuilds(ctx, query, nodes,
 			func(n *User) { n.appendNamedUserGuilds(name) },
 			func(n *User, e *Guild) { n.appendNamedUserGuilds(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range uq.withNamedBannedUsers {
+		if err := uq.loadBannedUsers(ctx, query, nodes,
+			func(n *User) { n.appendNamedBannedUsers(name) },
+			func(n *User, e *User) { n.appendNamedBannedUsers(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -467,6 +568,66 @@ func (uq *UserQuery) loadUserGuilds(ctx context.Context, query *GuildQuery, node
 		}
 		for kn := range nodes {
 			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (uq *UserQuery) loadBannedUsers(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.BannedUsersColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_banned_users
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_banned_users" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_banned_users" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadBannedBy(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*User)
+	for i := range nodes {
+		if nodes[i].user_banned_users == nil {
+			continue
+		}
+		fk := *nodes[i].user_banned_users
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_banned_users" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil
@@ -586,6 +747,20 @@ func (uq *UserQuery) WithNamedUserGuilds(name string, opts ...func(*GuildQuery))
 		uq.withNamedUserGuilds = make(map[string]*GuildQuery)
 	}
 	uq.withNamedUserGuilds[name] = query
+	return uq
+}
+
+// WithNamedBannedUsers tells the query-builder to eager-load the nodes that are connected to the "banned_users"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithNamedBannedUsers(name string, opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if uq.withNamedBannedUsers == nil {
+		uq.withNamedBannedUsers = make(map[string]*UserQuery)
+	}
+	uq.withNamedBannedUsers[name] = query
 	return uq
 }
 

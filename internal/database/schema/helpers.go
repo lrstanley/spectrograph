@@ -107,3 +107,19 @@ func DisallowDebugUnlessAdmin() privacy.QueryRule {
 		return nil
 	})
 }
+
+func AllowUserQuerySelf() privacy.QueryRule {
+	return privacy.UserQueryRuleFunc(func(ctx context.Context, q *ent.UserQuery) error {
+		uid := userID(ctx)
+
+		if uid == 0 {
+			return privacy.Skip
+		}
+
+		if !hasRole(ctx, models.RoleSystemAdmin) {
+			q.Where(user.ID(uid))
+			return privacy.Allow
+		}
+		return nil
+	})
+}

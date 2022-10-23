@@ -513,6 +513,28 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 			u.WithNamedUserGuilds(alias, func(wq *GuildQuery) {
 				*wq = *query
 			})
+		case "bannedUsers":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &UserQuery{config: u.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			u.WithNamedBannedUsers(alias, func(wq *UserQuery) {
+				*wq = *query
+			})
+		case "bannedBy":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &UserQuery{config: u.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			u.withBannedBy = query
 		}
 	}
 	return nil
