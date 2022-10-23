@@ -2,7 +2,6 @@
   <Landing>
     <div class="grid lg:w-[72rem] gap-5 px-6 mx-auto mt-14 md:gap-10">
       <div class="flex flex-col self-start flex-auto gap-4 md:sticky md:left-0 md:top-10">
-        <!-- throw this out? it's a PITA? -->
         <NavTableOfContents :element="el" />
       </div>
 

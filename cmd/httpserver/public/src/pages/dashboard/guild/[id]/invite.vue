@@ -39,5 +39,3 @@ interface Guild {
 
 const guild = computed(() => data.value?.node as Guild)
 </script>
-
-<style scoped></style>
