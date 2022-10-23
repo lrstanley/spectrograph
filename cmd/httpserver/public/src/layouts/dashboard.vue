@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-auto">
+  <div class="flex flex-col flex-auto w-full">
     <TransitionRoot as="template" :show="sidebarOpen">
       <Dialog as="div" class="relative z-40 md:hidden" @close="sidebarOpen = false">
         <TransitionChild
@@ -67,7 +67,7 @@
       </div>
 
       <main class="flex-1 bg-chat-500">
-        <div class="flex flex-col h-full px-6 py-8 mx-auto max-w-7xl">
+        <div class="flex flex-col h-full px-4 py-8 mx-auto md:px-6 max-w-7xl">
           <router-view v-slot="{ Component, route }">
             <transition name="fade" mode="out-in" appear>
               <Suspense>

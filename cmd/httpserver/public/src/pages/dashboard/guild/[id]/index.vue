@@ -66,10 +66,10 @@ meta:
       </div>
 
       <template #actions>
-        <div class="italic text-chat-300">last updated: {{ configUpdatedAt }}</div>
+        <div class="hidden italic text-chat-300 lg:block">last updated: {{ configUpdatedAt }}</div>
 
         <button
-          class="h-10 min-h-0 btn btn-accent"
+          class="h-10 min-h-0 ml-auto btn btn-accent"
           :disabled="!guild.guildAdminConfig.enabled"
           @click="updateConfig"
         >
@@ -134,9 +134,9 @@ meta:
       </div>
 
       <template #actions>
-        <div class="italic text-chat-300">last updated: {{ adminConfigUpdatedAt }}</div>
+        <div class="hidden italic text-chat-300 lg:block">last updated: {{ adminConfigUpdatedAt }}</div>
 
-        <div class="space-x-3">
+        <div class="ml-auto space-x-3">
           <button
             class="h-10 min-h-0 btn"
             :class="guild.guildAdminConfig?.enabled ? 'btn-error' : 'btn-success'"

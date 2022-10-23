@@ -6,12 +6,10 @@ meta:
 
 <template>
   <div>
-    <div class="pt-10 lg:overflow-hidden lg:py-16">
-      <div class="mx-auto max-w-7xl lg:px-8">
+    <div class="pt-10 lg:pt-24 lg:pb-16 lg:overflow-hidden">
+      <div class="px-6 mx-auto max-w-7xl lg:px-8">
         <div class="lg:grid lg:grid-cols-2 lg:gap-8">
-          <div
-            class="max-w-md px-4 mx-auto sm:max-w-2xl sm:px-6 sm:text-center lg:flex lg:items-center lg:px-0 lg:text-left"
-          >
+          <div class="max-w-md mx-auto sm:max-w-2xl sm:text-center lg:flex lg:items-center lg:text-left">
             <div class="lg:py-24">
               <h1 class="mt-4 text-4xl font-bold tracking-tight text-white lg:mt-6 xl:text-6xl">
                 <span class="block">It's time to use</span>
@@ -51,7 +49,7 @@ meta:
     </div>
 
     <div id="more-info" class="relative pt-16 pb-32 overflow-hidden">
-      <div class="relative max-w-xl px-4 mx-auto sm:px-6 lg:max-w-7xl lg:px-8">
+      <div class="relative max-w-xl px-6 mx-auto lg:max-w-7xl lg:px-8">
         <div class="relative mt-12 sm:mt-16 lg:mt-24">
           <div class="lg:grid lg:grid-flow-row-dense lg:grid-cols-2 lg:items-center lg:gap-8">
             <div class="lg:col-start-2">
@@ -175,7 +173,7 @@ meta:
     </div>
 
     <div class="bg-gradient-to-r from-nitro-800 to-bravery-700">
-      <div class="max-w-4xl px-4 py-16 mx-auto sm:px-6 sm:pt-20 sm:pb-24 lg:max-w-7xl lg:px-8 lg:pt-24">
+      <div class="max-w-4xl px-6 py-16 mx-auto sm:pt-20 sm:pb-24 lg:max-w-7xl lg:px-8 lg:pt-24">
         <h2 class="text-3xl font-bold tracking-tight text-white">
           Let Spectrograph do the work for you.
         </h2>

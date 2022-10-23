@@ -3,7 +3,7 @@
     <div class="border rounded shadow sm:overflow-hidden border-chat-800">
       <div
         v-if="!!$slots.header"
-        class="flex flex-row items-center justify-between flex-1 px-6 py-3 bg-chat-900"
+        class="flex flex-col items-center justify-center flex-1 px-6 py-3 md:justify-between md:flex-row bg-chat-900"
       >
         <slot name="header" />
       </div>

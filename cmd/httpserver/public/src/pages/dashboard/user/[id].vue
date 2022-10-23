@@ -51,7 +51,7 @@ meta:
       bare-panel
     >
       <div class="flex flex-col flex-auto divide-y divide-channel-800 border-chat-900">
-        <div class="flex flex-row items-center px-6 py-5">
+        <div class="flex flex-col items-start px-6 py-5 md:items-center md:flex-row">
           <div>
             <div class="text-base uppercase">Delete Account</div>
             <div class="text-sm text-gray-500">
@@ -59,15 +59,20 @@ meta:
               from your guilds).
             </div>
           </div>
-          <button class="ml-auto btn btn-sm btn-error">Delete account</button>
+          <button class="w-full mt-2 ml-auto btn btn-sm btn-error md:w-auto md:mt-0">
+            Delete account
+          </button>
         </div>
-        <div v-if="state.base.self?.admin" class="flex flex-row items-center px-6 py-5">
+        <div
+          v-if="state.base.self?.admin"
+          class="flex flex-col items-start px-6 py-5 md:items-center md:flex-row"
+        >
           <div>
             <div class="text-base uppercase">Ban user (admin only)</div>
             <div class="text-sm text-gray-500">This will ban the user from using Spectrograph.</div>
           </div>
           <button
-            class="ml-auto btn btn-sm btn-error"
+            class="w-full mt-2 ml-auto btn btn-sm btn-error md:w-auto md:mt-0"
             :disabled="state.base.self?.id === user.id"
             @click="openBanModal = true"
           >

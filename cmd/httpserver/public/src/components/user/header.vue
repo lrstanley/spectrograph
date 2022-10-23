@@ -13,9 +13,9 @@
           </div>
         </div>
       </div>
-      <div class="pt-1.5">
+      <div class="pt-0 md:pt-1.5">
         <h1 class="text-2xl font-bold text-nitro-500">{{ user.username }}</h1>
-        <span class="space-x-2">
+        <span class="flex flex-col gap-2 md:flex-row">
           <span class="badge badge-primary">#{{ user.discriminator }}</span>
           <span class="badge badge-success">joined: {{ joinedAt }}</span>
         </span>
