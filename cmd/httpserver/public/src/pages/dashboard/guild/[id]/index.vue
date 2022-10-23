@@ -17,7 +17,7 @@ meta:
     >
       <!-- contact email -->
       <div class="col-span-2 lg:col-span-1 form-control">
-        <label class="label">
+        <label id="contact-email" class="label">
           <span class="label-text text-secondary">Contact email</span>
         </label>
         <input
@@ -25,12 +25,13 @@ meta:
           type="email"
           placeholder="Contact email"
           class="w-full rounded input input-bordered"
+          aria-labelledby="contact-email"
         />
       </div>
 
       <!-- channel match rule -->
       <div class="col-span-2 lg:col-span-1 form-control">
-        <label class="label">
+        <label id="channel-match-rule" class="label">
           <span class="label-text text-secondary">Channel match rule</span>
           <a
             class="label-text-alt link link-primary"
@@ -45,12 +46,13 @@ meta:
           type="text"
           placeholder="default: '^.* +$'"
           class="w-full rounded input input-bordered"
+          aria-labelledby="channel-match-rule"
         />
       </div>
 
       <!-- maximum clones -->
       <div class="col-span-2 lg:col-span-1 form-control">
-        <label class="label">
+        <label id="maximum-clones" class="label">
           <span class="label-text text-secondary">Maximum allowed clones</span>
         </label>
         <input
@@ -59,6 +61,7 @@ meta:
           min="0"
           placeholder=""
           class="w-full rounded input input-bordered"
+          aria-labelledby="maximum-clones"
         />
         <label class="label">
           <span class="text-xs label-text">Set to 0 for max allowed</span>
@@ -66,7 +69,9 @@ meta:
       </div>
 
       <template #actions>
-        <div class="hidden italic text-chat-300 lg:block">last updated: {{ configUpdatedAt }}</div>
+        <div class="hidden italic text-chat-300 lg:block" aria-hidden="true">
+          last updated: {{ configUpdatedAt }}
+        </div>
 
         <button
           class="h-10 min-h-0 ml-auto btn btn-accent"
@@ -87,7 +92,7 @@ meta:
     >
       <!-- admin: maximum clones -->
       <div class="col-span-2 lg:col-span-1 form-control">
-        <label class="label">
+        <label id="admin-maximum-clones" class="label">
           <span class="label-text text-secondary">Maximum allowed clones</span>
         </label>
         <input
@@ -96,6 +101,7 @@ meta:
           min="0"
           placeholder=""
           class="w-full rounded input input-bordered"
+          aria-labelledby="admin-maximum-clones"
         />
         <label class="label">
           <span class="text-xs label-text">Set to 0 for max allowed</span>
@@ -104,7 +110,7 @@ meta:
 
       <!-- admin: maximum channels -->
       <div class="col-span-2 lg:col-span-1 form-control">
-        <label class="label">
+        <label id="admin-maximum-channels" class="label">
           <span class="label-text text-secondary">Maximum allowed channels</span>
         </label>
         <input
@@ -113,6 +119,7 @@ meta:
           min="0"
           placeholder=""
           class="w-full rounded input input-bordered"
+          aria-labelledby="admin-maximum-channels"
         />
         <label class="label">
           <span class="text-xs label-text">Set to 0 for max allowed</span>
@@ -121,12 +128,13 @@ meta:
 
       <!-- admin: comment -->
       <div class="col-span-2 form-control">
-        <label class="label">
+        <label id="admin-comment" class="label">
           <span class="label-text text-secondary">Administrative comment</span>
         </label>
         <textarea
           v-model="guild.guildAdminConfig.comment"
           class="w-full h-24 rounded input input-bordered"
+          aria-labelledby="admin-comment"
         />
         <label class="label">
           <span class="text-xs label-text">May be visible to the user</span>
@@ -134,7 +142,9 @@ meta:
       </div>
 
       <template #actions>
-        <div class="hidden italic text-chat-300 lg:block">last updated: {{ adminConfigUpdatedAt }}</div>
+        <div class="hidden italic text-chat-300 lg:block" aria-hidden="true">
+          last updated: {{ adminConfigUpdatedAt }}
+        </div>
 
         <div class="ml-auto space-x-3">
           <button
@@ -162,7 +172,6 @@ import {
   useGetGuildQuery,
   useUpdateGuildConfigMutation,
   useUpdateGuildAdminConfigMutation,
-  GuildEventType,
 } from "@/lib/api"
 import type { Guild } from "@/lib/api"
 

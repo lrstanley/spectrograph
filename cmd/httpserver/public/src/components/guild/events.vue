@@ -4,7 +4,7 @@
     v-bind="$attrs"
     class="overflow-x-auto overflow-y-scroll border rounded border-chat-900"
   >
-    <table class="table w-full table-compact">
+    <table class="table w-full table-compact" aria-label="guild events">
       <thead>
         <tr>
           <th class="sticky top-0 z-10 pl-4 bg-channel-500/80 backdrop-blur sm:pl-6">Event timestamp</th>

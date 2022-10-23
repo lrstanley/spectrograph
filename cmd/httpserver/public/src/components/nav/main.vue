@@ -1,20 +1,17 @@
 <template>
-  <nav class="flex flex-col justify-between md:items-center md:flex-row" aria-label="Main navigation">
+  <nav class="flex flex-col justify-between md:items-center md:flex-row" aria-label="Navigation">
     <div class="flex flex-col flex-1 md:flex-row" :class="props.isPanel ? '' : 'items-center'">
       <div class="flex items-center justify-between w-full md:w-auto">
-        <a href="#" class="inline-flex items-center">
+        <router-link to="/" class="inline-flex items-center group">
           <img
             loading="eager"
             alt="Spectrograph logo"
-            class="w-12 h-12 transition duration-200 animate-pulse hover:rotate-12"
+            class="w-12 h-12 transition duration-200 animate-pulse group-hover:rotate-12"
             :src="imgLogo"
+            aria-hidden="true"
           />
-          <router-link to="/">
-            <h2 class="text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
-              Spectrograph
-            </h2>
-          </router-link>
-        </a>
+          <h2 class="text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">Spectrograph</h2>
+        </router-link>
         <div class="flex items-center -mr-2 md:hidden">
           <PopoverButton
             class="inline-flex items-center justify-center p-2 text-white rounded-md bg-bravery-500 focus-ring-inset hover:bg-bravery-600 focus:outline-none"

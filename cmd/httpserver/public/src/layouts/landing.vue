@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col flex-auto max-w-full">
-    <Popover as="header" class="relative">
+    <Popover as="header" class="relative" aria-label="header">
       <NavMain class="relative px-4 pt-6 mx-auto max-w-7xl sm:px-6" />
 
       <transition
@@ -20,7 +20,7 @@
     </Popover>
 
     <slot>
-      <main>
+      <main aria-label="landing page">
         <router-view v-slot="{ Component, route }">
           <transition name="fade" mode="out-in" appear>
             <Suspense>

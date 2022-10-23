@@ -6,7 +6,7 @@ meta:
 
 <template>
   <div>
-    <div class="pt-10 lg:pt-24 lg:pb-16 lg:overflow-hidden">
+    <div class="pt-10 lg:pt-24 lg:pb-16 lg:overflow-hidden" aria-label="service summary">
       <div class="px-6 mx-auto max-w-7xl lg:px-8">
         <div class="lg:grid lg:grid-cols-2 lg:gap-8">
           <div class="max-w-md mx-auto sm:max-w-2xl sm:text-center lg:flex lg:items-center lg:text-left">
@@ -24,10 +24,10 @@ meta:
               </p>
               <div class="flex flex-col flex-auto w-full gap-2 mt-10 lg:flex-row sm:mt-12">
                 <a class="h-10 min-h-0 btn btn-primary" href="#more-info">
-                  <i-fas-circle-info class="h-8 mr-2" />
+                  <i-fas-circle-info class="h-8 mr-2" aria-hidden="true" />
                   More information
                 </a>
-                <a class="h-10 min-h-0 btn btn-secondary" href="/-/invite">
+                <a class="h-10 min-h-0 btn btn-secondary" href="/-/invite" aria-hidden="true">
                   <i-fas-circle-plus class="h-8 mr-2" />
                   Add to your server
                 </a>
@@ -51,7 +51,10 @@ meta:
     <div id="more-info" class="relative pt-16 pb-32 overflow-hidden">
       <div class="relative max-w-xl px-6 mx-auto lg:max-w-7xl lg:px-8">
         <div class="relative mt-12 sm:mt-16 lg:mt-24">
-          <div class="lg:grid lg:grid-flow-row-dense lg:grid-cols-2 lg:items-center lg:gap-8">
+          <div
+            class="lg:grid lg:grid-flow-row-dense lg:grid-cols-2 lg:items-center lg:gap-8"
+            aria-label="the existing solution sucks"
+          >
             <div class="lg:col-start-2">
               <h3 class="text-2xl font-bold tracking-tight text-idle-500 sm:text-3xl">
                 Out with the old.
@@ -93,7 +96,10 @@ meta:
             </div>
           </div>
 
-          <div class="relative mt-12 lg:mt-32 lg:grid lg:grid-cols-2 lg:items-center lg:gap-8">
+          <div
+            class="relative mt-12 lg:mt-32 lg:grid lg:grid-cols-2 lg:items-center lg:gap-8"
+            aria-label="why Spectrograph"
+          >
             <div class="relative">
               <h3 class="text-2xl font-bold tracking-tight text-nitro-500 sm:text-3xl">
                 In with the new (and simple).
@@ -172,7 +178,7 @@ meta:
       </div>
     </div>
 
-    <div class="bg-gradient-to-r from-nitro-800 to-bravery-700">
+    <div class="bg-gradient-to-r from-nitro-900 to-bravery-800" aria-label="Spectrograph feature list">
       <div class="max-w-4xl px-6 py-16 mx-auto sm:pt-20 sm:pb-24 lg:max-w-7xl lg:px-8 lg:pt-24">
         <h2 class="text-3xl font-bold tracking-tight text-white">
           Let Spectrograph do the work for you.

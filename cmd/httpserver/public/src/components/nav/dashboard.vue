@@ -1,16 +1,17 @@
 <template>
   <div class="flex flex-col flex-auto min-h-0 bg-channel-500">
     <div class="flex flex-col flex-auto pt-5 pb-4 overflow-y-auto">
-      <a href="#" class="inline-flex items-center px-4 shrink-0">
-        <img loading="eager" class="h-14 w-14 md:h-12 md:w-12" :src="imgLogo" />
-        <router-link to="/">
-          <h2 class="text-3xl md:text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
-            Spectrograph
-          </h2>
-        </router-link>
-      </a>
+      <router-link to="/" class="inline-flex items-center px-4 shrink-0" aria-label="Spectrograph logo">
+        <img loading="eager" class="h-14 w-14 md:h-12 md:w-12" :src="imgLogo" aria-hidden="true" />
+        <h2 class="text-3xl md:text-xl text-gradient bg-gradient-to-r from-nitro-500 to-dnd-400">
+          Spectrograph
+        </h2>
+      </router-link>
 
-      <nav class="flex flex-col flex-auto px-4 mt-5 space-y-2 md:space-y-1">
+      <nav
+        class="flex flex-col flex-auto px-4 mt-5 space-y-2 md:space-y-1"
+        aria-label="sidebar navigation"
+      >
         <template v-for="group in groups" :key="group.id">
           <div v-if="group.title" class="pt-5">
             <span class="px-3 text-sm font-bold text-idle-500">{{ group.title }}</span>
@@ -33,7 +34,12 @@
               />
               {{ link.name }}
 
-              <GuildStatus v-if="link.hasStatus" class="pl-1 ml-auto" :status="link.status" />
+              <GuildStatus
+                v-if="link.hasStatus"
+                class="pl-1 ml-auto"
+                :status="link.status"
+                aria-hidden="true"
+              />
             </component>
           </template>
         </template>
@@ -42,7 +48,7 @@
     <div class="flex flex-col grow-0 shrink-0 bg-channel-700">
       <div class="flex items-center p-4">
         <img
-          alt="User avatar"
+          aria-hidden="true"
           class="rounded-full w-9 h-9 max-w-none"
           :src="state.base.self.avatarURL"
         />

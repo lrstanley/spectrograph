@@ -1,12 +1,12 @@
 <template>
   <img
     v-if="props.guild.iconURL"
+    aria-hidden="true"
     class="rounded-full"
     :class="{
       'border-2 border-solid border-balance-500': props.status === LinkStatus.Healthy,
       'border-2 border-solid border-dnd-400': props.status === LinkStatus.Unhealthy,
     }"
-    :alt="guild.name + `'s Guild Icon`"
     :src="props.guild.iconURL"
     v-bind="$attrs"
   />

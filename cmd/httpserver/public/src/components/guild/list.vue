@@ -3,9 +3,18 @@
     v-if="guilds?.length || props.showEmpty"
     class="overflow-hidden border rounded shadow bg-chat-700 border-chat-900"
   >
-    <ul v-if="guilds?.length" role="list" class="divide-y divide-chat-800">
-      <li v-for="guild in guilds" :key="guild.guild.id">
-        <router-link :to="guild.to" class="block hover:bg-chat-800">
+    <ul
+      v-if="guilds?.length"
+      role="list"
+      class="divide-y divide-chat-800"
+      aria-label="discord guild list"
+    >
+      <li v-for="guild in guilds" :key="guild.guild.id" :aria-label="guild.name">
+        <router-link
+          :to="guild.to"
+          class="block hover:bg-chat-800"
+          :aria-label="'go to dashboard for ' + guild.name"
+        >
           <div class="flex items-center p-4 sm:px-6">
             <div class="flex items-center flex-1 min-w-0">
               <component :is="guild.icon" :status="guild.status" class="w-12 h-12 text-4xl shrink-0" />
