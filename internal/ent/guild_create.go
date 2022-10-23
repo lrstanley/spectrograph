@@ -426,107 +426,55 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = gc.conflict
 	if value, ok := gc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guild.FieldCreateTime,
-		})
+		_spec.SetField(guild.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := gc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guild.FieldUpdateTime,
-		})
+		_spec.SetField(guild.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := gc.mutation.GuildID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldGuildID,
-		})
+		_spec.SetField(guild.FieldGuildID, field.TypeString, value)
 		_node.GuildID = value
 	}
 	if value, ok := gc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldName,
-		})
+		_spec.SetField(guild.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := gc.mutation.Features(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: guild.FieldFeatures,
-		})
+		_spec.SetField(guild.FieldFeatures, field.TypeJSON, value)
 		_node.Features = value
 	}
 	if value, ok := gc.mutation.IconHash(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldIconHash,
-		})
+		_spec.SetField(guild.FieldIconHash, field.TypeString, value)
 		_node.IconHash = value
 	}
 	if value, ok := gc.mutation.IconURL(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldIconURL,
-		})
+		_spec.SetField(guild.FieldIconURL, field.TypeString, value)
 		_node.IconURL = value
 	}
 	if value, ok := gc.mutation.JoinedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guild.FieldJoinedAt,
-		})
+		_spec.SetField(guild.FieldJoinedAt, field.TypeTime, value)
 		_node.JoinedAt = &value
 	}
 	if value, ok := gc.mutation.Large(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: guild.FieldLarge,
-		})
+		_spec.SetField(guild.FieldLarge, field.TypeBool, value)
 		_node.Large = value
 	}
 	if value, ok := gc.mutation.MemberCount(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guild.FieldMemberCount,
-		})
+		_spec.SetField(guild.FieldMemberCount, field.TypeInt, value)
 		_node.MemberCount = value
 	}
 	if value, ok := gc.mutation.OwnerID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldOwnerID,
-		})
+		_spec.SetField(guild.FieldOwnerID, field.TypeString, value)
 		_node.OwnerID = value
 	}
 	if value, ok := gc.mutation.Permissions(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: guild.FieldPermissions,
-		})
+		_spec.SetField(guild.FieldPermissions, field.TypeUint64, value)
 		_node.Permissions = value
 	}
 	if value, ok := gc.mutation.SystemChannelFlags(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldSystemChannelFlags,
-		})
+		_spec.SetField(guild.FieldSystemChannelFlags, field.TypeString, value)
 		_node.SystemChannelFlags = value
 	}
 	if nodes := gc.mutation.GuildConfigIDs(); len(nodes) > 0 {

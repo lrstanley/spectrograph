@@ -550,216 +550,100 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := uu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldUpdateTime,
-		})
+		_spec.SetField(user.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := uu.mutation.Admin(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldAdmin,
-		})
+		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
 	}
 	if uu.mutation.AdminCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldAdmin,
-		})
+		_spec.ClearField(user.FieldAdmin, field.TypeBool)
 	}
 	if value, ok := uu.mutation.Banned(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldBanned,
-		})
+		_spec.SetField(user.FieldBanned, field.TypeBool, value)
 	}
 	if uu.mutation.BannedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldBanned,
-		})
+		_spec.ClearField(user.FieldBanned, field.TypeBool)
 	}
 	if value, ok := uu.mutation.BanReason(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldBanReason,
-		})
+		_spec.SetField(user.FieldBanReason, field.TypeString, value)
 	}
 	if uu.mutation.BanReasonCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldBanReason,
-		})
+		_spec.ClearField(user.FieldBanReason, field.TypeString)
 	}
 	if value, ok := uu.mutation.Username(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldUsername,
-		})
+		_spec.SetField(user.FieldUsername, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.Discriminator(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldDiscriminator,
-		})
+		_spec.SetField(user.FieldDiscriminator, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.Email(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldEmail,
-		})
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.AvatarHash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldAvatarHash,
-		})
+		_spec.SetField(user.FieldAvatarHash, field.TypeString, value)
 	}
 	if uu.mutation.AvatarHashCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldAvatarHash,
-		})
+		_spec.ClearField(user.FieldAvatarHash, field.TypeString)
 	}
 	if value, ok := uu.mutation.AvatarURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldAvatarURL,
-		})
+		_spec.SetField(user.FieldAvatarURL, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.Locale(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldLocale,
-		})
+		_spec.SetField(user.FieldLocale, field.TypeString, value)
 	}
 	if uu.mutation.LocaleCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldLocale,
-		})
+		_spec.ClearField(user.FieldLocale, field.TypeString)
 	}
 	if value, ok := uu.mutation.Bot(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldBot,
-		})
+		_spec.SetField(user.FieldBot, field.TypeBool, value)
 	}
 	if uu.mutation.BotCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldBot,
-		})
+		_spec.ClearField(user.FieldBot, field.TypeBool)
 	}
 	if value, ok := uu.mutation.System(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldSystem,
-		})
+		_spec.SetField(user.FieldSystem, field.TypeBool, value)
 	}
 	if uu.mutation.SystemCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldSystem,
-		})
+		_spec.ClearField(user.FieldSystem, field.TypeBool)
 	}
 	if value, ok := uu.mutation.MfaEnabled(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldMfaEnabled,
-		})
+		_spec.SetField(user.FieldMfaEnabled, field.TypeBool, value)
 	}
 	if uu.mutation.MfaEnabledCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldMfaEnabled,
-		})
+		_spec.ClearField(user.FieldMfaEnabled, field.TypeBool)
 	}
 	if value, ok := uu.mutation.Verified(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldVerified,
-		})
+		_spec.SetField(user.FieldVerified, field.TypeBool, value)
 	}
 	if uu.mutation.VerifiedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldVerified,
-		})
+		_spec.ClearField(user.FieldVerified, field.TypeBool)
 	}
 	if value, ok := uu.mutation.Flags(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: user.FieldFlags,
-		})
+		_spec.SetField(user.FieldFlags, field.TypeUint64, value)
 	}
 	if value, ok := uu.mutation.AddedFlags(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: user.FieldFlags,
-		})
+		_spec.AddField(user.FieldFlags, field.TypeUint64, value)
 	}
 	if uu.mutation.FlagsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Column: user.FieldFlags,
-		})
+		_spec.ClearField(user.FieldFlags, field.TypeUint64)
 	}
 	if value, ok := uu.mutation.PremiumType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldPremiumType,
-		})
+		_spec.SetField(user.FieldPremiumType, field.TypeInt, value)
 	}
 	if value, ok := uu.mutation.AddedPremiumType(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldPremiumType,
-		})
+		_spec.AddField(user.FieldPremiumType, field.TypeInt, value)
 	}
 	if uu.mutation.PremiumTypeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: user.FieldPremiumType,
-		})
+		_spec.ClearField(user.FieldPremiumType, field.TypeInt)
 	}
 	if value, ok := uu.mutation.PublicFlags(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: user.FieldPublicFlags,
-		})
+		_spec.SetField(user.FieldPublicFlags, field.TypeUint64, value)
 	}
 	if value, ok := uu.mutation.AddedPublicFlags(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: user.FieldPublicFlags,
-		})
+		_spec.AddField(user.FieldPublicFlags, field.TypeUint64, value)
 	}
 	if uu.mutation.PublicFlagsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Column: user.FieldPublicFlags,
-		})
+		_spec.ClearField(user.FieldPublicFlags, field.TypeUint64)
 	}
 	if uu.mutation.UserGuildsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1470,216 +1354,100 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 	}
 	if value, ok := uuo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldUpdateTime,
-		})
+		_spec.SetField(user.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := uuo.mutation.Admin(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldAdmin,
-		})
+		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
 	}
 	if uuo.mutation.AdminCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldAdmin,
-		})
+		_spec.ClearField(user.FieldAdmin, field.TypeBool)
 	}
 	if value, ok := uuo.mutation.Banned(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldBanned,
-		})
+		_spec.SetField(user.FieldBanned, field.TypeBool, value)
 	}
 	if uuo.mutation.BannedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldBanned,
-		})
+		_spec.ClearField(user.FieldBanned, field.TypeBool)
 	}
 	if value, ok := uuo.mutation.BanReason(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldBanReason,
-		})
+		_spec.SetField(user.FieldBanReason, field.TypeString, value)
 	}
 	if uuo.mutation.BanReasonCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldBanReason,
-		})
+		_spec.ClearField(user.FieldBanReason, field.TypeString)
 	}
 	if value, ok := uuo.mutation.Username(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldUsername,
-		})
+		_spec.SetField(user.FieldUsername, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.Discriminator(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldDiscriminator,
-		})
+		_spec.SetField(user.FieldDiscriminator, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.Email(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldEmail,
-		})
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.AvatarHash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldAvatarHash,
-		})
+		_spec.SetField(user.FieldAvatarHash, field.TypeString, value)
 	}
 	if uuo.mutation.AvatarHashCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldAvatarHash,
-		})
+		_spec.ClearField(user.FieldAvatarHash, field.TypeString)
 	}
 	if value, ok := uuo.mutation.AvatarURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldAvatarURL,
-		})
+		_spec.SetField(user.FieldAvatarURL, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.Locale(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldLocale,
-		})
+		_spec.SetField(user.FieldLocale, field.TypeString, value)
 	}
 	if uuo.mutation.LocaleCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldLocale,
-		})
+		_spec.ClearField(user.FieldLocale, field.TypeString)
 	}
 	if value, ok := uuo.mutation.Bot(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldBot,
-		})
+		_spec.SetField(user.FieldBot, field.TypeBool, value)
 	}
 	if uuo.mutation.BotCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldBot,
-		})
+		_spec.ClearField(user.FieldBot, field.TypeBool)
 	}
 	if value, ok := uuo.mutation.System(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldSystem,
-		})
+		_spec.SetField(user.FieldSystem, field.TypeBool, value)
 	}
 	if uuo.mutation.SystemCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldSystem,
-		})
+		_spec.ClearField(user.FieldSystem, field.TypeBool)
 	}
 	if value, ok := uuo.mutation.MfaEnabled(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldMfaEnabled,
-		})
+		_spec.SetField(user.FieldMfaEnabled, field.TypeBool, value)
 	}
 	if uuo.mutation.MfaEnabledCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldMfaEnabled,
-		})
+		_spec.ClearField(user.FieldMfaEnabled, field.TypeBool)
 	}
 	if value, ok := uuo.mutation.Verified(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldVerified,
-		})
+		_spec.SetField(user.FieldVerified, field.TypeBool, value)
 	}
 	if uuo.mutation.VerifiedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: user.FieldVerified,
-		})
+		_spec.ClearField(user.FieldVerified, field.TypeBool)
 	}
 	if value, ok := uuo.mutation.Flags(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: user.FieldFlags,
-		})
+		_spec.SetField(user.FieldFlags, field.TypeUint64, value)
 	}
 	if value, ok := uuo.mutation.AddedFlags(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: user.FieldFlags,
-		})
+		_spec.AddField(user.FieldFlags, field.TypeUint64, value)
 	}
 	if uuo.mutation.FlagsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Column: user.FieldFlags,
-		})
+		_spec.ClearField(user.FieldFlags, field.TypeUint64)
 	}
 	if value, ok := uuo.mutation.PremiumType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldPremiumType,
-		})
+		_spec.SetField(user.FieldPremiumType, field.TypeInt, value)
 	}
 	if value, ok := uuo.mutation.AddedPremiumType(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldPremiumType,
-		})
+		_spec.AddField(user.FieldPremiumType, field.TypeInt, value)
 	}
 	if uuo.mutation.PremiumTypeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: user.FieldPremiumType,
-		})
+		_spec.ClearField(user.FieldPremiumType, field.TypeInt)
 	}
 	if value, ok := uuo.mutation.PublicFlags(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: user.FieldPublicFlags,
-		})
+		_spec.SetField(user.FieldPublicFlags, field.TypeUint64, value)
 	}
 	if value, ok := uuo.mutation.AddedPublicFlags(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: user.FieldPublicFlags,
-		})
+		_spec.AddField(user.FieldPublicFlags, field.TypeUint64, value)
 	}
 	if uuo.mutation.PublicFlagsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Column: user.FieldPublicFlags,
-		})
+		_spec.ClearField(user.FieldPublicFlags, field.TypeUint64)
 	}
 	if uuo.mutation.UserGuildsCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -473,25 +473,13 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := gu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guild.FieldUpdateTime,
-		})
+		_spec.SetField(guild.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := gu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldName,
-		})
+		_spec.SetField(guild.FieldName, field.TypeString, value)
 	}
 	if value, ok := gu.mutation.Features(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: guild.FieldFeatures,
-		})
+		_spec.SetField(guild.FieldFeatures, field.TypeJSON, value)
 	}
 	if value, ok := gu.mutation.AppendedFeatures(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -499,122 +487,58 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		})
 	}
 	if gu.mutation.FeaturesCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: guild.FieldFeatures,
-		})
+		_spec.ClearField(guild.FieldFeatures, field.TypeJSON)
 	}
 	if value, ok := gu.mutation.IconHash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldIconHash,
-		})
+		_spec.SetField(guild.FieldIconHash, field.TypeString, value)
 	}
 	if gu.mutation.IconHashCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guild.FieldIconHash,
-		})
+		_spec.ClearField(guild.FieldIconHash, field.TypeString)
 	}
 	if value, ok := gu.mutation.IconURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldIconURL,
-		})
+		_spec.SetField(guild.FieldIconURL, field.TypeString, value)
 	}
 	if value, ok := gu.mutation.JoinedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guild.FieldJoinedAt,
-		})
+		_spec.SetField(guild.FieldJoinedAt, field.TypeTime, value)
 	}
 	if gu.mutation.JoinedAtCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: guild.FieldJoinedAt,
-		})
+		_spec.ClearField(guild.FieldJoinedAt, field.TypeTime)
 	}
 	if value, ok := gu.mutation.Large(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: guild.FieldLarge,
-		})
+		_spec.SetField(guild.FieldLarge, field.TypeBool, value)
 	}
 	if gu.mutation.LargeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: guild.FieldLarge,
-		})
+		_spec.ClearField(guild.FieldLarge, field.TypeBool)
 	}
 	if value, ok := gu.mutation.MemberCount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guild.FieldMemberCount,
-		})
+		_spec.SetField(guild.FieldMemberCount, field.TypeInt, value)
 	}
 	if value, ok := gu.mutation.AddedMemberCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guild.FieldMemberCount,
-		})
+		_spec.AddField(guild.FieldMemberCount, field.TypeInt, value)
 	}
 	if gu.mutation.MemberCountCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: guild.FieldMemberCount,
-		})
+		_spec.ClearField(guild.FieldMemberCount, field.TypeInt)
 	}
 	if value, ok := gu.mutation.OwnerID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldOwnerID,
-		})
+		_spec.SetField(guild.FieldOwnerID, field.TypeString, value)
 	}
 	if gu.mutation.OwnerIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guild.FieldOwnerID,
-		})
+		_spec.ClearField(guild.FieldOwnerID, field.TypeString)
 	}
 	if value, ok := gu.mutation.Permissions(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: guild.FieldPermissions,
-		})
+		_spec.SetField(guild.FieldPermissions, field.TypeUint64, value)
 	}
 	if value, ok := gu.mutation.AddedPermissions(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: guild.FieldPermissions,
-		})
+		_spec.AddField(guild.FieldPermissions, field.TypeUint64, value)
 	}
 	if gu.mutation.PermissionsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Column: guild.FieldPermissions,
-		})
+		_spec.ClearField(guild.FieldPermissions, field.TypeUint64)
 	}
 	if value, ok := gu.mutation.SystemChannelFlags(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldSystemChannelFlags,
-		})
+		_spec.SetField(guild.FieldSystemChannelFlags, field.TypeString, value)
 	}
 	if gu.mutation.SystemChannelFlagsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guild.FieldSystemChannelFlags,
-		})
+		_spec.ClearField(guild.FieldSystemChannelFlags, field.TypeString)
 	}
 	if gu.mutation.GuildConfigCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1279,25 +1203,13 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 		}
 	}
 	if value, ok := guo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guild.FieldUpdateTime,
-		})
+		_spec.SetField(guild.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := guo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldName,
-		})
+		_spec.SetField(guild.FieldName, field.TypeString, value)
 	}
 	if value, ok := guo.mutation.Features(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: guild.FieldFeatures,
-		})
+		_spec.SetField(guild.FieldFeatures, field.TypeJSON, value)
 	}
 	if value, ok := guo.mutation.AppendedFeatures(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
@@ -1305,122 +1217,58 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 		})
 	}
 	if guo.mutation.FeaturesCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: guild.FieldFeatures,
-		})
+		_spec.ClearField(guild.FieldFeatures, field.TypeJSON)
 	}
 	if value, ok := guo.mutation.IconHash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldIconHash,
-		})
+		_spec.SetField(guild.FieldIconHash, field.TypeString, value)
 	}
 	if guo.mutation.IconHashCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guild.FieldIconHash,
-		})
+		_spec.ClearField(guild.FieldIconHash, field.TypeString)
 	}
 	if value, ok := guo.mutation.IconURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldIconURL,
-		})
+		_spec.SetField(guild.FieldIconURL, field.TypeString, value)
 	}
 	if value, ok := guo.mutation.JoinedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guild.FieldJoinedAt,
-		})
+		_spec.SetField(guild.FieldJoinedAt, field.TypeTime, value)
 	}
 	if guo.mutation.JoinedAtCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: guild.FieldJoinedAt,
-		})
+		_spec.ClearField(guild.FieldJoinedAt, field.TypeTime)
 	}
 	if value, ok := guo.mutation.Large(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: guild.FieldLarge,
-		})
+		_spec.SetField(guild.FieldLarge, field.TypeBool, value)
 	}
 	if guo.mutation.LargeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: guild.FieldLarge,
-		})
+		_spec.ClearField(guild.FieldLarge, field.TypeBool)
 	}
 	if value, ok := guo.mutation.MemberCount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guild.FieldMemberCount,
-		})
+		_spec.SetField(guild.FieldMemberCount, field.TypeInt, value)
 	}
 	if value, ok := guo.mutation.AddedMemberCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guild.FieldMemberCount,
-		})
+		_spec.AddField(guild.FieldMemberCount, field.TypeInt, value)
 	}
 	if guo.mutation.MemberCountCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: guild.FieldMemberCount,
-		})
+		_spec.ClearField(guild.FieldMemberCount, field.TypeInt)
 	}
 	if value, ok := guo.mutation.OwnerID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldOwnerID,
-		})
+		_spec.SetField(guild.FieldOwnerID, field.TypeString, value)
 	}
 	if guo.mutation.OwnerIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guild.FieldOwnerID,
-		})
+		_spec.ClearField(guild.FieldOwnerID, field.TypeString)
 	}
 	if value, ok := guo.mutation.Permissions(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: guild.FieldPermissions,
-		})
+		_spec.SetField(guild.FieldPermissions, field.TypeUint64, value)
 	}
 	if value, ok := guo.mutation.AddedPermissions(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: guild.FieldPermissions,
-		})
+		_spec.AddField(guild.FieldPermissions, field.TypeUint64, value)
 	}
 	if guo.mutation.PermissionsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Column: guild.FieldPermissions,
-		})
+		_spec.ClearField(guild.FieldPermissions, field.TypeUint64)
 	}
 	if value, ok := guo.mutation.SystemChannelFlags(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guild.FieldSystemChannelFlags,
-		})
+		_spec.SetField(guild.FieldSystemChannelFlags, field.TypeString, value)
 	}
 	if guo.mutation.SystemChannelFlagsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guild.FieldSystemChannelFlags,
-		})
+		_spec.ClearField(guild.FieldSystemChannelFlags, field.TypeString)
 	}
 	if guo.mutation.GuildConfigCleared() {
 		edge := &sqlgraph.EdgeSpec{

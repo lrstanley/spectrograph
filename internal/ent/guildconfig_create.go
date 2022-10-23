@@ -289,51 +289,27 @@ func (gcc *GuildConfigCreate) createSpec() (*GuildConfig, *sqlgraph.CreateSpec) 
 	)
 	_spec.OnConflict = gcc.conflict
 	if value, ok := gcc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildconfig.FieldCreateTime,
-		})
+		_spec.SetField(guildconfig.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := gcc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildconfig.FieldUpdateTime,
-		})
+		_spec.SetField(guildconfig.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := gcc.mutation.Enabled(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: guildconfig.FieldEnabled,
-		})
+		_spec.SetField(guildconfig.FieldEnabled, field.TypeBool, value)
 		_node.Enabled = value
 	}
 	if value, ok := gcc.mutation.DefaultMaxClones(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildconfig.FieldDefaultMaxClones,
-		})
+		_spec.SetField(guildconfig.FieldDefaultMaxClones, field.TypeInt, value)
 		_node.DefaultMaxClones = value
 	}
 	if value, ok := gcc.mutation.RegexMatch(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildconfig.FieldRegexMatch,
-		})
+		_spec.SetField(guildconfig.FieldRegexMatch, field.TypeString, value)
 		_node.RegexMatch = value
 	}
 	if value, ok := gcc.mutation.ContactEmail(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildconfig.FieldContactEmail,
-		})
+		_spec.SetField(guildconfig.FieldContactEmail, field.TypeString, value)
 		_node.ContactEmail = value
 	}
 	if nodes := gcc.mutation.GuildIDs(); len(nodes) > 0 {

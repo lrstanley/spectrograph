@@ -339,6 +339,11 @@ func (gcq *GuildConfigQuery) Select(fields ...string) *GuildConfigSelect {
 	return selbuild
 }
 
+// Aggregate returns a GuildConfigSelect configured with the given aggregations.
+func (gcq *GuildConfigQuery) Aggregate(fns ...AggregateFunc) *GuildConfigSelect {
+	return gcq.Select().Aggregate(fns...)
+}
+
 func (gcq *GuildConfigQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range gcq.fields {
 		if !guildconfig.ValidColumn(f) {
@@ -596,8 +601,6 @@ func (gcgb *GuildConfigGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range gcgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(gcgb.fields)+len(gcgb.fns))
 		for _, f := range gcgb.fields {
@@ -617,6 +620,12 @@ type GuildConfigSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (gcs *GuildConfigSelect) Aggregate(fns ...AggregateFunc) *GuildConfigSelect {
+	gcs.fns = append(gcs.fns, fns...)
+	return gcs
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (gcs *GuildConfigSelect) Scan(ctx context.Context, v any) error {
 	if err := gcs.prepareQuery(ctx); err != nil {
@@ -627,6 +636,16 @@ func (gcs *GuildConfigSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (gcs *GuildConfigSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(gcs.fns))
+	for _, fn := range gcs.fns {
+		aggregation = append(aggregation, fn(gcs.sql))
+	}
+	switch n := len(*gcs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		gcs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		gcs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := gcs.sql.Query()
 	if err := gcs.driver.Query(ctx, query, args, rows); err != nil {

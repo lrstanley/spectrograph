@@ -284,51 +284,27 @@ func (gacc *GuildAdminConfigCreate) createSpec() (*GuildAdminConfig, *sqlgraph.C
 	)
 	_spec.OnConflict = gacc.conflict
 	if value, ok := gacc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildadminconfig.FieldCreateTime,
-		})
+		_spec.SetField(guildadminconfig.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := gacc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildadminconfig.FieldUpdateTime,
-		})
+		_spec.SetField(guildadminconfig.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := gacc.mutation.Enabled(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: guildadminconfig.FieldEnabled,
-		})
+		_spec.SetField(guildadminconfig.FieldEnabled, field.TypeBool, value)
 		_node.Enabled = value
 	}
 	if value, ok := gacc.mutation.DefaultMaxChannels(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildadminconfig.FieldDefaultMaxChannels,
-		})
+		_spec.SetField(guildadminconfig.FieldDefaultMaxChannels, field.TypeInt, value)
 		_node.DefaultMaxChannels = value
 	}
 	if value, ok := gacc.mutation.DefaultMaxClones(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildadminconfig.FieldDefaultMaxClones,
-		})
+		_spec.SetField(guildadminconfig.FieldDefaultMaxClones, field.TypeInt, value)
 		_node.DefaultMaxClones = value
 	}
 	if value, ok := gacc.mutation.Comment(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildadminconfig.FieldComment,
-		})
+		_spec.SetField(guildadminconfig.FieldComment, field.TypeString, value)
 		_node.Comment = value
 	}
 	if nodes := gacc.mutation.GuildIDs(); len(nodes) > 0 {

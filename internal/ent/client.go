@@ -245,7 +245,7 @@ func (c *GuildClient) GetX(ctx context.Context, id int) *Guild {
 // QueryGuildConfig queries the guild_config edge of a Guild.
 func (c *GuildClient) QueryGuildConfig(gu *Guild) *GuildConfigQuery {
 	query := &GuildConfigQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gu.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guild.Table, guild.FieldID, id),
@@ -261,7 +261,7 @@ func (c *GuildClient) QueryGuildConfig(gu *Guild) *GuildConfigQuery {
 // QueryGuildAdminConfig queries the guild_admin_config edge of a Guild.
 func (c *GuildClient) QueryGuildAdminConfig(gu *Guild) *GuildAdminConfigQuery {
 	query := &GuildAdminConfigQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gu.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guild.Table, guild.FieldID, id),
@@ -277,7 +277,7 @@ func (c *GuildClient) QueryGuildAdminConfig(gu *Guild) *GuildAdminConfigQuery {
 // QueryGuildEvents queries the guild_events edge of a Guild.
 func (c *GuildClient) QueryGuildEvents(gu *Guild) *GuildEventQuery {
 	query := &GuildEventQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gu.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guild.Table, guild.FieldID, id),
@@ -293,7 +293,7 @@ func (c *GuildClient) QueryGuildEvents(gu *Guild) *GuildEventQuery {
 // QueryAdmins queries the admins edge of a Guild.
 func (c *GuildClient) QueryAdmins(gu *Guild) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gu.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guild.Table, guild.FieldID, id),
@@ -400,7 +400,7 @@ func (c *GuildAdminConfigClient) GetX(ctx context.Context, id int) *GuildAdminCo
 // QueryGuild queries the guild edge of a GuildAdminConfig.
 func (c *GuildAdminConfigClient) QueryGuild(gac *GuildAdminConfig) *GuildQuery {
 	query := &GuildQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gac.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guildadminconfig.Table, guildadminconfig.FieldID, id),
@@ -507,7 +507,7 @@ func (c *GuildConfigClient) GetX(ctx context.Context, id int) *GuildConfig {
 // QueryGuild queries the guild edge of a GuildConfig.
 func (c *GuildConfigClient) QueryGuild(gc *GuildConfig) *GuildQuery {
 	query := &GuildQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guildconfig.Table, guildconfig.FieldID, id),
@@ -614,7 +614,7 @@ func (c *GuildEventClient) GetX(ctx context.Context, id int) *GuildEvent {
 // QueryGuild queries the guild edge of a GuildEvent.
 func (c *GuildEventClient) QueryGuild(ge *GuildEvent) *GuildQuery {
 	query := &GuildQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ge.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(guildevent.Table, guildevent.FieldID, id),
@@ -721,7 +721,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // QueryUserGuilds queries the user_guilds edge of a User.
 func (c *UserClient) QueryUserGuilds(u *User) *GuildQuery {
 	query := &GuildQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -737,7 +737,7 @@ func (c *UserClient) QueryUserGuilds(u *User) *GuildQuery {
 // QueryBannedUsers queries the banned_users edge of a User.
 func (c *UserClient) QueryBannedUsers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -753,7 +753,7 @@ func (c *UserClient) QueryBannedUsers(u *User) *UserQuery {
 // QueryBannedBy queries the banned_by edge of a User.
 func (c *UserClient) QueryBannedBy(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),

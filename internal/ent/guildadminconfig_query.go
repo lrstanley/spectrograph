@@ -339,6 +339,11 @@ func (gacq *GuildAdminConfigQuery) Select(fields ...string) *GuildAdminConfigSel
 	return selbuild
 }
 
+// Aggregate returns a GuildAdminConfigSelect configured with the given aggregations.
+func (gacq *GuildAdminConfigQuery) Aggregate(fns ...AggregateFunc) *GuildAdminConfigSelect {
+	return gacq.Select().Aggregate(fns...)
+}
+
 func (gacq *GuildAdminConfigQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range gacq.fields {
 		if !guildadminconfig.ValidColumn(f) {
@@ -596,8 +601,6 @@ func (gacgb *GuildAdminConfigGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range gacgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(gacgb.fields)+len(gacgb.fns))
 		for _, f := range gacgb.fields {
@@ -617,6 +620,12 @@ type GuildAdminConfigSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (gacs *GuildAdminConfigSelect) Aggregate(fns ...AggregateFunc) *GuildAdminConfigSelect {
+	gacs.fns = append(gacs.fns, fns...)
+	return gacs
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (gacs *GuildAdminConfigSelect) Scan(ctx context.Context, v any) error {
 	if err := gacs.prepareQuery(ctx); err != nil {
@@ -627,6 +636,16 @@ func (gacs *GuildAdminConfigSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (gacs *GuildAdminConfigSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(gacs.fns))
+	for _, fn := range gacs.fns {
+		aggregation = append(aggregation, fn(gacs.sql))
+	}
+	switch n := len(*gacs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		gacs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		gacs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := gacs.sql.Query()
 	if err := gacs.driver.Query(ctx, query, args, rows); err != nil {

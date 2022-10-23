@@ -249,77 +249,37 @@ func (gacu *GuildAdminConfigUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 	}
 	if value, ok := gacu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildadminconfig.FieldUpdateTime,
-		})
+		_spec.SetField(guildadminconfig.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := gacu.mutation.Enabled(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: guildadminconfig.FieldEnabled,
-		})
+		_spec.SetField(guildadminconfig.FieldEnabled, field.TypeBool, value)
 	}
 	if gacu.mutation.EnabledCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: guildadminconfig.FieldEnabled,
-		})
+		_spec.ClearField(guildadminconfig.FieldEnabled, field.TypeBool)
 	}
 	if value, ok := gacu.mutation.DefaultMaxChannels(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildadminconfig.FieldDefaultMaxChannels,
-		})
+		_spec.SetField(guildadminconfig.FieldDefaultMaxChannels, field.TypeInt, value)
 	}
 	if value, ok := gacu.mutation.AddedDefaultMaxChannels(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildadminconfig.FieldDefaultMaxChannels,
-		})
+		_spec.AddField(guildadminconfig.FieldDefaultMaxChannels, field.TypeInt, value)
 	}
 	if gacu.mutation.DefaultMaxChannelsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: guildadminconfig.FieldDefaultMaxChannels,
-		})
+		_spec.ClearField(guildadminconfig.FieldDefaultMaxChannels, field.TypeInt)
 	}
 	if value, ok := gacu.mutation.DefaultMaxClones(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildadminconfig.FieldDefaultMaxClones,
-		})
+		_spec.SetField(guildadminconfig.FieldDefaultMaxClones, field.TypeInt, value)
 	}
 	if value, ok := gacu.mutation.AddedDefaultMaxClones(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildadminconfig.FieldDefaultMaxClones,
-		})
+		_spec.AddField(guildadminconfig.FieldDefaultMaxClones, field.TypeInt, value)
 	}
 	if gacu.mutation.DefaultMaxClonesCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: guildadminconfig.FieldDefaultMaxClones,
-		})
+		_spec.ClearField(guildadminconfig.FieldDefaultMaxClones, field.TypeInt)
 	}
 	if value, ok := gacu.mutation.Comment(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildadminconfig.FieldComment,
-		})
+		_spec.SetField(guildadminconfig.FieldComment, field.TypeString, value)
 	}
 	if gacu.mutation.CommentCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guildadminconfig.FieldComment,
-		})
+		_spec.ClearField(guildadminconfig.FieldComment, field.TypeString)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, gacu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -587,77 +547,37 @@ func (gacuo *GuildAdminConfigUpdateOne) sqlSave(ctx context.Context) (_node *Gui
 		}
 	}
 	if value, ok := gacuo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildadminconfig.FieldUpdateTime,
-		})
+		_spec.SetField(guildadminconfig.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := gacuo.mutation.Enabled(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: guildadminconfig.FieldEnabled,
-		})
+		_spec.SetField(guildadminconfig.FieldEnabled, field.TypeBool, value)
 	}
 	if gacuo.mutation.EnabledCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: guildadminconfig.FieldEnabled,
-		})
+		_spec.ClearField(guildadminconfig.FieldEnabled, field.TypeBool)
 	}
 	if value, ok := gacuo.mutation.DefaultMaxChannels(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildadminconfig.FieldDefaultMaxChannels,
-		})
+		_spec.SetField(guildadminconfig.FieldDefaultMaxChannels, field.TypeInt, value)
 	}
 	if value, ok := gacuo.mutation.AddedDefaultMaxChannels(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildadminconfig.FieldDefaultMaxChannels,
-		})
+		_spec.AddField(guildadminconfig.FieldDefaultMaxChannels, field.TypeInt, value)
 	}
 	if gacuo.mutation.DefaultMaxChannelsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: guildadminconfig.FieldDefaultMaxChannels,
-		})
+		_spec.ClearField(guildadminconfig.FieldDefaultMaxChannels, field.TypeInt)
 	}
 	if value, ok := gacuo.mutation.DefaultMaxClones(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildadminconfig.FieldDefaultMaxClones,
-		})
+		_spec.SetField(guildadminconfig.FieldDefaultMaxClones, field.TypeInt, value)
 	}
 	if value, ok := gacuo.mutation.AddedDefaultMaxClones(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildadminconfig.FieldDefaultMaxClones,
-		})
+		_spec.AddField(guildadminconfig.FieldDefaultMaxClones, field.TypeInt, value)
 	}
 	if gacuo.mutation.DefaultMaxClonesCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: guildadminconfig.FieldDefaultMaxClones,
-		})
+		_spec.ClearField(guildadminconfig.FieldDefaultMaxClones, field.TypeInt)
 	}
 	if value, ok := gacuo.mutation.Comment(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildadminconfig.FieldComment,
-		})
+		_spec.SetField(guildadminconfig.FieldComment, field.TypeString, value)
 	}
 	if gacuo.mutation.CommentCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guildadminconfig.FieldComment,
-		})
+		_spec.ClearField(guildadminconfig.FieldComment, field.TypeString)
 	}
 	_node = &GuildAdminConfig{config: gacuo.config}
 	_spec.Assign = _node.assignValues

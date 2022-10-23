@@ -247,70 +247,34 @@ func (gcu *GuildConfigUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := gcu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildconfig.FieldUpdateTime,
-		})
+		_spec.SetField(guildconfig.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := gcu.mutation.Enabled(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: guildconfig.FieldEnabled,
-		})
+		_spec.SetField(guildconfig.FieldEnabled, field.TypeBool, value)
 	}
 	if gcu.mutation.EnabledCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: guildconfig.FieldEnabled,
-		})
+		_spec.ClearField(guildconfig.FieldEnabled, field.TypeBool)
 	}
 	if value, ok := gcu.mutation.DefaultMaxClones(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildconfig.FieldDefaultMaxClones,
-		})
+		_spec.SetField(guildconfig.FieldDefaultMaxClones, field.TypeInt, value)
 	}
 	if value, ok := gcu.mutation.AddedDefaultMaxClones(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildconfig.FieldDefaultMaxClones,
-		})
+		_spec.AddField(guildconfig.FieldDefaultMaxClones, field.TypeInt, value)
 	}
 	if gcu.mutation.DefaultMaxClonesCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: guildconfig.FieldDefaultMaxClones,
-		})
+		_spec.ClearField(guildconfig.FieldDefaultMaxClones, field.TypeInt)
 	}
 	if value, ok := gcu.mutation.RegexMatch(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildconfig.FieldRegexMatch,
-		})
+		_spec.SetField(guildconfig.FieldRegexMatch, field.TypeString, value)
 	}
 	if gcu.mutation.RegexMatchCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guildconfig.FieldRegexMatch,
-		})
+		_spec.ClearField(guildconfig.FieldRegexMatch, field.TypeString)
 	}
 	if value, ok := gcu.mutation.ContactEmail(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildconfig.FieldContactEmail,
-		})
+		_spec.SetField(guildconfig.FieldContactEmail, field.TypeString, value)
 	}
 	if gcu.mutation.ContactEmailCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guildconfig.FieldContactEmail,
-		})
+		_spec.ClearField(guildconfig.FieldContactEmail, field.TypeString)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, gcu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -576,70 +540,34 @@ func (gcuo *GuildConfigUpdateOne) sqlSave(ctx context.Context) (_node *GuildConf
 		}
 	}
 	if value, ok := gcuo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildconfig.FieldUpdateTime,
-		})
+		_spec.SetField(guildconfig.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := gcuo.mutation.Enabled(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: guildconfig.FieldEnabled,
-		})
+		_spec.SetField(guildconfig.FieldEnabled, field.TypeBool, value)
 	}
 	if gcuo.mutation.EnabledCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: guildconfig.FieldEnabled,
-		})
+		_spec.ClearField(guildconfig.FieldEnabled, field.TypeBool)
 	}
 	if value, ok := gcuo.mutation.DefaultMaxClones(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildconfig.FieldDefaultMaxClones,
-		})
+		_spec.SetField(guildconfig.FieldDefaultMaxClones, field.TypeInt, value)
 	}
 	if value, ok := gcuo.mutation.AddedDefaultMaxClones(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: guildconfig.FieldDefaultMaxClones,
-		})
+		_spec.AddField(guildconfig.FieldDefaultMaxClones, field.TypeInt, value)
 	}
 	if gcuo.mutation.DefaultMaxClonesCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: guildconfig.FieldDefaultMaxClones,
-		})
+		_spec.ClearField(guildconfig.FieldDefaultMaxClones, field.TypeInt)
 	}
 	if value, ok := gcuo.mutation.RegexMatch(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildconfig.FieldRegexMatch,
-		})
+		_spec.SetField(guildconfig.FieldRegexMatch, field.TypeString, value)
 	}
 	if gcuo.mutation.RegexMatchCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guildconfig.FieldRegexMatch,
-		})
+		_spec.ClearField(guildconfig.FieldRegexMatch, field.TypeString)
 	}
 	if value, ok := gcuo.mutation.ContactEmail(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildconfig.FieldContactEmail,
-		})
+		_spec.SetField(guildconfig.FieldContactEmail, field.TypeString, value)
 	}
 	if gcuo.mutation.ContactEmailCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: guildconfig.FieldContactEmail,
-		})
+		_spec.ClearField(guildconfig.FieldContactEmail, field.TypeString)
 	}
 	_node = &GuildConfig{config: gcuo.config}
 	_spec.Assign = _node.assignValues

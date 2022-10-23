@@ -174,38 +174,19 @@ func (geu *GuildEventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := geu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildevent.FieldUpdateTime,
-		})
+		_spec.SetField(guildevent.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := geu.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: guildevent.FieldType,
-		})
+		_spec.SetField(guildevent.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := geu.mutation.Message(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildevent.FieldMessage,
-		})
+		_spec.SetField(guildevent.FieldMessage, field.TypeString, value)
 	}
 	if value, ok := geu.mutation.Metadata(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: guildevent.FieldMetadata,
-		})
+		_spec.SetField(guildevent.FieldMetadata, field.TypeJSON, value)
 	}
 	if geu.mutation.MetadataCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: guildevent.FieldMetadata,
-		})
+		_spec.ClearField(guildevent.FieldMetadata, field.TypeJSON)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, geu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -398,38 +379,19 @@ func (geuo *GuildEventUpdateOne) sqlSave(ctx context.Context) (_node *GuildEvent
 		}
 	}
 	if value, ok := geuo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildevent.FieldUpdateTime,
-		})
+		_spec.SetField(guildevent.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := geuo.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: guildevent.FieldType,
-		})
+		_spec.SetField(guildevent.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := geuo.mutation.Message(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildevent.FieldMessage,
-		})
+		_spec.SetField(guildevent.FieldMessage, field.TypeString, value)
 	}
 	if value, ok := geuo.mutation.Metadata(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: guildevent.FieldMetadata,
-		})
+		_spec.SetField(guildevent.FieldMetadata, field.TypeJSON, value)
 	}
 	if geuo.mutation.MetadataCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: guildevent.FieldMetadata,
-		})
+		_spec.ClearField(guildevent.FieldMetadata, field.TypeJSON)
 	}
 	_node = &GuildEvent{config: geuo.config}
 	_spec.Assign = _node.assignValues

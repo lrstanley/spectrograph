@@ -475,155 +475,79 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = uc.conflict
 	if value, ok := uc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldCreateTime,
-		})
+		_spec.SetField(user.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := uc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldUpdateTime,
-		})
+		_spec.SetField(user.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := uc.mutation.UserID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldUserID,
-		})
+		_spec.SetField(user.FieldUserID, field.TypeString, value)
 		_node.UserID = value
 	}
 	if value, ok := uc.mutation.Admin(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldAdmin,
-		})
+		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
 		_node.Admin = value
 	}
 	if value, ok := uc.mutation.Banned(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldBanned,
-		})
+		_spec.SetField(user.FieldBanned, field.TypeBool, value)
 		_node.Banned = value
 	}
 	if value, ok := uc.mutation.BanReason(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldBanReason,
-		})
+		_spec.SetField(user.FieldBanReason, field.TypeString, value)
 		_node.BanReason = value
 	}
 	if value, ok := uc.mutation.Username(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldUsername,
-		})
+		_spec.SetField(user.FieldUsername, field.TypeString, value)
 		_node.Username = value
 	}
 	if value, ok := uc.mutation.Discriminator(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldDiscriminator,
-		})
+		_spec.SetField(user.FieldDiscriminator, field.TypeString, value)
 		_node.Discriminator = value
 	}
 	if value, ok := uc.mutation.Email(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldEmail,
-		})
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
 		_node.Email = value
 	}
 	if value, ok := uc.mutation.AvatarHash(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldAvatarHash,
-		})
+		_spec.SetField(user.FieldAvatarHash, field.TypeString, value)
 		_node.AvatarHash = value
 	}
 	if value, ok := uc.mutation.AvatarURL(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldAvatarURL,
-		})
+		_spec.SetField(user.FieldAvatarURL, field.TypeString, value)
 		_node.AvatarURL = value
 	}
 	if value, ok := uc.mutation.Locale(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldLocale,
-		})
+		_spec.SetField(user.FieldLocale, field.TypeString, value)
 		_node.Locale = value
 	}
 	if value, ok := uc.mutation.Bot(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldBot,
-		})
+		_spec.SetField(user.FieldBot, field.TypeBool, value)
 		_node.Bot = value
 	}
 	if value, ok := uc.mutation.System(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldSystem,
-		})
+		_spec.SetField(user.FieldSystem, field.TypeBool, value)
 		_node.System = value
 	}
 	if value, ok := uc.mutation.MfaEnabled(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldMfaEnabled,
-		})
+		_spec.SetField(user.FieldMfaEnabled, field.TypeBool, value)
 		_node.MfaEnabled = value
 	}
 	if value, ok := uc.mutation.Verified(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: user.FieldVerified,
-		})
+		_spec.SetField(user.FieldVerified, field.TypeBool, value)
 		_node.Verified = value
 	}
 	if value, ok := uc.mutation.Flags(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: user.FieldFlags,
-		})
+		_spec.SetField(user.FieldFlags, field.TypeUint64, value)
 		_node.Flags = value
 	}
 	if value, ok := uc.mutation.PremiumType(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldPremiumType,
-		})
+		_spec.SetField(user.FieldPremiumType, field.TypeInt, value)
 		_node.PremiumType = value
 	}
 	if value, ok := uc.mutation.PublicFlags(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: user.FieldPublicFlags,
-		})
+		_spec.SetField(user.FieldPublicFlags, field.TypeUint64, value)
 		_node.PublicFlags = value
 	}
 	if nodes := uc.mutation.UserGuildsIDs(); len(nodes) > 0 {

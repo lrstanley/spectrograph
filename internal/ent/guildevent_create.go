@@ -231,43 +231,23 @@ func (gec *GuildEventCreate) createSpec() (*GuildEvent, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = gec.conflict
 	if value, ok := gec.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildevent.FieldCreateTime,
-		})
+		_spec.SetField(guildevent.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := gec.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: guildevent.FieldUpdateTime,
-		})
+		_spec.SetField(guildevent.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := gec.mutation.GetType(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: guildevent.FieldType,
-		})
+		_spec.SetField(guildevent.FieldType, field.TypeEnum, value)
 		_node.Type = value
 	}
 	if value, ok := gec.mutation.Message(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: guildevent.FieldMessage,
-		})
+		_spec.SetField(guildevent.FieldMessage, field.TypeString, value)
 		_node.Message = value
 	}
 	if value, ok := gec.mutation.Metadata(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: guildevent.FieldMetadata,
-		})
+		_spec.SetField(guildevent.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
 	}
 	if nodes := gec.mutation.GuildIDs(); len(nodes) > 0 {
