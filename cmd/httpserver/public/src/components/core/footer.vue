@@ -5,14 +5,15 @@
     v-bind="$attrs"
   >
     <div class="grid grid-flow-row gap-4 md:gap-8 md:grid-flow-col">
-      <router-link
-        v-for="link in mainLinks"
-        :key="link.name"
-        :to="link.to || link.href"
-        class="link link-hover"
-      >
-        {{ link.name }}
-      </router-link>
+      <template v-for="link in mainLinks" :key="link.name">
+        <component
+          :is="link.to ? 'router-link' : 'a'"
+          v-bind="link.to ? { to: link.to } : { href: link.href }"
+          class="link link-hover"
+        >
+          {{ link.name }}
+        </component>
+      </template>
     </div>
     <div>
       <div class="grid grid-flow-col gap-4">

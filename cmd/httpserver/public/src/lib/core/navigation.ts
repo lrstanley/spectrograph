@@ -24,7 +24,7 @@ export const headerLinks: Link[] = [
   {
     name: "Documentation",
     description: "Our documentation includes guides on proper setup of Spectrograph",
-    href: "#",
+    href: "https://docs.spectrograph.app",
     icon: IFasBook,
   },
   {
@@ -39,7 +39,7 @@ export const mainLinks: Link[] = [
   {
     name: "Documentation",
     description: "Our documentation includes guides on proper setup of Spectrograph",
-    href: "#",
+    href: "https://docs.spectrograph.app",
     icon: IFasBook,
   },
   {
@@ -109,7 +109,7 @@ export const dashboardLinks: ComputedRef<DashboardLink[]> = computed(() => {
     {
       name: "Documentation",
       description: "Our documentation includes guides on proper setup of Spectrograph",
-      href: "#",
+      href: "https://docs.spectrograph.app",
       icon: IFasBook,
     },
     {

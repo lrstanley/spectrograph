@@ -15,23 +15,27 @@
           <div v-if="group.title" class="pt-5">
             <span class="px-3 text-sm font-bold text-idle-500">{{ group.title }}</span>
           </div>
-          <router-link
-            v-for="link in group.links"
-            :key="link.name"
-            :to="link.to || link.href"
-            active-class="text-white bg-channel-900/50"
-            class="flex items-center p-3 text-lg font-medium transition-all duration-100 ease-in rounded text-channel-300 hover:bg-channel-900/50 hover:text-white group md:py-2 md:text-sm"
-            :class="link.isChild ? 'ml-3' : ''"
-          >
+          <template v-for="link in group.links" :key="link.name">
             <component
-              :is="link.icon"
-              class="w-5 h-5 mr-3 text-gray-400 shrink-0 group-hover:text-gray-300"
-              aria-hidden="true"
-            />
-            {{ link.name }}
+              :is="link.to ? 'router-link' : 'a'"
+              v-bind="
+                link.to
+                  ? { to: link.to, 'active-class': 'text-white bg-channel-900/50' }
+                  : { href: link.href }
+              "
+              class="flex items-center p-3 text-lg font-medium transition-all duration-100 ease-in rounded text-channel-300 hover:bg-channel-900/50 hover:text-white group md:py-2 md:text-sm"
+              :class="link.isChild ? 'ml-3' : ''"
+            >
+              <component
+                :is="link.icon"
+                class="w-5 h-5 mr-3 text-gray-400 shrink-0 group-hover:text-gray-300"
+                aria-hidden="true"
+              />
+              {{ link.name }}
 
-            <GuildStatus v-if="link.hasStatus" class="pl-1 ml-auto" :status="link.status" />
-          </router-link>
+              <GuildStatus v-if="link.hasStatus" class="pl-1 ml-auto" :status="link.status" />
+            </component>
+          </template>
         </template>
       </nav>
     </div>

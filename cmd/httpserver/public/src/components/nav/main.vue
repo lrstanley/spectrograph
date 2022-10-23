@@ -29,15 +29,16 @@
         </div>
       </div>
       <div class="md:ml-10" :class="props.isPanel ? 'flex flex-col' : 'hidden md:flex space-x-8'">
-        <router-link
-          v-for="link in headerLinks"
-          :key="link.name"
-          :to="link.to || link.href"
-          class="text-lg font-medium text-white md:text-base hover:text-gray-300 focus:ring-1 ring-white"
-          :class="props.isPanel ? 'px-4 py-1 my-1 bg-channel-600 rounded' : ''"
-        >
-          {{ link.name }}
-        </router-link>
+        <template v-for="link in headerLinks" :key="link.name">
+          <component
+            :is="link.to ? 'router-link' : 'a'"
+            v-bind="link.to ? { to: link.to } : { href: link.href }"
+            class="text-lg font-medium text-white md:text-base hover:text-gray-300 focus:ring-1 ring-white"
+            :class="props.isPanel ? 'px-4 py-1 my-1 bg-channel-600 rounded' : ''"
+          >
+            {{ link.name }}
+          </component>
+        </template>
       </div>
     </div>
     <div class="items-center mt-2 space-x-6 md:mt-0" :class="props.isPanel ? 'flex' : 'hidden md:flex'">
