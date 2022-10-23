@@ -9,10 +9,23 @@
       </div>
     </div>
 
-    <ContainerPanel>
-      <slot />
+    <ContainerPanel v-bind="$attrs">
+      <template v-if="!!$slots.header" #header>
+        <slot name="header" />
+      </template>
 
-      <template #actions>
+      <template v-if="props.barePanel">
+        <slot />
+      </template>
+      <template v-else>
+        <div class="px-6 py-5 space-y-6">
+          <div class="grid grid-cols-2 gap-6">
+            <slot />
+          </div>
+        </div>
+      </template>
+
+      <template v-if="!!$slots.actions" #actions>
         <slot name="actions" />
       </template>
     </ContainerPanel>
@@ -23,5 +36,6 @@
 const props = defineProps<{
   title: string
   description: string
+  barePanel?: boolean
 }>()
 </script>
