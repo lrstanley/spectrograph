@@ -9,6 +9,7 @@ import (
 	"embed"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -53,7 +54,7 @@ func httpServer(ctx context.Context) *http.Server {
 	)
 
 	if len(cli.Flags.HTTP.TrustedProxies) > 0 {
-		r.Use(chix.UseRealIP(cli.Flags.HTTP.TrustedProxies, chix.OptUseXForwardedFor))
+		r.Use(chix.UseRealIPCLIOpts(cli.Flags.HTTP.TrustedProxies))
 	}
 
 	// Core middeware.
@@ -63,8 +64,10 @@ func httpServer(ctx context.Context) *http.Server {
 		middleware.RequestID,
 		chix.UseStructuredLogger(logger),
 		chix.UsePrometheus,
-		middleware.Recoverer,
-		middleware.StripSlashes,
+		chix.Recoverer,
+		middleware.Maybe(middleware.StripSlashes, func(r *http.Request) bool {
+			return !strings.HasPrefix(r.URL.Path, "/debug/")
+		}),
 		middleware.Compress(5),
 		chix.UseNextURL,
 	)
@@ -76,14 +79,14 @@ func httpServer(ctx context.Context) *http.Server {
 	r.Use(
 		cors.AllowAll().Handler,
 		chix.UseHeaders(map[string]string{
-			"Content-Security-Policy": "default-src 'self'; img-src * data:; media-src * data:; style-src 'self' 'unsafe-inline'; object-src 'none'; child-src 'none'; frame-src 'none'; worker-src 'none'",
+			"Content-Security-Policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: *; connect-src 'self' *; media-src 'none'; object-src 'none'; child-src 'none'; frame-src 'none'; worker-src 'self'",
 			"X-Frame-Options":         "DENY",
 			"X-Content-Type-Options":  "nosniff",
-			"Referrer-Policy":         "no-referrer-when-downgrade",
+			"Referrer-Policy":         "strict-origin",
 			"Permissions-Policy":      "clipboard-write=(self)",
 		}),
 		auth.AddToContext,
-		httprate.LimitByIP(150, 5*time.Minute),
+		httprate.LimitByIP(500, 5*time.Minute),
 	)
 
 	// Misc.
