@@ -12,7 +12,6 @@ vendor
 rice*.go
 .git
 bin
-**/*.md
 **/.env
 **/node_modules
 **/.gitapicache

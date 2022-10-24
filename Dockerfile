@@ -2,16 +2,16 @@
 
 # frontend
 FROM node:18 as build-node
-WORKDIR /build
 
 COPY . /build
+WORKDIR /build
+ENV NODE_ENV=production
 RUN \
     --mount=type=cache,target=/build/cmd/httpserver/public/node_modules \
-    make node-fetch node-build
+    make node-build
 
 # backend
 FROM golang:latest as build-go
-WORKDIR /build
 
 RUN \
     --mount=type=cache,target=/var/cache/apt \
@@ -19,6 +19,7 @@ RUN \
     apt-get update && apt-get install --assume-yes upx
 COPY . /build
 COPY --from=build-node /build/cmd/httpserver/public/dist/ /build/cmd/httpserver/public/dist/
+WORKDIR /build
 RUN \
     --mount=type=cache,target=/root/.cache \
     --mount=type=cache,target=/go \
@@ -27,10 +28,12 @@ RUN upx --best --lzma httpserver
 
 # runtime
 FROM alpine:latest
-WORKDIR /app
 
 RUN apk add --no-cache ca-certificates
 RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 COPY --from=build-go /build/httpserver /app/httpserver
 
+EXPOSE 8080
+WORKDIR /app
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 CMD ["/app/httpserver"]

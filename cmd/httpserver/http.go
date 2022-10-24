@@ -86,7 +86,7 @@ func httpServer(ctx context.Context) *http.Server {
 			"Permissions-Policy":      "clipboard-write=(self)",
 		}),
 		auth.AddToContext,
-		httprate.LimitByIP(500, 5*time.Minute),
+		httprate.LimitByIP(200, 1*time.Minute),
 	)
 
 	// Misc.

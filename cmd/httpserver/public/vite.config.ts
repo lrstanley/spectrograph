@@ -1,4 +1,5 @@
 import path from "path"
+import { visualizer } from "rollup-plugin-visualizer"
 import AutoImport from "unplugin-auto-import/vite"
 import IconsResolver from "unplugin-icons/resolver"
 import Icons from "unplugin-icons/vite"
@@ -32,6 +33,9 @@ export default defineConfig({
     },
   },
   plugins: [
+    visualizer({
+      filename: "./dist/stats.html",
+    }),
     codegen({
       enableWatcher: true,
       config: {
@@ -58,8 +62,7 @@ export default defineConfig({
     VueRouter({
       routesFolder: "src/pages",
       routeBlockLang: "yaml",
-      extensions: [".vue", ".md"],
-      logs: true,
+      extensions: ["vue", "md"],
     }),
     Vue({
       include: [/\.vue$/, /\.md$/],
@@ -81,7 +84,7 @@ export default defineConfig({
       defaultLayout: "default",
     }),
     Components({
-      dts: true,
+      extensions: ["vue", "md"],
       directives: true,
       directoryAsNamespace: true,
       importPathTransform: (path) => path.replace(/.*\/src\//, "@/"),
@@ -110,15 +113,17 @@ export default defineConfig({
   ],
   base: "/",
   build: {
-    sourcemap: false,
+    sourcemap: "hidden",
     emptyOutDir: true,
   },
   preview: {
     port: 8081,
+    open: false,
   },
   server: {
     base: "/",
     port: 8081,
+    open: false,
     strictPort: true,
     proxy: {
       "^/(-|security\\.txt|robots\\.txt)(/.*|$)": {
