@@ -44,7 +44,7 @@ meta:
         <input
           v-model="guild.guildConfig.regexMatch"
           type="text"
-          placeholder="default: '^.* +$'"
+          placeholder="default: '^.* \+$'"
           class="w-full rounded input input-bordered"
           aria-labelledby="channel-match-rule"
         />
