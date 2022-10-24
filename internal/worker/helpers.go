@@ -41,14 +41,14 @@ func (w *Worker) dbUpdateGuild(g *disgord.Guild, permissions models.DiscordPermi
 	}
 
 	var gid int
-	gid, err = q.OnConflictColumns(guild.FieldGuildID).Ignore().ID(w.ctx)
+	gid, err = q.OnConflictColumns(guild.FieldGuildID).UpdateNewValues().ID(w.ctx)
 	if err != nil {
 		return database.Commit(tx, err)
 	}
 
 	err = w.db.GuildConfig.Create().
 		SetGuildID(gid).
-		OnConflictColumns(guildconfig.GuildColumn).Ignore().
+		OnConflictColumns(guildconfig.GuildColumn).UpdateNewValues().
 		Exec(w.ctx)
 	if err != nil {
 		return database.Commit(tx, err)
@@ -57,7 +57,7 @@ func (w *Worker) dbUpdateGuild(g *disgord.Guild, permissions models.DiscordPermi
 	err = w.db.GuildAdminConfig.Create().
 		SetGuildID(gid).
 		SetEnabled(enabled).
-		OnConflictColumns(guildadminconfig.GuildColumn).Ignore().
+		OnConflictColumns(guildadminconfig.GuildColumn).UpdateNewValues().
 		Exec(w.ctx)
 	if err != nil {
 		return database.Commit(tx, err)
