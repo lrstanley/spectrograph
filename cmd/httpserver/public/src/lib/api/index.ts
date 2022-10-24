@@ -38,7 +38,9 @@ function fetchWithTimeout(url: RequestInfo, opts: RequestInit): Promise<Response
 }
 
 export const wsClient = createWSClient({
-  url: `${window.location.protocol == "https" ? "wss" : "ws"}://${window.location.host}/-/graphql`,
+  url: `${window.location.protocol.startsWith("https") ? "wss" : "ws"}://${
+    window.location.host
+  }/-/graphql`,
   keepAlive: 10000,
 })
 
