@@ -11,4 +11,4 @@ const (
 	DefaultMaxChannels = 10
 )
 
-var DefaultChannelMatch = regexp.MustCompile(`^.* +$`)
+var DefaultChannelMatch = regexp.MustCompile(`^.* \+$`)
