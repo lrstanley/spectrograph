@@ -27,7 +27,13 @@ meta:
                   <i-fas-circle-info class="h-8 mr-2" aria-hidden="true" />
                   More information
                 </a>
-                <a class="h-10 min-h-0 btn btn-secondary" href="/-/invite" aria-hidden="true">
+                <a
+                  class="h-10 min-h-0 btn btn-secondary"
+                  href="/-/invite"
+                  aria-hidden="true"
+                  target="blank"
+                  rel="noopener noreferrer"
+                >
                   <i-fas-circle-plus class="h-8 mr-2" />
                   Add to your server
                 </a>
