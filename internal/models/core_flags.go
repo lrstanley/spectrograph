@@ -22,7 +22,7 @@ type ConfigDatabase struct {
 type ConfigHTTP struct {
 	BaseURL        string   `env:"BASE_URL"        long:"base-url"        default:"http://localhost:8080" description:"base url for the HTTP server"`
 	BindAddr       string   `env:"BIND_ADDR"       long:"bind-addr"       default:":8080" required:"true" description:"ip:port pair to bind to"`
-	TrustedProxies []string `env:"TRUSTED_PROXIES" long:"trusted-proxies" env-delim:"," description:"CIDR ranges that we trust the X-Forwarded-For header from"`
+	TrustedProxies []string `env:"TRUSTED_PROXIES" long:"trusted-proxies" env-delim:"," description:"CIDR ranges that we trust the X-Forwarded-For header from (addl opts: local, *, cloudflare, and/or custom header to use)"`
 	ValidationKey  string   `env:"VALIDATION_KEY"  long:"validation-key"  required:"true" description:"key used to validate session cookies (32 or 64 bytes)"`
 	EncryptionKey  string   `env:"ENCRYPTION_KEY"  long:"encryption-key"  required:"true" description:"key used to encrypt session cookies (32 bytes)"`
 }

@@ -52,9 +52,9 @@ export default defineConfig({
               useTypeImports: true,
               inputMaybeValue: "T | Ref<T> | ComputedRef<T>",
             },
-            hooks: {
-              afterOneFileWrite: ["pnpm exec prettier --write"],
-            },
+            // hooks: {
+            //   afterOneFileWrite: ["pnpm exec prettier --write"],
+            // },
           },
         },
       },
