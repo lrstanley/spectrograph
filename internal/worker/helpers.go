@@ -74,6 +74,13 @@ func (w *Worker) dbDisableGuild(gid string) (err error) {
 		SetEnabled(false).
 		Save(w.ctx)
 
+	if err == nil {
+		_, err = w.db.Guild.Update().
+			Where(guild.GuildID(gid)).
+			ClearJoinedAt().
+			Save(w.ctx)
+	}
+
 	return err
 }
 

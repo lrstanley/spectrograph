@@ -25,7 +25,7 @@ func (Guild) Fields() []ent.Field {
 		field.String("name").Annotations(
 			entgql.OrderField("NAME"),
 		).MinLen(2).MaxLen(100).Comment("Guild name (2-100 chars, excl. trailing/leading spaces)."),
-		field.Strings("features").Optional().Optional().Default([]string{}).Comment("Enabled guild features."),
+		field.Strings("features").Optional().Default([]string{}).Comment("Enabled guild features."),
 		field.String("icon_hash").Optional().MaxLen(2048).Comment("Icon hash."),
 		field.String("icon_url").MaxLen(2048),
 		field.Time("joined_at").Optional().Nillable().Annotations(
