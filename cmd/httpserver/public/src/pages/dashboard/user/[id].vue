@@ -7,6 +7,7 @@ meta:
 <template>
   <FeedbackAlert v-if="error" type="error">{{ error }}</FeedbackAlert>
   <div v-else class="space-y-12">
+    <UserDeleteModal v-model="openDeleteModal" :user="user" />
     <UserBanModal v-model="openBanModal" :user="user" @banned="refetch" />
     <UserHeader :user="user" />
 
@@ -59,7 +60,11 @@ meta:
               from your guilds).
             </div>
           </div>
-          <button class="w-full mt-2 ml-auto btn btn-sm btn-error md:w-auto md:mt-0">
+          <button
+            class="w-full mt-2 ml-auto btn btn-sm btn-error md:w-auto md:mt-0"
+            :disabled="state.base.self?.admin"
+            @click="openDeleteModal = true"
+          >
             Delete account
           </button>
         </div>
@@ -110,4 +115,5 @@ const userEmail = computed(() => {
 
 const showEmail = ref(false)
 const openBanModal = ref(false)
+const openDeleteModal = ref(false)
 </script>

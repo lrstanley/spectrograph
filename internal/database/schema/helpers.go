@@ -123,3 +123,19 @@ func AllowUserQuerySelf() privacy.QueryRule {
 		return nil
 	})
 }
+
+func AllowUserMutateSelf() privacy.MutationRule {
+	return privacy.UserMutationRuleFunc(func(ctx context.Context, m *ent.UserMutation) error {
+		uid := userID(ctx)
+
+		if uid == 0 {
+			return privacy.Skip
+		}
+
+		if !hasRole(ctx, models.RoleSystemAdmin) {
+			m.Where(user.ID(uid))
+			return privacy.Allow
+		}
+		return nil
+	})
+}

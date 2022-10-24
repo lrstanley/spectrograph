@@ -17,3 +17,7 @@ mutation banUser($id: ID!, $reason: String!) {
 mutation unbanUser($id: ID!) {
     unbanUser(id: $id)
 }
+
+mutation deleteAccount {
+    deleteAccount(noop: -1)
+}

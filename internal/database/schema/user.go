@@ -65,6 +65,7 @@ func (User) Policy() ent.Policy {
 	return privacy.Policy{
 		Mutation: privacy.MutationPolicy{
 			AllowRoles(models.RoleSystemAdmin),
+			privacy.OnMutationOperation(AllowUserMutateSelf(), ent.OpDelete|ent.OpDeleteOne),
 			privacy.AlwaysDenyRule(),
 		},
 		Query: privacy.QueryPolicy{

@@ -5,4 +5,5 @@ extend type Query {
 extend type Mutation {
     banUser(id: ID!, reason: String!): Boolean!
     unbanUser(id: ID!): Boolean!
+    deleteAccount(noop: ID): Boolean!
 }

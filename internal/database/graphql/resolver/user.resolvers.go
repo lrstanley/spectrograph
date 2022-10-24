@@ -50,6 +50,17 @@ func (r *mutationResolver) UnbanUser(ctx context.Context, id int) (bool, error) 
 	return true, nil
 }
 
+// DeleteAccount is the resolver for the deleteAccount field.
+func (r *mutationResolver) DeleteAccount(ctx context.Context, noop *int) (bool, error) {
+	uid := chix.IDFromContext[int](ctx)
+
+	if err := ent.FromContext(ctx).User.DeleteOneID(uid).Exec(ctx); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // Self is the resolver for the self field.
 func (r *queryResolver) Self(ctx context.Context) (*ent.User, error) {
 	user := chix.IdentFromContext[ent.User](ctx)
