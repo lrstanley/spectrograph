@@ -71,8 +71,8 @@ func (b *DiscordPermissions) UnmarshalJSON(bytes []byte) error {
 }
 
 // Contains is used to check if the permission integer contains the bits specified.
-func (b DiscordPermissions) Contains(Bits DiscordPermissions) bool {
-	return (b & Bits) == Bits
+func (b DiscordPermissions) Contains(bits DiscordPermissions) bool {
+	return (b & bits) == bits
 }
 
 // Constants for the different bit offsets of text channel permissions.
