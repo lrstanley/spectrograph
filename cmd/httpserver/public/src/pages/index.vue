@@ -217,7 +217,7 @@ meta:
 <script setup lang="ts">
 import imgDiscord from "@/assets/img/discord.png?format=webp&imagetools"
 import imgExampleOld from "@/assets/img/example-old.png?format=webp&imagetools"
-import imgExampleNew from "@/assets/img/example-new.png?format=webp&imagetools"
+import imgExampleNew from "@/assets/img/example-new-optimized.gif"
 const features = [
   {
     name: "Auto-scaling magic",
