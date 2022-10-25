@@ -97,10 +97,15 @@ func (w *Worker) processUpdateWorker(sess disgord.Session, guildID disgord.Snowf
 		return
 	}
 
-	rgx, err := regexp.Compile(config.RegexMatch)
-	if err != nil {
-		w.es.Guild(event.guild).WithError(err).WithField("regex", config.RegexMatch).Error("unable to parse regex")
+	var rgx *regexp.Regexp
+	if config.RegexMatch == "" {
 		rgx = models.DefaultChannelMatch
+	} else {
+		rgx, err = regexp.Compile(config.RegexMatch)
+		if err != nil {
+			w.es.Guild(event.guild).WithError(err).WithField("regex", config.RegexMatch).Error("unable to parse regex, falling back to defaults")
+			rgx = models.DefaultChannelMatch
+		}
 	}
 
 	// Get number of users in each voice channel.
@@ -311,7 +316,6 @@ func (w *Worker) processUpdateWorker(sess disgord.Session, guildID disgord.Snowf
 					SetBitrate(primary.Bitrate).
 					SetPermissionOverwrites(primary.PermissionOverwrites).Execute()
 				if err != nil {
-					// TODO: this should be propagated up to the user somehow. events?
 					// TODO: should we change the permissions ourselves?
 					w.es.Guild(event.guild).WithError(err).WithFields(log.Fields{
 						"channel_id": channel.ID,
