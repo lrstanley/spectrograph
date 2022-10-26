@@ -17,13 +17,13 @@ require (
 	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v4 v4.17.2
-	github.com/lrstanley/chix v0.0.0-20221017164222-76f0c72450e5
+	github.com/lrstanley/chix v0.0.0-20221026003132-aaf290233019
 	github.com/lrstanley/clix v0.0.0-20220918173828-afa1308b68ae
-	github.com/markbates/goth v1.74.1
+	github.com/markbates/goth v1.74.2
 	github.com/prometheus/client_golang v1.13.0
 	github.com/vektah/gqlparser/v2 v2.5.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	golang.org/x/exp v0.0.0-20221019170559-20944726eadf
+	golang.org/x/exp v0.0.0-20221026004748-78e5e7837ae6
 	golang.org/x/sync v0.1.0
 )
 
@@ -67,7 +67,7 @@ require (
 	github.com/lrstanley/go-bogon v0.0.0-20220507183221-362a880cf97b // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.2 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
