@@ -20,7 +20,7 @@ require (
 	github.com/lrstanley/chix v0.0.0-20221026003132-aaf290233019
 	github.com/lrstanley/clix v0.0.0-20220918173828-afa1308b68ae
 	github.com/markbates/goth v1.74.2
-	github.com/prometheus/client_golang v1.13.0
+	github.com/prometheus/client_golang v1.13.1
 	github.com/vektah/gqlparser/v2 v2.5.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	golang.org/x/exp v0.0.0-20221026004748-78e5e7837ae6
