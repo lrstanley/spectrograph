@@ -117,6 +117,18 @@ func httpServer(ctx context.Context) *http.Server {
 	r.Get("/-/invite", getAuthorizeBot)
 	r.Get("/-/invite/{id:[a-zA-Z0-9]{3,}}", getAuthorizeBot)
 
+	r.With(middleware.ThrottleBacklog(1, 5, 5*time.Second)).Get("/-/healthy", func(w http.ResponseWriter, r *http.Request) {
+		err := database.Ping(ctx)
+		if err != nil {
+			chix.Error(w, r, err)
+			return
+		}
+
+		chix.JSON(w, r, 200, chix.M{
+			"status": "ok",
+		})
+	})
+
 	r.NotFound(chix.UseStatic(ctx, &chix.Static{
 		FS:         staticFS,
 		CatchAll:   true,
