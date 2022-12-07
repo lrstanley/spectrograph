@@ -652,7 +652,7 @@ type Query {
     """Filtering options for Guilds returned from the connection."""
     where: GuildWhereInput
   ): GuildConnection!
-  guildadminconfigs(
+  guildAdminConfigs(
     """Returns the elements in the list that come after the specified cursor."""
     after: Cursor
 
@@ -668,7 +668,7 @@ type Query {
     """Filtering options for GuildAdminConfigs returned from the connection."""
     where: GuildAdminConfigWhereInput
   ): GuildAdminConfigConnection!
-  guildconfigs(
+  guildConfigs(
     """Returns the elements in the list that come after the specified cursor."""
     after: Cursor
 
@@ -684,7 +684,7 @@ type Query {
     """Filtering options for GuildConfigs returned from the connection."""
     where: GuildConfigWhereInput
   ): GuildConfigConnection!
-  guildevents(
+  guildEvents(
     """Returns the elements in the list that come after the specified cursor."""
     after: Cursor
 

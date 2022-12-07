@@ -228,7 +228,7 @@ query getAllGuildEvents(
     $orderBy: GuildEventOrderField = CREATED_AT
     $where: GuildEventWhereInput
 ) {
-    guildevents(
+    guildEvents(
         first: $first
         last: $last
         before: $before

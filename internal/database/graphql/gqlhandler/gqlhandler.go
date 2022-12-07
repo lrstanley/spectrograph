@@ -162,9 +162,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Guildadminconfigs func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildAdminConfigWhereInput) int
-		Guildconfigs      func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildConfigWhereInput) int
-		Guildevents       func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildEventOrder, where *ent.GuildEventWhereInput) int
+		GuildAdminConfigs func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildAdminConfigWhereInput) int
+		GuildConfigs      func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildConfigWhereInput) int
+		GuildEvents       func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildEventOrder, where *ent.GuildEventWhereInput) int
 		Guilds            func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildOrder, where *ent.GuildWhereInput) int
 		Node              func(childComplexity int, id int) int
 		Nodes             func(childComplexity int, ids []int) int
@@ -226,9 +226,9 @@ type QueryResolver interface {
 	Node(ctx context.Context, id int) (ent.Noder, error)
 	Nodes(ctx context.Context, ids []int) ([]ent.Noder, error)
 	Guilds(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildOrder, where *ent.GuildWhereInput) (*ent.GuildConnection, error)
-	Guildadminconfigs(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildAdminConfigWhereInput) (*ent.GuildAdminConfigConnection, error)
-	Guildconfigs(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildConfigWhereInput) (*ent.GuildConfigConnection, error)
-	Guildevents(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildEventOrder, where *ent.GuildEventWhereInput) (*ent.GuildEventConnection, error)
+	GuildAdminConfigs(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildAdminConfigWhereInput) (*ent.GuildAdminConfigConnection, error)
+	GuildConfigs(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, where *ent.GuildConfigWhereInput) (*ent.GuildConfigConnection, error)
+	GuildEvents(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.GuildEventOrder, where *ent.GuildEventWhereInput) (*ent.GuildEventConnection, error)
 	Users(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.UserOrder, where *ent.UserWhereInput) (*ent.UserConnection, error)
 	Self(ctx context.Context) (*ent.User, error)
 }
@@ -778,41 +778,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PageInfo.StartCursor(childComplexity), true
 
-	case "Query.guildadminconfigs":
-		if e.complexity.Query.Guildadminconfigs == nil {
+	case "Query.guildAdminConfigs":
+		if e.complexity.Query.GuildAdminConfigs == nil {
 			break
 		}
 
-		args, err := ec.field_Query_guildadminconfigs_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_guildAdminConfigs_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Guildadminconfigs(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["where"].(*ent.GuildAdminConfigWhereInput)), true
+		return e.complexity.Query.GuildAdminConfigs(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["where"].(*ent.GuildAdminConfigWhereInput)), true
 
-	case "Query.guildconfigs":
-		if e.complexity.Query.Guildconfigs == nil {
+	case "Query.guildConfigs":
+		if e.complexity.Query.GuildConfigs == nil {
 			break
 		}
 
-		args, err := ec.field_Query_guildconfigs_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_guildConfigs_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Guildconfigs(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["where"].(*ent.GuildConfigWhereInput)), true
+		return e.complexity.Query.GuildConfigs(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["where"].(*ent.GuildConfigWhereInput)), true
 
-	case "Query.guildevents":
-		if e.complexity.Query.Guildevents == nil {
+	case "Query.guildEvents":
+		if e.complexity.Query.GuildEvents == nil {
 			break
 		}
 
-		args, err := ec.field_Query_guildevents_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_guildEvents_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Guildevents(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["orderBy"].(*ent.GuildEventOrder), args["where"].(*ent.GuildEventWhereInput)), true
+		return e.complexity.Query.GuildEvents(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["orderBy"].(*ent.GuildEventOrder), args["where"].(*ent.GuildEventWhereInput)), true
 
 	case "Query.guilds":
 		if e.complexity.Query.Guilds == nil {
@@ -1838,7 +1838,7 @@ type Query {
     """Filtering options for Guilds returned from the connection."""
     where: GuildWhereInput
   ): GuildConnection!
-  guildadminconfigs(
+  guildAdminConfigs(
     """Returns the elements in the list that come after the specified cursor."""
     after: Cursor
 
@@ -1854,7 +1854,7 @@ type Query {
     """Filtering options for GuildAdminConfigs returned from the connection."""
     where: GuildAdminConfigWhereInput
   ): GuildAdminConfigConnection!
-  guildconfigs(
+  guildConfigs(
     """Returns the elements in the list that come after the specified cursor."""
     after: Cursor
 
@@ -1870,7 +1870,7 @@ type Query {
     """Filtering options for GuildConfigs returned from the connection."""
     where: GuildConfigWhereInput
   ): GuildConfigConnection!
-  guildevents(
+  guildEvents(
     """Returns the elements in the list that come after the specified cursor."""
     after: Cursor
 
@@ -2469,7 +2469,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_guildadminconfigs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_guildAdminConfigs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *ent.Cursor
@@ -2520,7 +2520,7 @@ func (ec *executionContext) field_Query_guildadminconfigs_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_guildconfigs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_guildConfigs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *ent.Cursor
@@ -2571,7 +2571,7 @@ func (ec *executionContext) field_Query_guildconfigs_args(ctx context.Context, r
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_guildevents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_guildEvents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *ent.Cursor
@@ -6525,8 +6525,8 @@ func (ec *executionContext) fieldContext_Query_guilds(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_guildadminconfigs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_guildadminconfigs(ctx, field)
+func (ec *executionContext) _Query_guildAdminConfigs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_guildAdminConfigs(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6539,7 +6539,7 @@ func (ec *executionContext) _Query_guildadminconfigs(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Guildadminconfigs(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["where"].(*ent.GuildAdminConfigWhereInput))
+		return ec.resolvers.Query().GuildAdminConfigs(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["where"].(*ent.GuildAdminConfigWhereInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6556,7 +6556,7 @@ func (ec *executionContext) _Query_guildadminconfigs(ctx context.Context, field 
 	return ec.marshalNGuildAdminConfigConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_guildadminconfigs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_guildAdminConfigs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -6581,15 +6581,15 @@ func (ec *executionContext) fieldContext_Query_guildadminconfigs(ctx context.Con
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_guildadminconfigs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_guildAdminConfigs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_guildconfigs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_guildconfigs(ctx, field)
+func (ec *executionContext) _Query_guildConfigs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_guildConfigs(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6602,7 +6602,7 @@ func (ec *executionContext) _Query_guildconfigs(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Guildconfigs(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["where"].(*ent.GuildConfigWhereInput))
+		return ec.resolvers.Query().GuildConfigs(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["where"].(*ent.GuildConfigWhereInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6619,7 +6619,7 @@ func (ec *executionContext) _Query_guildconfigs(ctx context.Context, field graph
 	return ec.marshalNGuildConfigConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_guildconfigs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_guildConfigs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -6644,15 +6644,15 @@ func (ec *executionContext) fieldContext_Query_guildconfigs(ctx context.Context,
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_guildconfigs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_guildConfigs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_guildevents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_guildevents(ctx, field)
+func (ec *executionContext) _Query_guildEvents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_guildEvents(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6665,7 +6665,7 @@ func (ec *executionContext) _Query_guildevents(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Guildevents(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["orderBy"].(*ent.GuildEventOrder), fc.Args["where"].(*ent.GuildEventWhereInput))
+		return ec.resolvers.Query().GuildEvents(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["orderBy"].(*ent.GuildEventOrder), fc.Args["where"].(*ent.GuildEventWhereInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6682,7 +6682,7 @@ func (ec *executionContext) _Query_guildevents(ctx context.Context, field graphq
 	return ec.marshalNGuildEventConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_guildevents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_guildEvents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -6707,7 +6707,7 @@ func (ec *executionContext) fieldContext_Query_guildevents(ctx context.Context, 
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_guildevents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_guildEvents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -15853,7 +15853,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "guildadminconfigs":
+		case "guildAdminConfigs":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -15862,7 +15862,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_guildadminconfigs(ctx, field)
+				res = ec._Query_guildAdminConfigs(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -15876,7 +15876,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "guildconfigs":
+		case "guildConfigs":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -15885,7 +15885,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_guildconfigs(ctx, field)
+				res = ec._Query_guildConfigs(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -15899,7 +15899,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "guildevents":
+		case "guildEvents":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -15908,7 +15908,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_guildevents(ctx, field)
+				res = ec._Query_guildEvents(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

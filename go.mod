@@ -3,10 +3,10 @@ module github.com/lrstanley/spectrograph
 go 1.19
 
 require (
-	entgo.io/contrib v0.3.4-0.20221016003503-5c2796542014
-	entgo.io/ent v0.11.4-0.20221023065023-1d957101fc71
-	github.com/99designs/gqlgen v0.17.20
-	github.com/andersfylling/disgord v0.35.2-0.20220801123701-029733f48900
+	entgo.io/contrib v0.3.4
+	entgo.io/ent v0.11.5-0.20221031135557-521f9b57bc3d
+	github.com/99designs/gqlgen v0.17.21
+	github.com/andersfylling/disgord v0.36.0
 	github.com/andersfylling/snowflake/v5 v5.0.1
 	github.com/apex/log v1.9.0
 	github.com/dgraph-io/ristretto v0.1.1
@@ -17,23 +17,23 @@ require (
 	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v4 v4.17.2
-	github.com/lrstanley/chix v0.0.0-20221026003132-aaf290233019
+	github.com/lrstanley/chix v0.0.0-20221102040401-cd09b32313cc
 	github.com/lrstanley/clix v0.0.0-20220918173828-afa1308b68ae
-	github.com/markbates/goth v1.74.2
-	github.com/prometheus/client_golang v1.13.0
+	github.com/markbates/goth v1.75.2
+	github.com/prometheus/client_golang v1.14.0
 	github.com/vektah/gqlparser/v2 v2.5.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	golang.org/x/exp v0.0.0-20221026004748-78e5e7837ae6
+	golang.org/x/exp v0.0.0-20221205204356-47842c84f3db
 	golang.org/x/sync v0.1.0
 )
 
 require (
-	ariga.io/atlas v0.8.1 // indirect
+	ariga.io/atlas v0.8.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
@@ -53,16 +53,16 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/hashicorp/hcl/v2 v2.14.1 // indirect
+	github.com/hashicorp/hcl/v2 v2.15.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.3.1 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
-	github.com/jackc/pgtype v1.12.0 // indirect
+	github.com/jackc/pgtype v1.13.0 // indirect
 	github.com/jessevdk/go-flags v1.5.0 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
-	github.com/klauspost/compress v1.15.11 // indirect
+	github.com/klauspost/compress v1.15.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lrstanley/go-bogon v0.0.0-20220507183221-362a880cf97b // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -77,15 +77,15 @@ require (
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	github.com/zclconf/go-cty v1.11.1 // indirect
+	github.com/zclconf/go-cty v1.12.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/mod v0.6.0 // indirect
-	golang.org/x/net v0.1.0 // indirect
-	golang.org/x/oauth2 v0.1.0 // indirect
-	golang.org/x/sys v0.1.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
-	golang.org/x/tools v0.2.0 // indirect
+	golang.org/x/crypto v0.3.0 // indirect
+	golang.org/x/mod v0.7.0 // indirect
+	golang.org/x/net v0.3.0 // indirect
+	golang.org/x/oauth2 v0.3.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/tools v0.4.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

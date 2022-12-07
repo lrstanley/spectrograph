@@ -197,7 +197,7 @@ func (w *Worker) processUpdateWorker(sess disgord.Session, guildID disgord.Snowf
 
 			// Move empty channel to position after the last occupied channel.
 			if emptyChannel != nil && lastOccupiedChannel != nil && lastOccupiedChannel.ID != emptyChannel.ID {
-				err = sess.Guild(event.guild.ID).UpdateChannelPositions([]disgord.UpdateGuildChannelPositionsParams{
+				err = sess.Guild(event.guild.ID).UpdateChannelPositions([]disgord.UpdateGuildChannelPositions{
 					{ID: lastOccupiedChannel.ID, Position: lastOccupiedChannel.Position},
 					{ID: emptyChannel.ID, Position: lastOccupiedChannel.Position + 1},
 				})
@@ -212,7 +212,7 @@ func (w *Worker) processUpdateWorker(sess disgord.Session, guildID disgord.Snowf
 			// If no empty channel, make one, duplicating the config from the first
 			// channel in the bucket.
 			if emptyChannel == nil {
-				channel, err := sess.Guild(event.guild.ID).CreateChannel(state[parent][group][0].Name, &disgord.CreateGuildChannelParams{
+				channel, err := sess.Guild(event.guild.ID).CreateChannel(state[parent][group][0].Name, &disgord.CreateGuildChannel{
 					Name:                 state[parent][group][0].Name,
 					Type:                 state[parent][group][0].Type,
 					Bitrate:              state[parent][group][0].Bitrate,
@@ -310,11 +310,19 @@ func (w *Worker) processUpdateWorker(sess disgord.Session, guildID disgord.Snowf
 					continue
 				}
 
-				_, err := sess.Channel(channel.ID).UpdateBuilder().
-					SetPosition(channel.Position).
-					SetUserLimit(primary.UserLimit).
-					SetBitrate(primary.Bitrate).
-					SetPermissionOverwrites(primary.PermissionOverwrites).Execute()
+				chId := uint(channel.Position)
+				var permissionOverwrites []disgord.PermissionOverwriteType
+
+				for _, overwrite := range primary.PermissionOverwrites {
+					permissionOverwrites = append(permissionOverwrites, overwrite.Type)
+				}
+
+				_, err := sess.Channel(channel.ID).Update(&disgord.UpdateChannel{
+					Position:             &chId,
+					UserLimit:            &primary.UserLimit,
+					Bitrate:              &primary.Bitrate,
+					PermissionOverwrites: &permissionOverwrites,
+				})
 				if err != nil {
 					// TODO: should we change the permissions ourselves?
 					w.es.Guild(event.guild).WithError(err).WithFields(log.Fields{

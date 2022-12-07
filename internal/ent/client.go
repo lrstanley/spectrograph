@@ -213,7 +213,7 @@ func (c *GuildClient) DeleteOne(gu *Guild) *GuildDeleteOne {
 	return c.DeleteOneID(gu.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GuildClient) DeleteOneID(id int) *GuildDeleteOne {
 	builder := c.Delete().Where(guild.ID(id))
 	builder.mutation.id = &id
@@ -368,7 +368,7 @@ func (c *GuildAdminConfigClient) DeleteOne(gac *GuildAdminConfig) *GuildAdminCon
 	return c.DeleteOneID(gac.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GuildAdminConfigClient) DeleteOneID(id int) *GuildAdminConfigDeleteOne {
 	builder := c.Delete().Where(guildadminconfig.ID(id))
 	builder.mutation.id = &id
@@ -475,7 +475,7 @@ func (c *GuildConfigClient) DeleteOne(gc *GuildConfig) *GuildConfigDeleteOne {
 	return c.DeleteOneID(gc.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GuildConfigClient) DeleteOneID(id int) *GuildConfigDeleteOne {
 	builder := c.Delete().Where(guildconfig.ID(id))
 	builder.mutation.id = &id
@@ -582,7 +582,7 @@ func (c *GuildEventClient) DeleteOne(ge *GuildEvent) *GuildEventDeleteOne {
 	return c.DeleteOneID(ge.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GuildEventClient) DeleteOneID(id int) *GuildEventDeleteOne {
 	builder := c.Delete().Where(guildevent.ID(id))
 	builder.mutation.id = &id
@@ -689,7 +689,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
