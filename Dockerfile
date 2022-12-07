@@ -30,7 +30,7 @@ RUN upx --best --lzma httpserver
 FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates
-RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
+RUN if [ ! -e /etc/nsswitch.conf ];then echo 'hosts: files dns' > /etc/nsswitch.conf;fi
 COPY --from=build-go /build/httpserver /app/httpserver
 
 EXPOSE 8080
