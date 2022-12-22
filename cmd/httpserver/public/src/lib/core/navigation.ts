@@ -26,33 +26,33 @@ export const headerLinks: Link[] = [
     href: "/#more-info",
     icon: IEmojiSparkles,
   },
-  {
-    name: "Documentation",
-    description: "Our documentation includes guides on proper setup of Spectrograph",
-    href: urls.documentation,
-    icon: IFasBook,
-  },
-  {
-    name: "Service Health",
-    description: "Health of all components of the platform",
-    href: urls.serviceHealth,
-    icon: IFasHeartPulse,
-  },
+  // {
+  //   name: "Documentation",
+  //   description: "Our documentation includes guides on proper setup of Spectrograph",
+  //   href: urls.documentation,
+  //   icon: IFasBook,
+  // },
+  // {
+  //   name: "Service Health",
+  //   description: "Health of all components of the platform",
+  //   href: urls.serviceHealth,
+  //   icon: IFasHeartPulse,
+  // },
 ]
 
 export const mainLinks: Link[] = [
-  {
-    name: "Documentation",
-    description: "Our documentation includes guides on proper setup of Spectrograph",
-    href: urls.documentation,
-    icon: IFasBook,
-  },
-  {
-    name: "Service Health",
-    description: "Health of all components of the platform",
-    href: urls.serviceHealth,
-    icon: IFasHeartPulse,
-  },
+  // {
+  //   name: "Documentation",
+  //   description: "Our documentation includes guides on proper setup of Spectrograph",
+  //   href: urls.documentation,
+  //   icon: IFasBook,
+  // },
+  // {
+  //   name: "Service Health",
+  //   description: "Health of all components of the platform",
+  //   href: urls.serviceHealth,
+  //   icon: IFasHeartPulse,
+  // },
   {
     name: "Privacy",
     description: "Spectrograph's Privacy Policy",
@@ -111,18 +111,18 @@ export const dashboardLinks: ComputedRef<DashboardLink[]> = computed(() => {
       icon: IFasHouse,
     },
     ...guilds.map(guildLink),
-    {
-      name: "Documentation",
-      description: "Our documentation includes guides on proper setup of Spectrograph",
-      href: urls.documentation,
-      icon: IFasBook,
-    },
-    {
-      name: "Service Health",
-      description: "Health of all components of the platform",
-      href: urls.serviceHealth,
-      icon: IFasHeartPulse,
-    },
+    // {
+    //   name: "Documentation",
+    //   description: "Our documentation includes guides on proper setup of Spectrograph",
+    //   href: urls.documentation,
+    //   icon: IFasBook,
+    // },
+    // {
+    //   name: "Service Health",
+    //   description: "Health of all components of the platform",
+    //   href: urls.serviceHealth,
+    //   icon: IFasHeartPulse,
+    // },
   ]
 })
 
