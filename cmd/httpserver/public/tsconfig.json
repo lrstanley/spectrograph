@@ -9,7 +9,6 @@
                 "./*"
             ]
         },
-        "removeComments": true,
         "strict": false,
         "types": [
             "vite/client",

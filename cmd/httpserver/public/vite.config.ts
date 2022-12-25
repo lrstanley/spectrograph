@@ -1,3 +1,4 @@
+import anchor from "markdown-it-anchor"
 import path from "path"
 import { visualizer } from "rollup-plugin-visualizer"
 import AutoImport from "unplugin-auto-import/vite"
@@ -74,7 +75,7 @@ export default defineConfig({
         typographer: false,
       },
       markdownItSetup(md) {
-        md.use(require("markdown-it-anchor"))
+        md.use(anchor)
       },
       builders: [link()],
       wrapperClasses: "prose max-w-none",
