@@ -19,7 +19,7 @@ require (
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/lrstanley/chix v0.0.0-20221217035201-38748eed7705
 	github.com/lrstanley/clix v0.0.0-20220918173828-afa1308b68ae
-	github.com/markbates/goth v1.75.2
+	github.com/markbates/goth v1.76.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/vektah/gqlparser/v2 v2.5.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
