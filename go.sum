@@ -51,8 +51,8 @@ github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki
 github.com/agnivade/levenshtein v1.0.1/go.mod h1:CURSv5d9Uaml+FovSIICkLbAUZ9S4RqaHDIsdSBg7lM=
 github.com/agnivade/levenshtein v1.1.1 h1:QY8M92nrzkmr798gCo3kmMyqXFzdQVpxLlGPRBij0P8=
 github.com/agnivade/levenshtein v1.1.1/go.mod h1:veldBMzWxcCG2ZvUTKD2kJNRdCk5hVbJomOvKkmgYbo=
-github.com/andersfylling/disgord v0.36.0 h1:U1PzgrqpizAcgApRNdhYQ/WPoH3WRL29l030CYfNu5w=
-github.com/andersfylling/disgord v0.36.0/go.mod h1:GVmNoBOlnQyX1NrABUIpZWv94j2sArpyHXU1KWTi4jc=
+github.com/andersfylling/disgord v0.36.1 h1:FNnVCMdUmUevEf6YzRjn4mn4diLrZ1pqmhCLzOM2fD0=
+github.com/andersfylling/disgord v0.36.1/go.mod h1:GVmNoBOlnQyX1NrABUIpZWv94j2sArpyHXU1KWTi4jc=
 github.com/andersfylling/snowflake/v5 v5.0.1 h1:unXbYSij6tRCGJzoLz9zl3nJsqd9hu7bbYSgB8K8/i0=
 github.com/andersfylling/snowflake/v5 v5.0.1/go.mod h1:AdhrB+kewjnQInv8cR7ABe2SGoVXh79njnipUnz1HFc=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883 h1:bvNMNQO63//z+xNgfBlViaCIJKLlCJ6/fmUseuG0wVQ=
