@@ -6,7 +6,7 @@ require (
 	entgo.io/contrib v0.3.4
 	entgo.io/ent v0.11.5-0.20221031135557-521f9b57bc3d
 	github.com/99designs/gqlgen v0.17.22
-	github.com/andersfylling/disgord v0.36.0
+	github.com/andersfylling/disgord v0.36.1
 	github.com/andersfylling/snowflake/v5 v5.0.1
 	github.com/apex/log v1.9.0
 	github.com/dgraph-io/ristretto v0.1.1
