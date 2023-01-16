@@ -12,7 +12,7 @@ require (
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-chi/cors v1.2.1
-	github.com/go-chi/httprate v0.7.0
+	github.com/go-chi/httprate v0.7.1
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
