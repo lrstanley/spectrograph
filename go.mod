@@ -3,8 +3,8 @@ module github.com/lrstanley/spectrograph
 go 1.19
 
 require (
-	entgo.io/contrib v0.3.4
-	entgo.io/ent v0.11.5-0.20221031135557-521f9b57bc3d
+	entgo.io/contrib v0.3.5
+	entgo.io/ent v0.11.6
 	github.com/99designs/gqlgen v0.17.22
 	github.com/andersfylling/disgord v0.36.1
 	github.com/andersfylling/snowflake/v5 v5.0.1
@@ -23,12 +23,12 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/vektah/gqlparser/v2 v2.5.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15
+	golang.org/x/exp v0.0.0-20221230185412-738e83a70c30
 	golang.org/x/sync v0.1.0
 )
 
 require (
-	ariga.io/atlas v0.8.3 // indirect
+	ariga.io/atlas v0.9.1-0.20230119123307-a3ab6808892b // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
@@ -66,7 +66,7 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lrstanley/go-bogon v0.0.0-20220507183221-362a880cf97b // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.16 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
