@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	entgo.io/contrib v0.3.4
-	entgo.io/ent v0.11.5-0.20221031135557-521f9b57bc3d
+	entgo.io/ent v0.11.8
 	github.com/99designs/gqlgen v0.17.22
 	github.com/andersfylling/disgord v0.36.1
 	github.com/andersfylling/snowflake/v5 v5.0.1
@@ -28,7 +28,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.8.3 // indirect
+	ariga.io/atlas v0.9.1-0.20230119145809-92243f7c55cb // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
