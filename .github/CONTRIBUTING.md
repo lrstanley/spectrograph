@@ -107,6 +107,6 @@ Below are a few guidelines if you would like to contribute:
 [discussions]: https://github.com/lrstanley/spectrograph/discussions
 [issues]: https://github.com/lrstanley/spectrograph/issues/new/choose
 [license]: https://github.com/lrstanley/spectrograph/blob/master/LICENSE
-[pull-requests]: https://github.com/lrstanley/spectrograph/issues/new/choose
+[pull-requests]: https://github.com/lrstanley/spectrograph/pulls?q=is%3Aopen+is%3Apr
 [security]: https://github.com/lrstanley/spectrograph/security/policy
 [support]: https://github.com/lrstanley/spectrograph/blob/master/.github/SUPPORT.md
