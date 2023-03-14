@@ -69,43 +69,10 @@ func (geu *GuildEventUpdate) Mutation() *GuildEventMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (geu *GuildEventUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	if err := geu.defaults(); err != nil {
 		return 0, err
 	}
-	if len(geu.hooks) == 0 {
-		if err = geu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = geu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildEventMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = geu.check(); err != nil {
-				return 0, err
-			}
-			geu.mutation = mutation
-			affected, err = geu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(geu.hooks) - 1; i >= 0; i-- {
-			if geu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = geu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, geu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GuildEventMutation](ctx, geu.sqlSave, geu.mutation, geu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -156,16 +123,10 @@ func (geu *GuildEventUpdate) check() error {
 }
 
 func (geu *GuildEventUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   guildevent.Table,
-			Columns: guildevent.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildevent.FieldID,
-			},
-		},
+	if err := geu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(guildevent.Table, guildevent.Columns, sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt))
 	if ps := geu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -196,6 +157,7 @@ func (geu *GuildEventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	geu.mutation.done = true
 	return n, nil
 }
 
@@ -242,6 +204,12 @@ func (geuo *GuildEventUpdateOne) Mutation() *GuildEventMutation {
 	return geuo.mutation
 }
 
+// Where appends a list predicates to the GuildEventUpdate builder.
+func (geuo *GuildEventUpdateOne) Where(ps ...predicate.GuildEvent) *GuildEventUpdateOne {
+	geuo.mutation.Where(ps...)
+	return geuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (geuo *GuildEventUpdateOne) Select(field string, fields ...string) *GuildEventUpdateOne {
@@ -251,49 +219,10 @@ func (geuo *GuildEventUpdateOne) Select(field string, fields ...string) *GuildEv
 
 // Save executes the query and returns the updated GuildEvent entity.
 func (geuo *GuildEventUpdateOne) Save(ctx context.Context) (*GuildEvent, error) {
-	var (
-		err  error
-		node *GuildEvent
-	)
 	if err := geuo.defaults(); err != nil {
 		return nil, err
 	}
-	if len(geuo.hooks) == 0 {
-		if err = geuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = geuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildEventMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = geuo.check(); err != nil {
-				return nil, err
-			}
-			geuo.mutation = mutation
-			node, err = geuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(geuo.hooks) - 1; i >= 0; i-- {
-			if geuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = geuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, geuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GuildEvent)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GuildEventMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GuildEvent, GuildEventMutation](ctx, geuo.sqlSave, geuo.mutation, geuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -344,16 +273,10 @@ func (geuo *GuildEventUpdateOne) check() error {
 }
 
 func (geuo *GuildEventUpdateOne) sqlSave(ctx context.Context) (_node *GuildEvent, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   guildevent.Table,
-			Columns: guildevent.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildevent.FieldID,
-			},
-		},
+	if err := geuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(guildevent.Table, guildevent.Columns, sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt))
 	id, ok := geuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "GuildEvent.id" for update`)}
@@ -404,5 +327,6 @@ func (geuo *GuildEventUpdateOne) sqlSave(ctx context.Context) (_node *GuildEvent
 		}
 		return nil, err
 	}
+	geuo.mutation.done = true
 	return _node, nil
 }

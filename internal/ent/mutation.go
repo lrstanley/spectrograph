@@ -13,14 +13,14 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 	"github.com/lrstanley/spectrograph/internal/ent/guild"
 	"github.com/lrstanley/spectrograph/internal/ent/guildadminconfig"
 	"github.com/lrstanley/spectrograph/internal/ent/guildconfig"
 	"github.com/lrstanley/spectrograph/internal/ent/guildevent"
 	"github.com/lrstanley/spectrograph/internal/ent/predicate"
 	"github.com/lrstanley/spectrograph/internal/ent/user"
-
-	"entgo.io/ent"
 )
 
 const (
@@ -996,9 +996,24 @@ func (m *GuildMutation) Where(ps ...predicate.Guild) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the GuildMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GuildMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Guild, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *GuildMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GuildMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Guild).
@@ -2009,9 +2024,24 @@ func (m *GuildAdminConfigMutation) Where(ps ...predicate.GuildAdminConfig) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the GuildAdminConfigMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GuildAdminConfigMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.GuildAdminConfig, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *GuildAdminConfigMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GuildAdminConfigMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (GuildAdminConfig).
@@ -2785,9 +2815,24 @@ func (m *GuildConfigMutation) Where(ps ...predicate.GuildConfig) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the GuildConfigMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GuildConfigMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.GuildConfig, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *GuildConfigMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GuildConfigMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (GuildConfig).
@@ -3451,9 +3496,24 @@ func (m *GuildEventMutation) Where(ps ...predicate.GuildEvent) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the GuildEventMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GuildEventMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.GuildEvent, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *GuildEventMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GuildEventMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (GuildEvent).
@@ -4908,9 +4968,24 @@ func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the UserMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UserMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.User, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).

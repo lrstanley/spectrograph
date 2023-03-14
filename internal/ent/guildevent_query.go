@@ -23,11 +23,9 @@ import (
 // GuildEventQuery is the builder for querying GuildEvent entities.
 type GuildEventQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
+	inters     []Interceptor
 	predicates []predicate.GuildEvent
 	withGuild  *GuildQuery
 	withFKs    bool
@@ -44,26 +42,26 @@ func (geq *GuildEventQuery) Where(ps ...predicate.GuildEvent) *GuildEventQuery {
 	return geq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (geq *GuildEventQuery) Limit(limit int) *GuildEventQuery {
-	geq.limit = &limit
+	geq.ctx.Limit = &limit
 	return geq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (geq *GuildEventQuery) Offset(offset int) *GuildEventQuery {
-	geq.offset = &offset
+	geq.ctx.Offset = &offset
 	return geq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (geq *GuildEventQuery) Unique(unique bool) *GuildEventQuery {
-	geq.unique = &unique
+	geq.ctx.Unique = &unique
 	return geq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (geq *GuildEventQuery) Order(o ...OrderFunc) *GuildEventQuery {
 	geq.order = append(geq.order, o...)
 	return geq
@@ -71,7 +69,7 @@ func (geq *GuildEventQuery) Order(o ...OrderFunc) *GuildEventQuery {
 
 // QueryGuild chains the current query on the "guild" edge.
 func (geq *GuildEventQuery) QueryGuild() *GuildQuery {
-	query := &GuildQuery{config: geq.config}
+	query := (&GuildClient{config: geq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := geq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -94,7 +92,7 @@ func (geq *GuildEventQuery) QueryGuild() *GuildQuery {
 // First returns the first GuildEvent entity from the query.
 // Returns a *NotFoundError when no GuildEvent was found.
 func (geq *GuildEventQuery) First(ctx context.Context) (*GuildEvent, error) {
-	nodes, err := geq.Limit(1).All(ctx)
+	nodes, err := geq.Limit(1).All(setContextOp(ctx, geq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +115,7 @@ func (geq *GuildEventQuery) FirstX(ctx context.Context) *GuildEvent {
 // Returns a *NotFoundError when no GuildEvent ID was found.
 func (geq *GuildEventQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = geq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = geq.Limit(1).IDs(setContextOp(ctx, geq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -140,7 +138,7 @@ func (geq *GuildEventQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one GuildEvent entity is found.
 // Returns a *NotFoundError when no GuildEvent entities are found.
 func (geq *GuildEventQuery) Only(ctx context.Context) (*GuildEvent, error) {
-	nodes, err := geq.Limit(2).All(ctx)
+	nodes, err := geq.Limit(2).All(setContextOp(ctx, geq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +166,7 @@ func (geq *GuildEventQuery) OnlyX(ctx context.Context) *GuildEvent {
 // Returns a *NotFoundError when no entities are found.
 func (geq *GuildEventQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = geq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = geq.Limit(2).IDs(setContextOp(ctx, geq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -193,10 +191,12 @@ func (geq *GuildEventQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of GuildEvents.
 func (geq *GuildEventQuery) All(ctx context.Context) ([]*GuildEvent, error) {
+	ctx = setContextOp(ctx, geq.ctx, "All")
 	if err := geq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return geq.sqlAll(ctx)
+	qr := querierAll[[]*GuildEvent, *GuildEventQuery]()
+	return withInterceptors[[]*GuildEvent](ctx, geq, qr, geq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -209,9 +209,12 @@ func (geq *GuildEventQuery) AllX(ctx context.Context) []*GuildEvent {
 }
 
 // IDs executes the query and returns a list of GuildEvent IDs.
-func (geq *GuildEventQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := geq.Select(guildevent.FieldID).Scan(ctx, &ids); err != nil {
+func (geq *GuildEventQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if geq.ctx.Unique == nil && geq.path != nil {
+		geq.Unique(true)
+	}
+	ctx = setContextOp(ctx, geq.ctx, "IDs")
+	if err = geq.Select(guildevent.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -228,10 +231,11 @@ func (geq *GuildEventQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (geq *GuildEventQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, geq.ctx, "Count")
 	if err := geq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return geq.sqlCount(ctx)
+	return withInterceptors[int](ctx, geq, querierCount[*GuildEventQuery](), geq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -245,10 +249,15 @@ func (geq *GuildEventQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (geq *GuildEventQuery) Exist(ctx context.Context) (bool, error) {
-	if err := geq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, geq.ctx, "Exist")
+	switch _, err := geq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return geq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -268,22 +277,21 @@ func (geq *GuildEventQuery) Clone() *GuildEventQuery {
 	}
 	return &GuildEventQuery{
 		config:     geq.config,
-		limit:      geq.limit,
-		offset:     geq.offset,
+		ctx:        geq.ctx.Clone(),
 		order:      append([]OrderFunc{}, geq.order...),
+		inters:     append([]Interceptor{}, geq.inters...),
 		predicates: append([]predicate.GuildEvent{}, geq.predicates...),
 		withGuild:  geq.withGuild.Clone(),
 		// clone intermediate query.
-		sql:    geq.sql.Clone(),
-		path:   geq.path,
-		unique: geq.unique,
+		sql:  geq.sql.Clone(),
+		path: geq.path,
 	}
 }
 
 // WithGuild tells the query-builder to eager-load the nodes that are connected to
 // the "guild" edge. The optional arguments are used to configure the query builder of the edge.
 func (geq *GuildEventQuery) WithGuild(opts ...func(*GuildQuery)) *GuildEventQuery {
-	query := &GuildQuery{config: geq.config}
+	query := (&GuildClient{config: geq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -306,16 +314,11 @@ func (geq *GuildEventQuery) WithGuild(opts ...func(*GuildQuery)) *GuildEventQuer
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (geq *GuildEventQuery) GroupBy(field string, fields ...string) *GuildEventGroupBy {
-	grbuild := &GuildEventGroupBy{config: geq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := geq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return geq.sqlQuery(ctx), nil
-	}
+	geq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &GuildEventGroupBy{build: geq}
+	grbuild.flds = &geq.ctx.Fields
 	grbuild.label = guildevent.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -332,11 +335,11 @@ func (geq *GuildEventQuery) GroupBy(field string, fields ...string) *GuildEventG
 //		Select(guildevent.FieldCreateTime).
 //		Scan(ctx, &v)
 func (geq *GuildEventQuery) Select(fields ...string) *GuildEventSelect {
-	geq.fields = append(geq.fields, fields...)
-	selbuild := &GuildEventSelect{GuildEventQuery: geq}
-	selbuild.label = guildevent.Label
-	selbuild.flds, selbuild.scan = &geq.fields, selbuild.Scan
-	return selbuild
+	geq.ctx.Fields = append(geq.ctx.Fields, fields...)
+	sbuild := &GuildEventSelect{GuildEventQuery: geq}
+	sbuild.label = guildevent.Label
+	sbuild.flds, sbuild.scan = &geq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a GuildEventSelect configured with the given aggregations.
@@ -345,7 +348,17 @@ func (geq *GuildEventQuery) Aggregate(fns ...AggregateFunc) *GuildEventSelect {
 }
 
 func (geq *GuildEventQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range geq.fields {
+	for _, inter := range geq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, geq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range geq.ctx.Fields {
 		if !guildevent.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -429,6 +442,9 @@ func (geq *GuildEventQuery) loadGuild(ctx context.Context, query *GuildQuery, no
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(guild.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -451,41 +467,22 @@ func (geq *GuildEventQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(geq.modifiers) > 0 {
 		_spec.Modifiers = geq.modifiers
 	}
-	_spec.Node.Columns = geq.fields
-	if len(geq.fields) > 0 {
-		_spec.Unique = geq.unique != nil && *geq.unique
+	_spec.Node.Columns = geq.ctx.Fields
+	if len(geq.ctx.Fields) > 0 {
+		_spec.Unique = geq.ctx.Unique != nil && *geq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, geq.driver, _spec)
 }
 
-func (geq *GuildEventQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := geq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (geq *GuildEventQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   guildevent.Table,
-			Columns: guildevent.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildevent.FieldID,
-			},
-		},
-		From:   geq.sql,
-		Unique: true,
-	}
-	if unique := geq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(guildevent.Table, guildevent.Columns, sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt))
+	_spec.From = geq.sql
+	if unique := geq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if geq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := geq.fields; len(fields) > 0 {
+	if fields := geq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, guildevent.FieldID)
 		for i := range fields {
@@ -501,10 +498,10 @@ func (geq *GuildEventQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := geq.limit; limit != nil {
+	if limit := geq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := geq.offset; offset != nil {
+	if offset := geq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := geq.order; len(ps) > 0 {
@@ -520,7 +517,7 @@ func (geq *GuildEventQuery) querySpec() *sqlgraph.QuerySpec {
 func (geq *GuildEventQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(geq.driver.Dialect())
 	t1 := builder.Table(guildevent.Table)
-	columns := geq.fields
+	columns := geq.ctx.Fields
 	if len(columns) == 0 {
 		columns = guildevent.Columns
 	}
@@ -529,7 +526,7 @@ func (geq *GuildEventQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = geq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if geq.unique != nil && *geq.unique {
+	if geq.ctx.Unique != nil && *geq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range geq.predicates {
@@ -538,12 +535,12 @@ func (geq *GuildEventQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range geq.order {
 		p(selector)
 	}
-	if offset := geq.offset; offset != nil {
+	if offset := geq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := geq.limit; limit != nil {
+	if limit := geq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -551,13 +548,8 @@ func (geq *GuildEventQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // GuildEventGroupBy is the group-by builder for GuildEvent entities.
 type GuildEventGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *GuildEventQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -566,58 +558,46 @@ func (gegb *GuildEventGroupBy) Aggregate(fns ...AggregateFunc) *GuildEventGroupB
 	return gegb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (gegb *GuildEventGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := gegb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, gegb.build.ctx, "GroupBy")
+	if err := gegb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gegb.sql = query
-	return gegb.sqlScan(ctx, v)
+	return scanWithInterceptors[*GuildEventQuery, *GuildEventGroupBy](ctx, gegb.build, gegb, gegb.build.inters, v)
 }
 
-func (gegb *GuildEventGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range gegb.fields {
-		if !guildevent.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (gegb *GuildEventGroupBy) sqlScan(ctx context.Context, root *GuildEventQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(gegb.fns))
+	for _, fn := range gegb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := gegb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*gegb.flds)+len(gegb.fns))
+		for _, f := range *gegb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*gegb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gegb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := gegb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (gegb *GuildEventGroupBy) sqlQuery() *sql.Selector {
-	selector := gegb.sql.Select()
-	aggregation := make([]string, 0, len(gegb.fns))
-	for _, fn := range gegb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(gegb.fields)+len(gegb.fns))
-		for _, f := range gegb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(gegb.fields...)...)
-}
-
 // GuildEventSelect is the builder for selecting fields of GuildEvent entities.
 type GuildEventSelect struct {
 	*GuildEventQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -628,26 +608,27 @@ func (ges *GuildEventSelect) Aggregate(fns ...AggregateFunc) *GuildEventSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ges *GuildEventSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, ges.ctx, "Select")
 	if err := ges.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ges.sql = ges.GuildEventQuery.sqlQuery(ctx)
-	return ges.sqlScan(ctx, v)
+	return scanWithInterceptors[*GuildEventQuery, *GuildEventSelect](ctx, ges.GuildEventQuery, ges, ges.inters, v)
 }
 
-func (ges *GuildEventSelect) sqlScan(ctx context.Context, v any) error {
+func (ges *GuildEventSelect) sqlScan(ctx context.Context, root *GuildEventQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ges.fns))
 	for _, fn := range ges.fns {
-		aggregation = append(aggregation, fn(ges.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ges.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ges.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ges.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ges.sql.Query()
+	query, args := selector.Query()
 	if err := ges.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

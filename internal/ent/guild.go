@@ -242,29 +242,29 @@ func (gu *Guild) assignValues(columns []string, values []any) error {
 
 // QueryGuildConfig queries the "guild_config" edge of the Guild entity.
 func (gu *Guild) QueryGuildConfig() *GuildConfigQuery {
-	return (&GuildClient{config: gu.config}).QueryGuildConfig(gu)
+	return NewGuildClient(gu.config).QueryGuildConfig(gu)
 }
 
 // QueryGuildAdminConfig queries the "guild_admin_config" edge of the Guild entity.
 func (gu *Guild) QueryGuildAdminConfig() *GuildAdminConfigQuery {
-	return (&GuildClient{config: gu.config}).QueryGuildAdminConfig(gu)
+	return NewGuildClient(gu.config).QueryGuildAdminConfig(gu)
 }
 
 // QueryGuildEvents queries the "guild_events" edge of the Guild entity.
 func (gu *Guild) QueryGuildEvents() *GuildEventQuery {
-	return (&GuildClient{config: gu.config}).QueryGuildEvents(gu)
+	return NewGuildClient(gu.config).QueryGuildEvents(gu)
 }
 
 // QueryAdmins queries the "admins" edge of the Guild entity.
 func (gu *Guild) QueryAdmins() *UserQuery {
-	return (&GuildClient{config: gu.config}).QueryAdmins(gu)
+	return NewGuildClient(gu.config).QueryAdmins(gu)
 }
 
 // Update returns a builder for updating this Guild.
 // Note that you need to call Guild.Unwrap() before calling this method if this Guild
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gu *Guild) Update() *GuildUpdateOne {
-	return (&GuildClient{config: gu.config}).UpdateOne(gu)
+	return NewGuildClient(gu.config).UpdateOne(gu)
 }
 
 // Unwrap unwraps the Guild entity that was returned from a transaction after it was closed,
@@ -377,9 +377,3 @@ func (gu *Guild) appendNamedAdmins(name string, edges ...*User) {
 
 // Guilds is a parsable slice of Guild.
 type Guilds []*Guild
-
-func (gu Guilds) config(cfg config) {
-	for _i := range gu {
-		gu[_i].config = cfg
-	}
-}

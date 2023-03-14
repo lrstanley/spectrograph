@@ -37,7 +37,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &GuildConfigQuery{config: gu.config}
+				query = (&GuildConfigClient{config: gu.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -47,7 +47,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &GuildAdminConfigQuery{config: gu.config}
+				query = (&GuildAdminConfigClient{config: gu.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -57,7 +57,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &GuildEventQuery{config: gu.config}
+				query = (&GuildEventClient{config: gu.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -69,7 +69,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &UserQuery{config: gu.config}
+				query = (&UserClient{config: gu.config}).Query()
 			)
 			args := newUserPaginateArgs(fieldArgs(ctx, new(UserWhereInput), path...))
 			if err := validateFirstLast(args.first, args.last); err != nil {
@@ -228,7 +228,7 @@ func (gac *GuildAdminConfigQuery) collectField(ctx context.Context, op *graphql.
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &GuildQuery{config: gac.config}
+				query = (&GuildClient{config: gac.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -288,7 +288,7 @@ func (gc *GuildConfigQuery) collectField(ctx context.Context, op *graphql.Operat
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &GuildQuery{config: gc.config}
+				query = (&GuildClient{config: gc.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -348,7 +348,7 @@ func (ge *GuildEventQuery) collectField(ctx context.Context, op *graphql.Operati
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &GuildQuery{config: ge.config}
+				query = (&GuildClient{config: ge.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -430,7 +430,7 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &GuildQuery{config: u.config}
+				query = (&GuildClient{config: u.config}).Query()
 			)
 			args := newGuildPaginateArgs(fieldArgs(ctx, new(GuildWhereInput), path...))
 			if err := validateFirstLast(args.first, args.last); err != nil {
@@ -517,7 +517,7 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &UserQuery{config: u.config}
+				query = (&UserClient{config: u.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -529,7 +529,7 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &UserQuery{config: u.config}
+				query = (&UserClient{config: u.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err

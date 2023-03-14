@@ -144,14 +144,14 @@ func (ge *GuildEvent) assignValues(columns []string, values []any) error {
 
 // QueryGuild queries the "guild" edge of the GuildEvent entity.
 func (ge *GuildEvent) QueryGuild() *GuildQuery {
-	return (&GuildEventClient{config: ge.config}).QueryGuild(ge)
+	return NewGuildEventClient(ge.config).QueryGuild(ge)
 }
 
 // Update returns a builder for updating this GuildEvent.
 // Note that you need to call GuildEvent.Unwrap() before calling this method if this GuildEvent
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ge *GuildEvent) Update() *GuildEventUpdateOne {
-	return (&GuildEventClient{config: ge.config}).UpdateOne(ge)
+	return NewGuildEventClient(ge.config).UpdateOne(ge)
 }
 
 // Unwrap unwraps the GuildEvent entity that was returned from a transaction after it was closed,
@@ -190,9 +190,3 @@ func (ge *GuildEvent) String() string {
 
 // GuildEvents is a parsable slice of GuildEvent.
 type GuildEvents []*GuildEvent
-
-func (ge GuildEvents) config(cfg config) {
-	for _i := range ge {
-		ge[_i].config = cfg
-	}
-}

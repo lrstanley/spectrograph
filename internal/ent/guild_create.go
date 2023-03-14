@@ -255,52 +255,10 @@ func (gc *GuildCreate) Mutation() *GuildMutation {
 
 // Save creates the Guild in the database.
 func (gc *GuildCreate) Save(ctx context.Context) (*Guild, error) {
-	var (
-		err  error
-		node *Guild
-	)
 	if err := gc.defaults(); err != nil {
 		return nil, err
 	}
-	if len(gc.hooks) == 0 {
-		if err = gc.check(); err != nil {
-			return nil, err
-		}
-		node, err = gc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gc.check(); err != nil {
-				return nil, err
-			}
-			gc.mutation = mutation
-			if node, err = gc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gc.hooks) - 1; i >= 0; i-- {
-			if gc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Guild)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GuildMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Guild, GuildMutation](ctx, gc.sqlSave, gc.mutation, gc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -401,6 +359,9 @@ func (gc *GuildCreate) check() error {
 }
 
 func (gc *GuildCreate) sqlSave(ctx context.Context) (*Guild, error) {
+	if err := gc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -410,19 +371,15 @@ func (gc *GuildCreate) sqlSave(ctx context.Context) (*Guild, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	gc.mutation.id = &_node.ID
+	gc.mutation.done = true
 	return _node, nil
 }
 
 func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Guild{config: gc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: guild.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guild.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(guild.Table, sqlgraph.NewFieldSpec(guild.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = gc.conflict
 	if value, ok := gc.mutation.CreateTime(); ok {
@@ -485,10 +442,7 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 			Columns: []string{guild.GuildConfigColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildconfig.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildconfig.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -504,10 +458,7 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 			Columns: []string{guild.GuildAdminConfigColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildadminconfig.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildadminconfig.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -523,10 +474,7 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 			Columns: []string{guild.GuildEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildevent.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -542,10 +490,7 @@ func (gc *GuildCreate) createSpec() (*Guild, *sqlgraph.CreateSpec) {
 			Columns: guild.AdminsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

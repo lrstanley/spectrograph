@@ -139,43 +139,10 @@ func (gacu *GuildAdminConfigUpdate) Mutation() *GuildAdminConfigMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gacu *GuildAdminConfigUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	if err := gacu.defaults(); err != nil {
 		return 0, err
 	}
-	if len(gacu.hooks) == 0 {
-		if err = gacu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = gacu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildAdminConfigMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gacu.check(); err != nil {
-				return 0, err
-			}
-			gacu.mutation = mutation
-			affected, err = gacu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(gacu.hooks) - 1; i >= 0; i-- {
-			if gacu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gacu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, gacu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GuildAdminConfigMutation](ctx, gacu.sqlSave, gacu.mutation, gacu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -231,16 +198,10 @@ func (gacu *GuildAdminConfigUpdate) check() error {
 }
 
 func (gacu *GuildAdminConfigUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   guildadminconfig.Table,
-			Columns: guildadminconfig.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildadminconfig.FieldID,
-			},
-		},
+	if err := gacu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(guildadminconfig.Table, guildadminconfig.Columns, sqlgraph.NewFieldSpec(guildadminconfig.FieldID, field.TypeInt))
 	if ps := gacu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -289,6 +250,7 @@ func (gacu *GuildAdminConfigUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		return 0, err
 	}
+	gacu.mutation.done = true
 	return n, nil
 }
 
@@ -405,6 +367,12 @@ func (gacuo *GuildAdminConfigUpdateOne) Mutation() *GuildAdminConfigMutation {
 	return gacuo.mutation
 }
 
+// Where appends a list predicates to the GuildAdminConfigUpdate builder.
+func (gacuo *GuildAdminConfigUpdateOne) Where(ps ...predicate.GuildAdminConfig) *GuildAdminConfigUpdateOne {
+	gacuo.mutation.Where(ps...)
+	return gacuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (gacuo *GuildAdminConfigUpdateOne) Select(field string, fields ...string) *GuildAdminConfigUpdateOne {
@@ -414,49 +382,10 @@ func (gacuo *GuildAdminConfigUpdateOne) Select(field string, fields ...string) *
 
 // Save executes the query and returns the updated GuildAdminConfig entity.
 func (gacuo *GuildAdminConfigUpdateOne) Save(ctx context.Context) (*GuildAdminConfig, error) {
-	var (
-		err  error
-		node *GuildAdminConfig
-	)
 	if err := gacuo.defaults(); err != nil {
 		return nil, err
 	}
-	if len(gacuo.hooks) == 0 {
-		if err = gacuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = gacuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildAdminConfigMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gacuo.check(); err != nil {
-				return nil, err
-			}
-			gacuo.mutation = mutation
-			node, err = gacuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gacuo.hooks) - 1; i >= 0; i-- {
-			if gacuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gacuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gacuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GuildAdminConfig)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GuildAdminConfigMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GuildAdminConfig, GuildAdminConfigMutation](ctx, gacuo.sqlSave, gacuo.mutation, gacuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -512,16 +441,10 @@ func (gacuo *GuildAdminConfigUpdateOne) check() error {
 }
 
 func (gacuo *GuildAdminConfigUpdateOne) sqlSave(ctx context.Context) (_node *GuildAdminConfig, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   guildadminconfig.Table,
-			Columns: guildadminconfig.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildadminconfig.FieldID,
-			},
-		},
+	if err := gacuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(guildadminconfig.Table, guildadminconfig.Columns, sqlgraph.NewFieldSpec(guildadminconfig.FieldID, field.TypeInt))
 	id, ok := gacuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "GuildAdminConfig.id" for update`)}
@@ -590,5 +513,6 @@ func (gacuo *GuildAdminConfigUpdateOne) sqlSave(ctx context.Context) (_node *Gui
 		}
 		return nil, err
 	}
+	gacuo.mutation.done = true
 	return _node, nil
 }

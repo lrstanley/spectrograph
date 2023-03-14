@@ -23,11 +23,9 @@ import (
 // GuildAdminConfigQuery is the builder for querying GuildAdminConfig entities.
 type GuildAdminConfigQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
+	inters     []Interceptor
 	predicates []predicate.GuildAdminConfig
 	withGuild  *GuildQuery
 	withFKs    bool
@@ -44,26 +42,26 @@ func (gacq *GuildAdminConfigQuery) Where(ps ...predicate.GuildAdminConfig) *Guil
 	return gacq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (gacq *GuildAdminConfigQuery) Limit(limit int) *GuildAdminConfigQuery {
-	gacq.limit = &limit
+	gacq.ctx.Limit = &limit
 	return gacq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (gacq *GuildAdminConfigQuery) Offset(offset int) *GuildAdminConfigQuery {
-	gacq.offset = &offset
+	gacq.ctx.Offset = &offset
 	return gacq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (gacq *GuildAdminConfigQuery) Unique(unique bool) *GuildAdminConfigQuery {
-	gacq.unique = &unique
+	gacq.ctx.Unique = &unique
 	return gacq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (gacq *GuildAdminConfigQuery) Order(o ...OrderFunc) *GuildAdminConfigQuery {
 	gacq.order = append(gacq.order, o...)
 	return gacq
@@ -71,7 +69,7 @@ func (gacq *GuildAdminConfigQuery) Order(o ...OrderFunc) *GuildAdminConfigQuery 
 
 // QueryGuild chains the current query on the "guild" edge.
 func (gacq *GuildAdminConfigQuery) QueryGuild() *GuildQuery {
-	query := &GuildQuery{config: gacq.config}
+	query := (&GuildClient{config: gacq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gacq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -94,7 +92,7 @@ func (gacq *GuildAdminConfigQuery) QueryGuild() *GuildQuery {
 // First returns the first GuildAdminConfig entity from the query.
 // Returns a *NotFoundError when no GuildAdminConfig was found.
 func (gacq *GuildAdminConfigQuery) First(ctx context.Context) (*GuildAdminConfig, error) {
-	nodes, err := gacq.Limit(1).All(ctx)
+	nodes, err := gacq.Limit(1).All(setContextOp(ctx, gacq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +115,7 @@ func (gacq *GuildAdminConfigQuery) FirstX(ctx context.Context) *GuildAdminConfig
 // Returns a *NotFoundError when no GuildAdminConfig ID was found.
 func (gacq *GuildAdminConfigQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gacq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = gacq.Limit(1).IDs(setContextOp(ctx, gacq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -140,7 +138,7 @@ func (gacq *GuildAdminConfigQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one GuildAdminConfig entity is found.
 // Returns a *NotFoundError when no GuildAdminConfig entities are found.
 func (gacq *GuildAdminConfigQuery) Only(ctx context.Context) (*GuildAdminConfig, error) {
-	nodes, err := gacq.Limit(2).All(ctx)
+	nodes, err := gacq.Limit(2).All(setContextOp(ctx, gacq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +166,7 @@ func (gacq *GuildAdminConfigQuery) OnlyX(ctx context.Context) *GuildAdminConfig 
 // Returns a *NotFoundError when no entities are found.
 func (gacq *GuildAdminConfigQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = gacq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = gacq.Limit(2).IDs(setContextOp(ctx, gacq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -193,10 +191,12 @@ func (gacq *GuildAdminConfigQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of GuildAdminConfigs.
 func (gacq *GuildAdminConfigQuery) All(ctx context.Context) ([]*GuildAdminConfig, error) {
+	ctx = setContextOp(ctx, gacq.ctx, "All")
 	if err := gacq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return gacq.sqlAll(ctx)
+	qr := querierAll[[]*GuildAdminConfig, *GuildAdminConfigQuery]()
+	return withInterceptors[[]*GuildAdminConfig](ctx, gacq, qr, gacq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -209,9 +209,12 @@ func (gacq *GuildAdminConfigQuery) AllX(ctx context.Context) []*GuildAdminConfig
 }
 
 // IDs executes the query and returns a list of GuildAdminConfig IDs.
-func (gacq *GuildAdminConfigQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := gacq.Select(guildadminconfig.FieldID).Scan(ctx, &ids); err != nil {
+func (gacq *GuildAdminConfigQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if gacq.ctx.Unique == nil && gacq.path != nil {
+		gacq.Unique(true)
+	}
+	ctx = setContextOp(ctx, gacq.ctx, "IDs")
+	if err = gacq.Select(guildadminconfig.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -228,10 +231,11 @@ func (gacq *GuildAdminConfigQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (gacq *GuildAdminConfigQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, gacq.ctx, "Count")
 	if err := gacq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return gacq.sqlCount(ctx)
+	return withInterceptors[int](ctx, gacq, querierCount[*GuildAdminConfigQuery](), gacq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -245,10 +249,15 @@ func (gacq *GuildAdminConfigQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gacq *GuildAdminConfigQuery) Exist(ctx context.Context) (bool, error) {
-	if err := gacq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, gacq.ctx, "Exist")
+	switch _, err := gacq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return gacq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -268,22 +277,21 @@ func (gacq *GuildAdminConfigQuery) Clone() *GuildAdminConfigQuery {
 	}
 	return &GuildAdminConfigQuery{
 		config:     gacq.config,
-		limit:      gacq.limit,
-		offset:     gacq.offset,
+		ctx:        gacq.ctx.Clone(),
 		order:      append([]OrderFunc{}, gacq.order...),
+		inters:     append([]Interceptor{}, gacq.inters...),
 		predicates: append([]predicate.GuildAdminConfig{}, gacq.predicates...),
 		withGuild:  gacq.withGuild.Clone(),
 		// clone intermediate query.
-		sql:    gacq.sql.Clone(),
-		path:   gacq.path,
-		unique: gacq.unique,
+		sql:  gacq.sql.Clone(),
+		path: gacq.path,
 	}
 }
 
 // WithGuild tells the query-builder to eager-load the nodes that are connected to
 // the "guild" edge. The optional arguments are used to configure the query builder of the edge.
 func (gacq *GuildAdminConfigQuery) WithGuild(opts ...func(*GuildQuery)) *GuildAdminConfigQuery {
-	query := &GuildQuery{config: gacq.config}
+	query := (&GuildClient{config: gacq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -306,16 +314,11 @@ func (gacq *GuildAdminConfigQuery) WithGuild(opts ...func(*GuildQuery)) *GuildAd
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (gacq *GuildAdminConfigQuery) GroupBy(field string, fields ...string) *GuildAdminConfigGroupBy {
-	grbuild := &GuildAdminConfigGroupBy{config: gacq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := gacq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return gacq.sqlQuery(ctx), nil
-	}
+	gacq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &GuildAdminConfigGroupBy{build: gacq}
+	grbuild.flds = &gacq.ctx.Fields
 	grbuild.label = guildadminconfig.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -332,11 +335,11 @@ func (gacq *GuildAdminConfigQuery) GroupBy(field string, fields ...string) *Guil
 //		Select(guildadminconfig.FieldCreateTime).
 //		Scan(ctx, &v)
 func (gacq *GuildAdminConfigQuery) Select(fields ...string) *GuildAdminConfigSelect {
-	gacq.fields = append(gacq.fields, fields...)
-	selbuild := &GuildAdminConfigSelect{GuildAdminConfigQuery: gacq}
-	selbuild.label = guildadminconfig.Label
-	selbuild.flds, selbuild.scan = &gacq.fields, selbuild.Scan
-	return selbuild
+	gacq.ctx.Fields = append(gacq.ctx.Fields, fields...)
+	sbuild := &GuildAdminConfigSelect{GuildAdminConfigQuery: gacq}
+	sbuild.label = guildadminconfig.Label
+	sbuild.flds, sbuild.scan = &gacq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a GuildAdminConfigSelect configured with the given aggregations.
@@ -345,7 +348,17 @@ func (gacq *GuildAdminConfigQuery) Aggregate(fns ...AggregateFunc) *GuildAdminCo
 }
 
 func (gacq *GuildAdminConfigQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range gacq.fields {
+	for _, inter := range gacq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, gacq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range gacq.ctx.Fields {
 		if !guildadminconfig.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -429,6 +442,9 @@ func (gacq *GuildAdminConfigQuery) loadGuild(ctx context.Context, query *GuildQu
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(guild.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -451,41 +467,22 @@ func (gacq *GuildAdminConfigQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(gacq.modifiers) > 0 {
 		_spec.Modifiers = gacq.modifiers
 	}
-	_spec.Node.Columns = gacq.fields
-	if len(gacq.fields) > 0 {
-		_spec.Unique = gacq.unique != nil && *gacq.unique
+	_spec.Node.Columns = gacq.ctx.Fields
+	if len(gacq.ctx.Fields) > 0 {
+		_spec.Unique = gacq.ctx.Unique != nil && *gacq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, gacq.driver, _spec)
 }
 
-func (gacq *GuildAdminConfigQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := gacq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (gacq *GuildAdminConfigQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   guildadminconfig.Table,
-			Columns: guildadminconfig.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildadminconfig.FieldID,
-			},
-		},
-		From:   gacq.sql,
-		Unique: true,
-	}
-	if unique := gacq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(guildadminconfig.Table, guildadminconfig.Columns, sqlgraph.NewFieldSpec(guildadminconfig.FieldID, field.TypeInt))
+	_spec.From = gacq.sql
+	if unique := gacq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if gacq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := gacq.fields; len(fields) > 0 {
+	if fields := gacq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, guildadminconfig.FieldID)
 		for i := range fields {
@@ -501,10 +498,10 @@ func (gacq *GuildAdminConfigQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := gacq.limit; limit != nil {
+	if limit := gacq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := gacq.offset; offset != nil {
+	if offset := gacq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := gacq.order; len(ps) > 0 {
@@ -520,7 +517,7 @@ func (gacq *GuildAdminConfigQuery) querySpec() *sqlgraph.QuerySpec {
 func (gacq *GuildAdminConfigQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(gacq.driver.Dialect())
 	t1 := builder.Table(guildadminconfig.Table)
-	columns := gacq.fields
+	columns := gacq.ctx.Fields
 	if len(columns) == 0 {
 		columns = guildadminconfig.Columns
 	}
@@ -529,7 +526,7 @@ func (gacq *GuildAdminConfigQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = gacq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if gacq.unique != nil && *gacq.unique {
+	if gacq.ctx.Unique != nil && *gacq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range gacq.predicates {
@@ -538,12 +535,12 @@ func (gacq *GuildAdminConfigQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range gacq.order {
 		p(selector)
 	}
-	if offset := gacq.offset; offset != nil {
+	if offset := gacq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := gacq.limit; limit != nil {
+	if limit := gacq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -551,13 +548,8 @@ func (gacq *GuildAdminConfigQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // GuildAdminConfigGroupBy is the group-by builder for GuildAdminConfig entities.
 type GuildAdminConfigGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *GuildAdminConfigQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -566,58 +558,46 @@ func (gacgb *GuildAdminConfigGroupBy) Aggregate(fns ...AggregateFunc) *GuildAdmi
 	return gacgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (gacgb *GuildAdminConfigGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := gacgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, gacgb.build.ctx, "GroupBy")
+	if err := gacgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gacgb.sql = query
-	return gacgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*GuildAdminConfigQuery, *GuildAdminConfigGroupBy](ctx, gacgb.build, gacgb, gacgb.build.inters, v)
 }
 
-func (gacgb *GuildAdminConfigGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range gacgb.fields {
-		if !guildadminconfig.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (gacgb *GuildAdminConfigGroupBy) sqlScan(ctx context.Context, root *GuildAdminConfigQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(gacgb.fns))
+	for _, fn := range gacgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := gacgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*gacgb.flds)+len(gacgb.fns))
+		for _, f := range *gacgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*gacgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gacgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := gacgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (gacgb *GuildAdminConfigGroupBy) sqlQuery() *sql.Selector {
-	selector := gacgb.sql.Select()
-	aggregation := make([]string, 0, len(gacgb.fns))
-	for _, fn := range gacgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(gacgb.fields)+len(gacgb.fns))
-		for _, f := range gacgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(gacgb.fields...)...)
-}
-
 // GuildAdminConfigSelect is the builder for selecting fields of GuildAdminConfig entities.
 type GuildAdminConfigSelect struct {
 	*GuildAdminConfigQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -628,26 +608,27 @@ func (gacs *GuildAdminConfigSelect) Aggregate(fns ...AggregateFunc) *GuildAdminC
 
 // Scan applies the selector query and scans the result into the given value.
 func (gacs *GuildAdminConfigSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, gacs.ctx, "Select")
 	if err := gacs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gacs.sql = gacs.GuildAdminConfigQuery.sqlQuery(ctx)
-	return gacs.sqlScan(ctx, v)
+	return scanWithInterceptors[*GuildAdminConfigQuery, *GuildAdminConfigSelect](ctx, gacs.GuildAdminConfigQuery, gacs, gacs.inters, v)
 }
 
-func (gacs *GuildAdminConfigSelect) sqlScan(ctx context.Context, v any) error {
+func (gacs *GuildAdminConfigSelect) sqlScan(ctx context.Context, root *GuildAdminConfigQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(gacs.fns))
 	for _, fn := range gacs.fns {
-		aggregation = append(aggregation, fn(gacs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*gacs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		gacs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		gacs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := gacs.sql.Query()
+	query, args := selector.Query()
 	if err := gacs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

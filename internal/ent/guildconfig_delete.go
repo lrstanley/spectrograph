@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,34 +31,7 @@ func (gcd *GuildConfigDelete) Where(ps ...predicate.GuildConfig) *GuildConfigDel
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gcd *GuildConfigDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(gcd.hooks) == 0 {
-		affected, err = gcd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildConfigMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			gcd.mutation = mutation
-			affected, err = gcd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(gcd.hooks) - 1; i >= 0; i-- {
-			if gcd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gcd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, gcd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GuildConfigMutation](ctx, gcd.sqlExec, gcd.mutation, gcd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -72,15 +44,7 @@ func (gcd *GuildConfigDelete) ExecX(ctx context.Context) int {
 }
 
 func (gcd *GuildConfigDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: guildconfig.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildconfig.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(guildconfig.Table, sqlgraph.NewFieldSpec(guildconfig.FieldID, field.TypeInt))
 	if ps := gcd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -92,12 +56,19 @@ func (gcd *GuildConfigDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	gcd.mutation.done = true
 	return affected, err
 }
 
 // GuildConfigDeleteOne is the builder for deleting a single GuildConfig entity.
 type GuildConfigDeleteOne struct {
 	gcd *GuildConfigDelete
+}
+
+// Where appends a list predicates to the GuildConfigDelete builder.
+func (gcdo *GuildConfigDeleteOne) Where(ps ...predicate.GuildConfig) *GuildConfigDeleteOne {
+	gcdo.gcd.mutation.Where(ps...)
+	return gcdo
 }
 
 // Exec executes the deletion query.
@@ -115,5 +86,7 @@ func (gcdo *GuildConfigDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (gcdo *GuildConfigDeleteOne) ExecX(ctx context.Context) {
-	gcdo.gcd.ExecX(ctx)
+	if err := gcdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

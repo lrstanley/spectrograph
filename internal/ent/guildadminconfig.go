@@ -149,14 +149,14 @@ func (gac *GuildAdminConfig) assignValues(columns []string, values []any) error 
 
 // QueryGuild queries the "guild" edge of the GuildAdminConfig entity.
 func (gac *GuildAdminConfig) QueryGuild() *GuildQuery {
-	return (&GuildAdminConfigClient{config: gac.config}).QueryGuild(gac)
+	return NewGuildAdminConfigClient(gac.config).QueryGuild(gac)
 }
 
 // Update returns a builder for updating this GuildAdminConfig.
 // Note that you need to call GuildAdminConfig.Unwrap() before calling this method if this GuildAdminConfig
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gac *GuildAdminConfig) Update() *GuildAdminConfigUpdateOne {
-	return (&GuildAdminConfigClient{config: gac.config}).UpdateOne(gac)
+	return NewGuildAdminConfigClient(gac.config).UpdateOne(gac)
 }
 
 // Unwrap unwraps the GuildAdminConfig entity that was returned from a transaction after it was closed,
@@ -198,9 +198,3 @@ func (gac *GuildAdminConfig) String() string {
 
 // GuildAdminConfigs is a parsable slice of GuildAdminConfig.
 type GuildAdminConfigs []*GuildAdminConfig
-
-func (gac GuildAdminConfigs) config(cfg config) {
-	for _i := range gac {
-		gac[_i].config = cfg
-	}
-}

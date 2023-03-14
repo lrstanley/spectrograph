@@ -16,540 +16,352 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLTE(FieldID, id))
 }
 
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
 func UpdateTime(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // Enabled applies equality check predicate on the "enabled" field. It's identical to EnabledEQ.
 func Enabled(v bool) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldEnabled), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldEnabled, v))
 }
 
 // DefaultMaxChannels applies equality check predicate on the "default_max_channels" field. It's identical to DefaultMaxChannelsEQ.
 func DefaultMaxChannels(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDefaultMaxChannels), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldDefaultMaxChannels, v))
 }
 
 // DefaultMaxClones applies equality check predicate on the "default_max_clones" field. It's identical to DefaultMaxClonesEQ.
 func DefaultMaxClones(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDefaultMaxClones), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldDefaultMaxClones, v))
 }
 
 // Comment applies equality check predicate on the "comment" field. It's identical to CommentEQ.
 func Comment(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldComment, v))
 }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNEQ(FieldCreateTime, v))
 }
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
 func CreateTimeIn(vs ...time.Time) predicate.GuildAdminConfig {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreateTime), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
 func CreateTimeNotIn(vs ...time.Time) predicate.GuildAdminConfig {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNotIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGT(FieldCreateTime, v))
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGTE(FieldCreateTime, v))
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLT(FieldCreateTime, v))
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
 func UpdateTimeEQ(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
 func UpdateTimeNEQ(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
 func UpdateTimeIn(vs ...time.Time) predicate.GuildAdminConfig {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
 func UpdateTimeNotIn(vs ...time.Time) predicate.GuildAdminConfig {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNotIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeGT applies the GT predicate on the "update_time" field.
 func UpdateTimeGT(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGT(FieldUpdateTime, v))
 }
 
 // UpdateTimeGTE applies the GTE predicate on the "update_time" field.
 func UpdateTimeGTE(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGTE(FieldUpdateTime, v))
 }
 
 // UpdateTimeLT applies the LT predicate on the "update_time" field.
 func UpdateTimeLT(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLT(FieldUpdateTime, v))
 }
 
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // EnabledEQ applies the EQ predicate on the "enabled" field.
 func EnabledEQ(v bool) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldEnabled), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldEnabled, v))
 }
 
 // EnabledNEQ applies the NEQ predicate on the "enabled" field.
 func EnabledNEQ(v bool) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldEnabled), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNEQ(FieldEnabled, v))
 }
 
 // EnabledIsNil applies the IsNil predicate on the "enabled" field.
 func EnabledIsNil() predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldEnabled)))
-	})
+	return predicate.GuildAdminConfig(sql.FieldIsNull(FieldEnabled))
 }
 
 // EnabledNotNil applies the NotNil predicate on the "enabled" field.
 func EnabledNotNil() predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldEnabled)))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNotNull(FieldEnabled))
 }
 
 // DefaultMaxChannelsEQ applies the EQ predicate on the "default_max_channels" field.
 func DefaultMaxChannelsEQ(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDefaultMaxChannels), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldDefaultMaxChannels, v))
 }
 
 // DefaultMaxChannelsNEQ applies the NEQ predicate on the "default_max_channels" field.
 func DefaultMaxChannelsNEQ(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDefaultMaxChannels), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNEQ(FieldDefaultMaxChannels, v))
 }
 
 // DefaultMaxChannelsIn applies the In predicate on the "default_max_channels" field.
 func DefaultMaxChannelsIn(vs ...int) predicate.GuildAdminConfig {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDefaultMaxChannels), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldIn(FieldDefaultMaxChannels, vs...))
 }
 
 // DefaultMaxChannelsNotIn applies the NotIn predicate on the "default_max_channels" field.
 func DefaultMaxChannelsNotIn(vs ...int) predicate.GuildAdminConfig {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDefaultMaxChannels), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNotIn(FieldDefaultMaxChannels, vs...))
 }
 
 // DefaultMaxChannelsGT applies the GT predicate on the "default_max_channels" field.
 func DefaultMaxChannelsGT(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDefaultMaxChannels), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGT(FieldDefaultMaxChannels, v))
 }
 
 // DefaultMaxChannelsGTE applies the GTE predicate on the "default_max_channels" field.
 func DefaultMaxChannelsGTE(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDefaultMaxChannels), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGTE(FieldDefaultMaxChannels, v))
 }
 
 // DefaultMaxChannelsLT applies the LT predicate on the "default_max_channels" field.
 func DefaultMaxChannelsLT(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDefaultMaxChannels), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLT(FieldDefaultMaxChannels, v))
 }
 
 // DefaultMaxChannelsLTE applies the LTE predicate on the "default_max_channels" field.
 func DefaultMaxChannelsLTE(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDefaultMaxChannels), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLTE(FieldDefaultMaxChannels, v))
 }
 
 // DefaultMaxChannelsIsNil applies the IsNil predicate on the "default_max_channels" field.
 func DefaultMaxChannelsIsNil() predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldDefaultMaxChannels)))
-	})
+	return predicate.GuildAdminConfig(sql.FieldIsNull(FieldDefaultMaxChannels))
 }
 
 // DefaultMaxChannelsNotNil applies the NotNil predicate on the "default_max_channels" field.
 func DefaultMaxChannelsNotNil() predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldDefaultMaxChannels)))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNotNull(FieldDefaultMaxChannels))
 }
 
 // DefaultMaxClonesEQ applies the EQ predicate on the "default_max_clones" field.
 func DefaultMaxClonesEQ(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDefaultMaxClones), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldDefaultMaxClones, v))
 }
 
 // DefaultMaxClonesNEQ applies the NEQ predicate on the "default_max_clones" field.
 func DefaultMaxClonesNEQ(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDefaultMaxClones), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNEQ(FieldDefaultMaxClones, v))
 }
 
 // DefaultMaxClonesIn applies the In predicate on the "default_max_clones" field.
 func DefaultMaxClonesIn(vs ...int) predicate.GuildAdminConfig {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDefaultMaxClones), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldIn(FieldDefaultMaxClones, vs...))
 }
 
 // DefaultMaxClonesNotIn applies the NotIn predicate on the "default_max_clones" field.
 func DefaultMaxClonesNotIn(vs ...int) predicate.GuildAdminConfig {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDefaultMaxClones), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNotIn(FieldDefaultMaxClones, vs...))
 }
 
 // DefaultMaxClonesGT applies the GT predicate on the "default_max_clones" field.
 func DefaultMaxClonesGT(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDefaultMaxClones), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGT(FieldDefaultMaxClones, v))
 }
 
 // DefaultMaxClonesGTE applies the GTE predicate on the "default_max_clones" field.
 func DefaultMaxClonesGTE(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDefaultMaxClones), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGTE(FieldDefaultMaxClones, v))
 }
 
 // DefaultMaxClonesLT applies the LT predicate on the "default_max_clones" field.
 func DefaultMaxClonesLT(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDefaultMaxClones), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLT(FieldDefaultMaxClones, v))
 }
 
 // DefaultMaxClonesLTE applies the LTE predicate on the "default_max_clones" field.
 func DefaultMaxClonesLTE(v int) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDefaultMaxClones), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLTE(FieldDefaultMaxClones, v))
 }
 
 // DefaultMaxClonesIsNil applies the IsNil predicate on the "default_max_clones" field.
 func DefaultMaxClonesIsNil() predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldDefaultMaxClones)))
-	})
+	return predicate.GuildAdminConfig(sql.FieldIsNull(FieldDefaultMaxClones))
 }
 
 // DefaultMaxClonesNotNil applies the NotNil predicate on the "default_max_clones" field.
 func DefaultMaxClonesNotNil() predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldDefaultMaxClones)))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNotNull(FieldDefaultMaxClones))
 }
 
 // CommentEQ applies the EQ predicate on the "comment" field.
 func CommentEQ(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEQ(FieldComment, v))
 }
 
 // CommentNEQ applies the NEQ predicate on the "comment" field.
 func CommentNEQ(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNEQ(FieldComment, v))
 }
 
 // CommentIn applies the In predicate on the "comment" field.
 func CommentIn(vs ...string) predicate.GuildAdminConfig {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldComment), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldIn(FieldComment, vs...))
 }
 
 // CommentNotIn applies the NotIn predicate on the "comment" field.
 func CommentNotIn(vs ...string) predicate.GuildAdminConfig {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldComment), v...))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNotIn(FieldComment, vs...))
 }
 
 // CommentGT applies the GT predicate on the "comment" field.
 func CommentGT(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGT(FieldComment, v))
 }
 
 // CommentGTE applies the GTE predicate on the "comment" field.
 func CommentGTE(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldGTE(FieldComment, v))
 }
 
 // CommentLT applies the LT predicate on the "comment" field.
 func CommentLT(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLT(FieldComment, v))
 }
 
 // CommentLTE applies the LTE predicate on the "comment" field.
 func CommentLTE(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldLTE(FieldComment, v))
 }
 
 // CommentContains applies the Contains predicate on the "comment" field.
 func CommentContains(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldContains(FieldComment, v))
 }
 
 // CommentHasPrefix applies the HasPrefix predicate on the "comment" field.
 func CommentHasPrefix(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldHasPrefix(FieldComment, v))
 }
 
 // CommentHasSuffix applies the HasSuffix predicate on the "comment" field.
 func CommentHasSuffix(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldHasSuffix(FieldComment, v))
 }
 
 // CommentIsNil applies the IsNil predicate on the "comment" field.
 func CommentIsNil() predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldComment)))
-	})
+	return predicate.GuildAdminConfig(sql.FieldIsNull(FieldComment))
 }
 
 // CommentNotNil applies the NotNil predicate on the "comment" field.
 func CommentNotNil() predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldComment)))
-	})
+	return predicate.GuildAdminConfig(sql.FieldNotNull(FieldComment))
 }
 
 // CommentEqualFold applies the EqualFold predicate on the "comment" field.
 func CommentEqualFold(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldEqualFold(FieldComment, v))
 }
 
 // CommentContainsFold applies the ContainsFold predicate on the "comment" field.
 func CommentContainsFold(v string) predicate.GuildAdminConfig {
-	return predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldComment), v))
-	})
+	return predicate.GuildAdminConfig(sql.FieldContainsFold(FieldComment, v))
 }
 
 // HasGuild applies the HasEdge predicate on the "guild" edge.
@@ -557,7 +369,6 @@ func HasGuild() predicate.GuildAdminConfig {
 	return predicate.GuildAdminConfig(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GuildTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, GuildTable, GuildColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

@@ -14,15 +14,15 @@ import (
 
 	"github.com/lrstanley/spectrograph/internal/ent/migrate"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/lrstanley/spectrograph/internal/ent/guild"
 	"github.com/lrstanley/spectrograph/internal/ent/guildadminconfig"
 	"github.com/lrstanley/spectrograph/internal/ent/guildconfig"
 	"github.com/lrstanley/spectrograph/internal/ent/guildevent"
 	"github.com/lrstanley/spectrograph/internal/ent/user"
-
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -46,7 +46,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -60,6 +60,55 @@ func (c *Client) init() {
 	c.GuildConfig = NewGuildConfigClient(c.config)
 	c.GuildEvent = NewGuildEventClient(c.config)
 	c.User = NewUserClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -157,6 +206,34 @@ func (c *Client) Use(hooks ...Hook) {
 	c.User.Use(hooks...)
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Guild.Intercept(interceptors...)
+	c.GuildAdminConfig.Intercept(interceptors...)
+	c.GuildConfig.Intercept(interceptors...)
+	c.GuildEvent.Intercept(interceptors...)
+	c.User.Intercept(interceptors...)
+}
+
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *GuildMutation:
+		return c.Guild.mutate(ctx, m)
+	case *GuildAdminConfigMutation:
+		return c.GuildAdminConfig.mutate(ctx, m)
+	case *GuildConfigMutation:
+		return c.GuildConfig.mutate(ctx, m)
+	case *GuildEventMutation:
+		return c.GuildEvent.mutate(ctx, m)
+	case *UserMutation:
+		return c.User.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
 // GuildClient is a client for the Guild schema.
 type GuildClient struct {
 	config
@@ -171,6 +248,12 @@ func NewGuildClient(c config) *GuildClient {
 // A call to `Use(f, g, h)` equals to `guild.Hooks(f(g(h())))`.
 func (c *GuildClient) Use(hooks ...Hook) {
 	c.hooks.Guild = append(c.hooks.Guild, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `guild.Intercept(f(g(h())))`.
+func (c *GuildClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Guild = append(c.inters.Guild, interceptors...)
 }
 
 // Create returns a builder for creating a Guild entity.
@@ -225,6 +308,8 @@ func (c *GuildClient) DeleteOneID(id int) *GuildDeleteOne {
 func (c *GuildClient) Query() *GuildQuery {
 	return &GuildQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGuild},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -244,7 +329,7 @@ func (c *GuildClient) GetX(ctx context.Context, id int) *Guild {
 
 // QueryGuildConfig queries the guild_config edge of a Guild.
 func (c *GuildClient) QueryGuildConfig(gu *Guild) *GuildConfigQuery {
-	query := &GuildConfigQuery{config: c.config}
+	query := (&GuildConfigClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gu.ID
 		step := sqlgraph.NewStep(
@@ -260,7 +345,7 @@ func (c *GuildClient) QueryGuildConfig(gu *Guild) *GuildConfigQuery {
 
 // QueryGuildAdminConfig queries the guild_admin_config edge of a Guild.
 func (c *GuildClient) QueryGuildAdminConfig(gu *Guild) *GuildAdminConfigQuery {
-	query := &GuildAdminConfigQuery{config: c.config}
+	query := (&GuildAdminConfigClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gu.ID
 		step := sqlgraph.NewStep(
@@ -276,7 +361,7 @@ func (c *GuildClient) QueryGuildAdminConfig(gu *Guild) *GuildAdminConfigQuery {
 
 // QueryGuildEvents queries the guild_events edge of a Guild.
 func (c *GuildClient) QueryGuildEvents(gu *Guild) *GuildEventQuery {
-	query := &GuildEventQuery{config: c.config}
+	query := (&GuildEventClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gu.ID
 		step := sqlgraph.NewStep(
@@ -292,7 +377,7 @@ func (c *GuildClient) QueryGuildEvents(gu *Guild) *GuildEventQuery {
 
 // QueryAdmins queries the admins edge of a Guild.
 func (c *GuildClient) QueryAdmins(gu *Guild) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gu.ID
 		step := sqlgraph.NewStep(
@@ -312,6 +397,26 @@ func (c *GuildClient) Hooks() []Hook {
 	return append(hooks[:len(hooks):len(hooks)], guild.Hooks[:]...)
 }
 
+// Interceptors returns the client interceptors.
+func (c *GuildClient) Interceptors() []Interceptor {
+	return c.inters.Guild
+}
+
+func (c *GuildClient) mutate(ctx context.Context, m *GuildMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GuildCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GuildUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GuildUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GuildDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Guild mutation op: %q", m.Op())
+	}
+}
+
 // GuildAdminConfigClient is a client for the GuildAdminConfig schema.
 type GuildAdminConfigClient struct {
 	config
@@ -326,6 +431,12 @@ func NewGuildAdminConfigClient(c config) *GuildAdminConfigClient {
 // A call to `Use(f, g, h)` equals to `guildadminconfig.Hooks(f(g(h())))`.
 func (c *GuildAdminConfigClient) Use(hooks ...Hook) {
 	c.hooks.GuildAdminConfig = append(c.hooks.GuildAdminConfig, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `guildadminconfig.Intercept(f(g(h())))`.
+func (c *GuildAdminConfigClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GuildAdminConfig = append(c.inters.GuildAdminConfig, interceptors...)
 }
 
 // Create returns a builder for creating a GuildAdminConfig entity.
@@ -380,6 +491,8 @@ func (c *GuildAdminConfigClient) DeleteOneID(id int) *GuildAdminConfigDeleteOne 
 func (c *GuildAdminConfigClient) Query() *GuildAdminConfigQuery {
 	return &GuildAdminConfigQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGuildAdminConfig},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -399,7 +512,7 @@ func (c *GuildAdminConfigClient) GetX(ctx context.Context, id int) *GuildAdminCo
 
 // QueryGuild queries the guild edge of a GuildAdminConfig.
 func (c *GuildAdminConfigClient) QueryGuild(gac *GuildAdminConfig) *GuildQuery {
-	query := &GuildQuery{config: c.config}
+	query := (&GuildClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gac.ID
 		step := sqlgraph.NewStep(
@@ -419,6 +532,26 @@ func (c *GuildAdminConfigClient) Hooks() []Hook {
 	return append(hooks[:len(hooks):len(hooks)], guildadminconfig.Hooks[:]...)
 }
 
+// Interceptors returns the client interceptors.
+func (c *GuildAdminConfigClient) Interceptors() []Interceptor {
+	return c.inters.GuildAdminConfig
+}
+
+func (c *GuildAdminConfigClient) mutate(ctx context.Context, m *GuildAdminConfigMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GuildAdminConfigCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GuildAdminConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GuildAdminConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GuildAdminConfigDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown GuildAdminConfig mutation op: %q", m.Op())
+	}
+}
+
 // GuildConfigClient is a client for the GuildConfig schema.
 type GuildConfigClient struct {
 	config
@@ -433,6 +566,12 @@ func NewGuildConfigClient(c config) *GuildConfigClient {
 // A call to `Use(f, g, h)` equals to `guildconfig.Hooks(f(g(h())))`.
 func (c *GuildConfigClient) Use(hooks ...Hook) {
 	c.hooks.GuildConfig = append(c.hooks.GuildConfig, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `guildconfig.Intercept(f(g(h())))`.
+func (c *GuildConfigClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GuildConfig = append(c.inters.GuildConfig, interceptors...)
 }
 
 // Create returns a builder for creating a GuildConfig entity.
@@ -487,6 +626,8 @@ func (c *GuildConfigClient) DeleteOneID(id int) *GuildConfigDeleteOne {
 func (c *GuildConfigClient) Query() *GuildConfigQuery {
 	return &GuildConfigQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGuildConfig},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -506,7 +647,7 @@ func (c *GuildConfigClient) GetX(ctx context.Context, id int) *GuildConfig {
 
 // QueryGuild queries the guild edge of a GuildConfig.
 func (c *GuildConfigClient) QueryGuild(gc *GuildConfig) *GuildQuery {
-	query := &GuildQuery{config: c.config}
+	query := (&GuildClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := gc.ID
 		step := sqlgraph.NewStep(
@@ -526,6 +667,26 @@ func (c *GuildConfigClient) Hooks() []Hook {
 	return append(hooks[:len(hooks):len(hooks)], guildconfig.Hooks[:]...)
 }
 
+// Interceptors returns the client interceptors.
+func (c *GuildConfigClient) Interceptors() []Interceptor {
+	return c.inters.GuildConfig
+}
+
+func (c *GuildConfigClient) mutate(ctx context.Context, m *GuildConfigMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GuildConfigCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GuildConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GuildConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GuildConfigDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown GuildConfig mutation op: %q", m.Op())
+	}
+}
+
 // GuildEventClient is a client for the GuildEvent schema.
 type GuildEventClient struct {
 	config
@@ -540,6 +701,12 @@ func NewGuildEventClient(c config) *GuildEventClient {
 // A call to `Use(f, g, h)` equals to `guildevent.Hooks(f(g(h())))`.
 func (c *GuildEventClient) Use(hooks ...Hook) {
 	c.hooks.GuildEvent = append(c.hooks.GuildEvent, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `guildevent.Intercept(f(g(h())))`.
+func (c *GuildEventClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GuildEvent = append(c.inters.GuildEvent, interceptors...)
 }
 
 // Create returns a builder for creating a GuildEvent entity.
@@ -594,6 +761,8 @@ func (c *GuildEventClient) DeleteOneID(id int) *GuildEventDeleteOne {
 func (c *GuildEventClient) Query() *GuildEventQuery {
 	return &GuildEventQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeGuildEvent},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -613,7 +782,7 @@ func (c *GuildEventClient) GetX(ctx context.Context, id int) *GuildEvent {
 
 // QueryGuild queries the guild edge of a GuildEvent.
 func (c *GuildEventClient) QueryGuild(ge *GuildEvent) *GuildQuery {
-	query := &GuildQuery{config: c.config}
+	query := (&GuildClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ge.ID
 		step := sqlgraph.NewStep(
@@ -633,6 +802,26 @@ func (c *GuildEventClient) Hooks() []Hook {
 	return append(hooks[:len(hooks):len(hooks)], guildevent.Hooks[:]...)
 }
 
+// Interceptors returns the client interceptors.
+func (c *GuildEventClient) Interceptors() []Interceptor {
+	return c.inters.GuildEvent
+}
+
+func (c *GuildEventClient) mutate(ctx context.Context, m *GuildEventMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GuildEventCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GuildEventUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GuildEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GuildEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown GuildEvent mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -647,6 +836,12 @@ func NewUserClient(c config) *UserClient {
 // A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
 func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
+func (c *UserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.User = append(c.inters.User, interceptors...)
 }
 
 // Create returns a builder for creating a User entity.
@@ -701,6 +896,8 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -720,7 +917,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 
 // QueryUserGuilds queries the user_guilds edge of a User.
 func (c *UserClient) QueryUserGuilds(u *User) *GuildQuery {
-	query := &GuildQuery{config: c.config}
+	query := (&GuildClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -736,7 +933,7 @@ func (c *UserClient) QueryUserGuilds(u *User) *GuildQuery {
 
 // QueryBannedUsers queries the banned_users edge of a User.
 func (c *UserClient) QueryBannedUsers(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -752,7 +949,7 @@ func (c *UserClient) QueryBannedUsers(u *User) *UserQuery {
 
 // QueryBannedBy queries the banned_by edge of a User.
 func (c *UserClient) QueryBannedBy(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -771,3 +968,33 @@ func (c *UserClient) Hooks() []Hook {
 	hooks := c.hooks.User
 	return append(hooks[:len(hooks):len(hooks)], user.Hooks[:]...)
 }
+
+// Interceptors returns the client interceptors.
+func (c *UserClient) Interceptors() []Interceptor {
+	return c.inters.User
+}
+
+func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
+	}
+}
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Guild, GuildAdminConfig, GuildConfig, GuildEvent, User []ent.Hook
+	}
+	inters struct {
+		Guild, GuildAdminConfig, GuildConfig, GuildEvent, User []ent.Interceptor
+	}
+)

@@ -129,52 +129,10 @@ func (gacc *GuildAdminConfigCreate) Mutation() *GuildAdminConfigMutation {
 
 // Save creates the GuildAdminConfig in the database.
 func (gacc *GuildAdminConfigCreate) Save(ctx context.Context) (*GuildAdminConfig, error) {
-	var (
-		err  error
-		node *GuildAdminConfig
-	)
 	if err := gacc.defaults(); err != nil {
 		return nil, err
 	}
-	if len(gacc.hooks) == 0 {
-		if err = gacc.check(); err != nil {
-			return nil, err
-		}
-		node, err = gacc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildAdminConfigMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gacc.check(); err != nil {
-				return nil, err
-			}
-			gacc.mutation = mutation
-			if node, err = gacc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gacc.hooks) - 1; i >= 0; i-- {
-			if gacc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gacc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gacc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GuildAdminConfig)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GuildAdminConfigMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GuildAdminConfig, GuildAdminConfigMutation](ctx, gacc.sqlSave, gacc.mutation, gacc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -259,6 +217,9 @@ func (gacc *GuildAdminConfigCreate) check() error {
 }
 
 func (gacc *GuildAdminConfigCreate) sqlSave(ctx context.Context) (*GuildAdminConfig, error) {
+	if err := gacc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := gacc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gacc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -268,19 +229,15 @@ func (gacc *GuildAdminConfigCreate) sqlSave(ctx context.Context) (*GuildAdminCon
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	gacc.mutation.id = &_node.ID
+	gacc.mutation.done = true
 	return _node, nil
 }
 
 func (gacc *GuildAdminConfigCreate) createSpec() (*GuildAdminConfig, *sqlgraph.CreateSpec) {
 	var (
 		_node = &GuildAdminConfig{config: gacc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: guildadminconfig.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildadminconfig.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(guildadminconfig.Table, sqlgraph.NewFieldSpec(guildadminconfig.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = gacc.conflict
 	if value, ok := gacc.mutation.CreateTime(); ok {
@@ -315,10 +272,7 @@ func (gacc *GuildAdminConfigCreate) createSpec() (*GuildAdminConfig, *sqlgraph.C
 			Columns: []string{guildadminconfig.GuildColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guild.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guild.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

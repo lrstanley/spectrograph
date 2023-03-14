@@ -19,11 +19,10 @@ type GuildFunc func(context.Context, *ent.GuildMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f GuildFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.GuildMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GuildMutation", m)
+	if mv, ok := m.(*ent.GuildMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GuildMutation", m)
 }
 
 // The GuildAdminConfigFunc type is an adapter to allow the use of ordinary
@@ -32,11 +31,10 @@ type GuildAdminConfigFunc func(context.Context, *ent.GuildAdminConfigMutation) (
 
 // Mutate calls f(ctx, m).
 func (f GuildAdminConfigFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.GuildAdminConfigMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GuildAdminConfigMutation", m)
+	if mv, ok := m.(*ent.GuildAdminConfigMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GuildAdminConfigMutation", m)
 }
 
 // The GuildConfigFunc type is an adapter to allow the use of ordinary
@@ -45,11 +43,10 @@ type GuildConfigFunc func(context.Context, *ent.GuildConfigMutation) (ent.Value,
 
 // Mutate calls f(ctx, m).
 func (f GuildConfigFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.GuildConfigMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GuildConfigMutation", m)
+	if mv, ok := m.(*ent.GuildConfigMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GuildConfigMutation", m)
 }
 
 // The GuildEventFunc type is an adapter to allow the use of ordinary
@@ -58,11 +55,10 @@ type GuildEventFunc func(context.Context, *ent.GuildEventMutation) (ent.Value, e
 
 // Mutate calls f(ctx, m).
 func (f GuildEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.GuildEventMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GuildEventMutation", m)
+	if mv, ok := m.(*ent.GuildEventMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GuildEventMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary
@@ -71,11 +67,10 @@ type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.UserMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+	if mv, ok := m.(*ent.UserMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
 }
 
 // Condition is a hook condition function.

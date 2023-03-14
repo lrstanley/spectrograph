@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,34 +31,7 @@ func (ged *GuildEventDelete) Where(ps ...predicate.GuildEvent) *GuildEventDelete
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ged *GuildEventDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ged.hooks) == 0 {
-		affected, err = ged.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildEventMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ged.mutation = mutation
-			affected, err = ged.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ged.hooks) - 1; i >= 0; i-- {
-			if ged.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ged.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ged.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GuildEventMutation](ctx, ged.sqlExec, ged.mutation, ged.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -72,15 +44,7 @@ func (ged *GuildEventDelete) ExecX(ctx context.Context) int {
 }
 
 func (ged *GuildEventDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: guildevent.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildevent.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(guildevent.Table, sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt))
 	if ps := ged.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -92,12 +56,19 @@ func (ged *GuildEventDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	ged.mutation.done = true
 	return affected, err
 }
 
 // GuildEventDeleteOne is the builder for deleting a single GuildEvent entity.
 type GuildEventDeleteOne struct {
 	ged *GuildEventDelete
+}
+
+// Where appends a list predicates to the GuildEventDelete builder.
+func (gedo *GuildEventDeleteOne) Where(ps ...predicate.GuildEvent) *GuildEventDeleteOne {
+	gedo.ged.mutation.Where(ps...)
+	return gedo
 }
 
 // Exec executes the deletion query.
@@ -115,5 +86,7 @@ func (gedo *GuildEventDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (gedo *GuildEventDeleteOne) ExecX(ctx context.Context) {
-	gedo.ged.ExecX(ctx)
+	if err := gedo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

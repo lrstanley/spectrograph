@@ -277,24 +277,24 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // QueryUserGuilds queries the "user_guilds" edge of the User entity.
 func (u *User) QueryUserGuilds() *GuildQuery {
-	return (&UserClient{config: u.config}).QueryUserGuilds(u)
+	return NewUserClient(u.config).QueryUserGuilds(u)
 }
 
 // QueryBannedUsers queries the "banned_users" edge of the User entity.
 func (u *User) QueryBannedUsers() *UserQuery {
-	return (&UserClient{config: u.config}).QueryBannedUsers(u)
+	return NewUserClient(u.config).QueryBannedUsers(u)
 }
 
 // QueryBannedBy queries the "banned_by" edge of the User entity.
 func (u *User) QueryBannedBy() *UserQuery {
-	return (&UserClient{config: u.config}).QueryBannedBy(u)
+	return NewUserClient(u.config).QueryBannedBy(u)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{config: u.config}).UpdateOne(u)
+	return NewUserClient(u.config).UpdateOne(u)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
@@ -423,9 +423,3 @@ func (u *User) appendNamedBannedUsers(name string, edges ...*User) {
 
 // Users is a parsable slice of User.
 type Users []*User
-
-func (u Users) config(cfg config) {
-	for _i := range u {
-		u[_i].config = cfg
-	}
-}

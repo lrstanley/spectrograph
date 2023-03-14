@@ -91,52 +91,10 @@ func (gec *GuildEventCreate) Mutation() *GuildEventMutation {
 
 // Save creates the GuildEvent in the database.
 func (gec *GuildEventCreate) Save(ctx context.Context) (*GuildEvent, error) {
-	var (
-		err  error
-		node *GuildEvent
-	)
 	if err := gec.defaults(); err != nil {
 		return nil, err
 	}
-	if len(gec.hooks) == 0 {
-		if err = gec.check(); err != nil {
-			return nil, err
-		}
-		node, err = gec.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildEventMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gec.check(); err != nil {
-				return nil, err
-			}
-			gec.mutation = mutation
-			if node, err = gec.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gec.hooks) - 1; i >= 0; i-- {
-			if gec.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gec.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gec.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GuildEvent)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GuildEventMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GuildEvent, GuildEventMutation](ctx, gec.sqlSave, gec.mutation, gec.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -206,6 +164,9 @@ func (gec *GuildEventCreate) check() error {
 }
 
 func (gec *GuildEventCreate) sqlSave(ctx context.Context) (*GuildEvent, error) {
+	if err := gec.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := gec.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gec.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -215,19 +176,15 @@ func (gec *GuildEventCreate) sqlSave(ctx context.Context) (*GuildEvent, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	gec.mutation.id = &_node.ID
+	gec.mutation.done = true
 	return _node, nil
 }
 
 func (gec *GuildEventCreate) createSpec() (*GuildEvent, *sqlgraph.CreateSpec) {
 	var (
 		_node = &GuildEvent{config: gec.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: guildevent.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildevent.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(guildevent.Table, sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = gec.conflict
 	if value, ok := gec.mutation.CreateTime(); ok {
@@ -258,10 +215,7 @@ func (gec *GuildEventCreate) createSpec() (*GuildEvent, *sqlgraph.CreateSpec) {
 			Columns: []string{guildevent.GuildColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guild.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guild.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

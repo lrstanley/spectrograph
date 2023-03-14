@@ -129,52 +129,10 @@ func (gcc *GuildConfigCreate) Mutation() *GuildConfigMutation {
 
 // Save creates the GuildConfig in the database.
 func (gcc *GuildConfigCreate) Save(ctx context.Context) (*GuildConfig, error) {
-	var (
-		err  error
-		node *GuildConfig
-	)
 	if err := gcc.defaults(); err != nil {
 		return nil, err
 	}
-	if len(gcc.hooks) == 0 {
-		if err = gcc.check(); err != nil {
-			return nil, err
-		}
-		node, err = gcc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildConfigMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gcc.check(); err != nil {
-				return nil, err
-			}
-			gcc.mutation = mutation
-			if node, err = gcc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gcc.hooks) - 1; i >= 0; i-- {
-			if gcc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gcc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gcc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GuildConfig)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GuildConfigMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GuildConfig, GuildConfigMutation](ctx, gcc.sqlSave, gcc.mutation, gcc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -264,6 +222,9 @@ func (gcc *GuildConfigCreate) check() error {
 }
 
 func (gcc *GuildConfigCreate) sqlSave(ctx context.Context) (*GuildConfig, error) {
+	if err := gcc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := gcc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gcc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -273,19 +234,15 @@ func (gcc *GuildConfigCreate) sqlSave(ctx context.Context) (*GuildConfig, error)
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	gcc.mutation.id = &_node.ID
+	gcc.mutation.done = true
 	return _node, nil
 }
 
 func (gcc *GuildConfigCreate) createSpec() (*GuildConfig, *sqlgraph.CreateSpec) {
 	var (
 		_node = &GuildConfig{config: gcc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: guildconfig.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guildconfig.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(guildconfig.Table, sqlgraph.NewFieldSpec(guildconfig.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = gcc.conflict
 	if value, ok := gcc.mutation.CreateTime(); ok {
@@ -320,10 +277,7 @@ func (gcc *GuildConfigCreate) createSpec() (*GuildConfig, *sqlgraph.CreateSpec) 
 			Columns: []string{guildconfig.GuildColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guild.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guild.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

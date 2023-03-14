@@ -16,1197 +16,787 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Guild(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Guild(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldID, id))
 }
 
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
 func UpdateTime(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // GuildID applies equality check predicate on the "guild_id" field. It's identical to GuildIDEQ.
 func GuildID(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldGuildID, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldName, v))
 }
 
 // IconHash applies equality check predicate on the "icon_hash" field. It's identical to IconHashEQ.
 func IconHash(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldIconHash, v))
 }
 
 // IconURL applies equality check predicate on the "icon_url" field. It's identical to IconURLEQ.
 func IconURL(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldIconURL, v))
 }
 
 // JoinedAt applies equality check predicate on the "joined_at" field. It's identical to JoinedAtEQ.
 func JoinedAt(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldJoinedAt), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldJoinedAt, v))
 }
 
 // Large applies equality check predicate on the "large" field. It's identical to LargeEQ.
 func Large(v bool) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLarge), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldLarge, v))
 }
 
 // MemberCount applies equality check predicate on the "member_count" field. It's identical to MemberCountEQ.
 func MemberCount(v int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMemberCount), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldMemberCount, v))
 }
 
 // OwnerID applies equality check predicate on the "owner_id" field. It's identical to OwnerIDEQ.
 func OwnerID(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldOwnerID, v))
 }
 
 // Permissions applies equality check predicate on the "permissions" field. It's identical to PermissionsEQ.
 func Permissions(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPermissions), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldPermissions, v))
 }
 
 // SystemChannelFlags applies equality check predicate on the "system_channel_flags" field. It's identical to SystemChannelFlagsEQ.
 func SystemChannelFlags(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldSystemChannelFlags, v))
 }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldCreateTime, v))
 }
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
 func CreateTimeIn(vs ...time.Time) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreateTime), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
 func CreateTimeNotIn(vs ...time.Time) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateTime), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldCreateTime, v))
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldCreateTime, v))
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateTime), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldCreateTime, v))
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
 func UpdateTimeEQ(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
 func UpdateTimeNEQ(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
 func UpdateTimeIn(vs ...time.Time) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
 func UpdateTimeNotIn(vs ...time.Time) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeGT applies the GT predicate on the "update_time" field.
 func UpdateTimeGT(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldUpdateTime, v))
 }
 
 // UpdateTimeGTE applies the GTE predicate on the "update_time" field.
 func UpdateTimeGTE(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldUpdateTime, v))
 }
 
 // UpdateTimeLT applies the LT predicate on the "update_time" field.
 func UpdateTimeLT(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldUpdateTime, v))
 }
 
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // GuildIDEQ applies the EQ predicate on the "guild_id" field.
 func GuildIDEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldGuildID, v))
 }
 
 // GuildIDNEQ applies the NEQ predicate on the "guild_id" field.
 func GuildIDNEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldGuildID, v))
 }
 
 // GuildIDIn applies the In predicate on the "guild_id" field.
 func GuildIDIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldGuildID), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldGuildID, vs...))
 }
 
 // GuildIDNotIn applies the NotIn predicate on the "guild_id" field.
 func GuildIDNotIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldGuildID), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldGuildID, vs...))
 }
 
 // GuildIDGT applies the GT predicate on the "guild_id" field.
 func GuildIDGT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldGuildID, v))
 }
 
 // GuildIDGTE applies the GTE predicate on the "guild_id" field.
 func GuildIDGTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldGuildID, v))
 }
 
 // GuildIDLT applies the LT predicate on the "guild_id" field.
 func GuildIDLT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldGuildID, v))
 }
 
 // GuildIDLTE applies the LTE predicate on the "guild_id" field.
 func GuildIDLTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldGuildID, v))
 }
 
 // GuildIDContains applies the Contains predicate on the "guild_id" field.
 func GuildIDContains(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldContains(FieldGuildID, v))
 }
 
 // GuildIDHasPrefix applies the HasPrefix predicate on the "guild_id" field.
 func GuildIDHasPrefix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldHasPrefix(FieldGuildID, v))
 }
 
 // GuildIDHasSuffix applies the HasSuffix predicate on the "guild_id" field.
 func GuildIDHasSuffix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldHasSuffix(FieldGuildID, v))
 }
 
 // GuildIDEqualFold applies the EqualFold predicate on the "guild_id" field.
 func GuildIDEqualFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldEqualFold(FieldGuildID, v))
 }
 
 // GuildIDContainsFold applies the ContainsFold predicate on the "guild_id" field.
 func GuildIDContainsFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldGuildID), v))
-	})
+	return predicate.Guild(sql.FieldContainsFold(FieldGuildID, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldName, v))
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
 func NameNEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldName, v))
 }
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldName), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldName, vs...))
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldName), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldName, vs...))
 }
 
 // NameGT applies the GT predicate on the "name" field.
 func NameGT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldName, v))
 }
 
 // NameGTE applies the GTE predicate on the "name" field.
 func NameGTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldName, v))
 }
 
 // NameLT applies the LT predicate on the "name" field.
 func NameLT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldName, v))
 }
 
 // NameLTE applies the LTE predicate on the "name" field.
 func NameLTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldName, v))
 }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldContains(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldHasPrefix(FieldName, v))
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldHasSuffix(FieldName, v))
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldEqualFold(FieldName, v))
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldName), v))
-	})
+	return predicate.Guild(sql.FieldContainsFold(FieldName, v))
 }
 
 // FeaturesIsNil applies the IsNil predicate on the "features" field.
 func FeaturesIsNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldFeatures)))
-	})
+	return predicate.Guild(sql.FieldIsNull(FieldFeatures))
 }
 
 // FeaturesNotNil applies the NotNil predicate on the "features" field.
 func FeaturesNotNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldFeatures)))
-	})
+	return predicate.Guild(sql.FieldNotNull(FieldFeatures))
 }
 
 // IconHashEQ applies the EQ predicate on the "icon_hash" field.
 func IconHashEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldIconHash, v))
 }
 
 // IconHashNEQ applies the NEQ predicate on the "icon_hash" field.
 func IconHashNEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldIconHash, v))
 }
 
 // IconHashIn applies the In predicate on the "icon_hash" field.
 func IconHashIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldIconHash), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldIconHash, vs...))
 }
 
 // IconHashNotIn applies the NotIn predicate on the "icon_hash" field.
 func IconHashNotIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldIconHash), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldIconHash, vs...))
 }
 
 // IconHashGT applies the GT predicate on the "icon_hash" field.
 func IconHashGT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldIconHash, v))
 }
 
 // IconHashGTE applies the GTE predicate on the "icon_hash" field.
 func IconHashGTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldIconHash, v))
 }
 
 // IconHashLT applies the LT predicate on the "icon_hash" field.
 func IconHashLT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldIconHash, v))
 }
 
 // IconHashLTE applies the LTE predicate on the "icon_hash" field.
 func IconHashLTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldIconHash, v))
 }
 
 // IconHashContains applies the Contains predicate on the "icon_hash" field.
 func IconHashContains(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldContains(FieldIconHash, v))
 }
 
 // IconHashHasPrefix applies the HasPrefix predicate on the "icon_hash" field.
 func IconHashHasPrefix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldHasPrefix(FieldIconHash, v))
 }
 
 // IconHashHasSuffix applies the HasSuffix predicate on the "icon_hash" field.
 func IconHashHasSuffix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldHasSuffix(FieldIconHash, v))
 }
 
 // IconHashIsNil applies the IsNil predicate on the "icon_hash" field.
 func IconHashIsNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldIconHash)))
-	})
+	return predicate.Guild(sql.FieldIsNull(FieldIconHash))
 }
 
 // IconHashNotNil applies the NotNil predicate on the "icon_hash" field.
 func IconHashNotNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldIconHash)))
-	})
+	return predicate.Guild(sql.FieldNotNull(FieldIconHash))
 }
 
 // IconHashEqualFold applies the EqualFold predicate on the "icon_hash" field.
 func IconHashEqualFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldEqualFold(FieldIconHash, v))
 }
 
 // IconHashContainsFold applies the ContainsFold predicate on the "icon_hash" field.
 func IconHashContainsFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldIconHash), v))
-	})
+	return predicate.Guild(sql.FieldContainsFold(FieldIconHash, v))
 }
 
 // IconURLEQ applies the EQ predicate on the "icon_url" field.
 func IconURLEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldIconURL, v))
 }
 
 // IconURLNEQ applies the NEQ predicate on the "icon_url" field.
 func IconURLNEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldIconURL, v))
 }
 
 // IconURLIn applies the In predicate on the "icon_url" field.
 func IconURLIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldIconURL), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldIconURL, vs...))
 }
 
 // IconURLNotIn applies the NotIn predicate on the "icon_url" field.
 func IconURLNotIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldIconURL), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldIconURL, vs...))
 }
 
 // IconURLGT applies the GT predicate on the "icon_url" field.
 func IconURLGT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldIconURL, v))
 }
 
 // IconURLGTE applies the GTE predicate on the "icon_url" field.
 func IconURLGTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldIconURL, v))
 }
 
 // IconURLLT applies the LT predicate on the "icon_url" field.
 func IconURLLT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldIconURL, v))
 }
 
 // IconURLLTE applies the LTE predicate on the "icon_url" field.
 func IconURLLTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldIconURL, v))
 }
 
 // IconURLContains applies the Contains predicate on the "icon_url" field.
 func IconURLContains(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldContains(FieldIconURL, v))
 }
 
 // IconURLHasPrefix applies the HasPrefix predicate on the "icon_url" field.
 func IconURLHasPrefix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldHasPrefix(FieldIconURL, v))
 }
 
 // IconURLHasSuffix applies the HasSuffix predicate on the "icon_url" field.
 func IconURLHasSuffix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldHasSuffix(FieldIconURL, v))
 }
 
 // IconURLEqualFold applies the EqualFold predicate on the "icon_url" field.
 func IconURLEqualFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldEqualFold(FieldIconURL, v))
 }
 
 // IconURLContainsFold applies the ContainsFold predicate on the "icon_url" field.
 func IconURLContainsFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldIconURL), v))
-	})
+	return predicate.Guild(sql.FieldContainsFold(FieldIconURL, v))
 }
 
 // JoinedAtEQ applies the EQ predicate on the "joined_at" field.
 func JoinedAtEQ(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldJoinedAt), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldJoinedAt, v))
 }
 
 // JoinedAtNEQ applies the NEQ predicate on the "joined_at" field.
 func JoinedAtNEQ(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldJoinedAt), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldJoinedAt, v))
 }
 
 // JoinedAtIn applies the In predicate on the "joined_at" field.
 func JoinedAtIn(vs ...time.Time) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldJoinedAt), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldJoinedAt, vs...))
 }
 
 // JoinedAtNotIn applies the NotIn predicate on the "joined_at" field.
 func JoinedAtNotIn(vs ...time.Time) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldJoinedAt), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldJoinedAt, vs...))
 }
 
 // JoinedAtGT applies the GT predicate on the "joined_at" field.
 func JoinedAtGT(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldJoinedAt), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldJoinedAt, v))
 }
 
 // JoinedAtGTE applies the GTE predicate on the "joined_at" field.
 func JoinedAtGTE(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldJoinedAt), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldJoinedAt, v))
 }
 
 // JoinedAtLT applies the LT predicate on the "joined_at" field.
 func JoinedAtLT(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldJoinedAt), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldJoinedAt, v))
 }
 
 // JoinedAtLTE applies the LTE predicate on the "joined_at" field.
 func JoinedAtLTE(v time.Time) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldJoinedAt), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldJoinedAt, v))
 }
 
 // JoinedAtIsNil applies the IsNil predicate on the "joined_at" field.
 func JoinedAtIsNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldJoinedAt)))
-	})
+	return predicate.Guild(sql.FieldIsNull(FieldJoinedAt))
 }
 
 // JoinedAtNotNil applies the NotNil predicate on the "joined_at" field.
 func JoinedAtNotNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldJoinedAt)))
-	})
+	return predicate.Guild(sql.FieldNotNull(FieldJoinedAt))
 }
 
 // LargeEQ applies the EQ predicate on the "large" field.
 func LargeEQ(v bool) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLarge), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldLarge, v))
 }
 
 // LargeNEQ applies the NEQ predicate on the "large" field.
 func LargeNEQ(v bool) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLarge), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldLarge, v))
 }
 
 // LargeIsNil applies the IsNil predicate on the "large" field.
 func LargeIsNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldLarge)))
-	})
+	return predicate.Guild(sql.FieldIsNull(FieldLarge))
 }
 
 // LargeNotNil applies the NotNil predicate on the "large" field.
 func LargeNotNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldLarge)))
-	})
+	return predicate.Guild(sql.FieldNotNull(FieldLarge))
 }
 
 // MemberCountEQ applies the EQ predicate on the "member_count" field.
 func MemberCountEQ(v int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMemberCount), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldMemberCount, v))
 }
 
 // MemberCountNEQ applies the NEQ predicate on the "member_count" field.
 func MemberCountNEQ(v int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMemberCount), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldMemberCount, v))
 }
 
 // MemberCountIn applies the In predicate on the "member_count" field.
 func MemberCountIn(vs ...int) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMemberCount), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldMemberCount, vs...))
 }
 
 // MemberCountNotIn applies the NotIn predicate on the "member_count" field.
 func MemberCountNotIn(vs ...int) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMemberCount), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldMemberCount, vs...))
 }
 
 // MemberCountGT applies the GT predicate on the "member_count" field.
 func MemberCountGT(v int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMemberCount), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldMemberCount, v))
 }
 
 // MemberCountGTE applies the GTE predicate on the "member_count" field.
 func MemberCountGTE(v int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMemberCount), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldMemberCount, v))
 }
 
 // MemberCountLT applies the LT predicate on the "member_count" field.
 func MemberCountLT(v int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMemberCount), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldMemberCount, v))
 }
 
 // MemberCountLTE applies the LTE predicate on the "member_count" field.
 func MemberCountLTE(v int) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMemberCount), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldMemberCount, v))
 }
 
 // MemberCountIsNil applies the IsNil predicate on the "member_count" field.
 func MemberCountIsNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldMemberCount)))
-	})
+	return predicate.Guild(sql.FieldIsNull(FieldMemberCount))
 }
 
 // MemberCountNotNil applies the NotNil predicate on the "member_count" field.
 func MemberCountNotNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldMemberCount)))
-	})
+	return predicate.Guild(sql.FieldNotNull(FieldMemberCount))
 }
 
 // OwnerIDEQ applies the EQ predicate on the "owner_id" field.
 func OwnerIDEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldOwnerID, v))
 }
 
 // OwnerIDNEQ applies the NEQ predicate on the "owner_id" field.
 func OwnerIDNEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldOwnerID, v))
 }
 
 // OwnerIDIn applies the In predicate on the "owner_id" field.
 func OwnerIDIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldOwnerID), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldOwnerID, vs...))
 }
 
 // OwnerIDNotIn applies the NotIn predicate on the "owner_id" field.
 func OwnerIDNotIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldOwnerID), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldOwnerID, vs...))
 }
 
 // OwnerIDGT applies the GT predicate on the "owner_id" field.
 func OwnerIDGT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldOwnerID, v))
 }
 
 // OwnerIDGTE applies the GTE predicate on the "owner_id" field.
 func OwnerIDGTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldOwnerID, v))
 }
 
 // OwnerIDLT applies the LT predicate on the "owner_id" field.
 func OwnerIDLT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldOwnerID, v))
 }
 
 // OwnerIDLTE applies the LTE predicate on the "owner_id" field.
 func OwnerIDLTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldOwnerID, v))
 }
 
 // OwnerIDContains applies the Contains predicate on the "owner_id" field.
 func OwnerIDContains(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldContains(FieldOwnerID, v))
 }
 
 // OwnerIDHasPrefix applies the HasPrefix predicate on the "owner_id" field.
 func OwnerIDHasPrefix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldHasPrefix(FieldOwnerID, v))
 }
 
 // OwnerIDHasSuffix applies the HasSuffix predicate on the "owner_id" field.
 func OwnerIDHasSuffix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldHasSuffix(FieldOwnerID, v))
 }
 
 // OwnerIDIsNil applies the IsNil predicate on the "owner_id" field.
 func OwnerIDIsNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldOwnerID)))
-	})
+	return predicate.Guild(sql.FieldIsNull(FieldOwnerID))
 }
 
 // OwnerIDNotNil applies the NotNil predicate on the "owner_id" field.
 func OwnerIDNotNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldOwnerID)))
-	})
+	return predicate.Guild(sql.FieldNotNull(FieldOwnerID))
 }
 
 // OwnerIDEqualFold applies the EqualFold predicate on the "owner_id" field.
 func OwnerIDEqualFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldEqualFold(FieldOwnerID, v))
 }
 
 // OwnerIDContainsFold applies the ContainsFold predicate on the "owner_id" field.
 func OwnerIDContainsFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldOwnerID), v))
-	})
+	return predicate.Guild(sql.FieldContainsFold(FieldOwnerID, v))
 }
 
 // PermissionsEQ applies the EQ predicate on the "permissions" field.
 func PermissionsEQ(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPermissions), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldPermissions, v))
 }
 
 // PermissionsNEQ applies the NEQ predicate on the "permissions" field.
 func PermissionsNEQ(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPermissions), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldPermissions, v))
 }
 
 // PermissionsIn applies the In predicate on the "permissions" field.
 func PermissionsIn(vs ...uint64) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPermissions), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldPermissions, vs...))
 }
 
 // PermissionsNotIn applies the NotIn predicate on the "permissions" field.
 func PermissionsNotIn(vs ...uint64) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPermissions), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldPermissions, vs...))
 }
 
 // PermissionsGT applies the GT predicate on the "permissions" field.
 func PermissionsGT(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPermissions), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldPermissions, v))
 }
 
 // PermissionsGTE applies the GTE predicate on the "permissions" field.
 func PermissionsGTE(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPermissions), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldPermissions, v))
 }
 
 // PermissionsLT applies the LT predicate on the "permissions" field.
 func PermissionsLT(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPermissions), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldPermissions, v))
 }
 
 // PermissionsLTE applies the LTE predicate on the "permissions" field.
 func PermissionsLTE(v uint64) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPermissions), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldPermissions, v))
 }
 
 // PermissionsIsNil applies the IsNil predicate on the "permissions" field.
 func PermissionsIsNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldPermissions)))
-	})
+	return predicate.Guild(sql.FieldIsNull(FieldPermissions))
 }
 
 // PermissionsNotNil applies the NotNil predicate on the "permissions" field.
 func PermissionsNotNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldPermissions)))
-	})
+	return predicate.Guild(sql.FieldNotNull(FieldPermissions))
 }
 
 // SystemChannelFlagsEQ applies the EQ predicate on the "system_channel_flags" field.
 func SystemChannelFlagsEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldEQ(FieldSystemChannelFlags, v))
 }
 
 // SystemChannelFlagsNEQ applies the NEQ predicate on the "system_channel_flags" field.
 func SystemChannelFlagsNEQ(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldNEQ(FieldSystemChannelFlags, v))
 }
 
 // SystemChannelFlagsIn applies the In predicate on the "system_channel_flags" field.
 func SystemChannelFlagsIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldSystemChannelFlags), v...))
-	})
+	return predicate.Guild(sql.FieldIn(FieldSystemChannelFlags, vs...))
 }
 
 // SystemChannelFlagsNotIn applies the NotIn predicate on the "system_channel_flags" field.
 func SystemChannelFlagsNotIn(vs ...string) predicate.Guild {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldSystemChannelFlags), v...))
-	})
+	return predicate.Guild(sql.FieldNotIn(FieldSystemChannelFlags, vs...))
 }
 
 // SystemChannelFlagsGT applies the GT predicate on the "system_channel_flags" field.
 func SystemChannelFlagsGT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldGT(FieldSystemChannelFlags, v))
 }
 
 // SystemChannelFlagsGTE applies the GTE predicate on the "system_channel_flags" field.
 func SystemChannelFlagsGTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldGTE(FieldSystemChannelFlags, v))
 }
 
 // SystemChannelFlagsLT applies the LT predicate on the "system_channel_flags" field.
 func SystemChannelFlagsLT(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldLT(FieldSystemChannelFlags, v))
 }
 
 // SystemChannelFlagsLTE applies the LTE predicate on the "system_channel_flags" field.
 func SystemChannelFlagsLTE(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldLTE(FieldSystemChannelFlags, v))
 }
 
 // SystemChannelFlagsContains applies the Contains predicate on the "system_channel_flags" field.
 func SystemChannelFlagsContains(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldContains(FieldSystemChannelFlags, v))
 }
 
 // SystemChannelFlagsHasPrefix applies the HasPrefix predicate on the "system_channel_flags" field.
 func SystemChannelFlagsHasPrefix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldHasPrefix(FieldSystemChannelFlags, v))
 }
 
 // SystemChannelFlagsHasSuffix applies the HasSuffix predicate on the "system_channel_flags" field.
 func SystemChannelFlagsHasSuffix(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldHasSuffix(FieldSystemChannelFlags, v))
 }
 
 // SystemChannelFlagsIsNil applies the IsNil predicate on the "system_channel_flags" field.
 func SystemChannelFlagsIsNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldSystemChannelFlags)))
-	})
+	return predicate.Guild(sql.FieldIsNull(FieldSystemChannelFlags))
 }
 
 // SystemChannelFlagsNotNil applies the NotNil predicate on the "system_channel_flags" field.
 func SystemChannelFlagsNotNil() predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldSystemChannelFlags)))
-	})
+	return predicate.Guild(sql.FieldNotNull(FieldSystemChannelFlags))
 }
 
 // SystemChannelFlagsEqualFold applies the EqualFold predicate on the "system_channel_flags" field.
 func SystemChannelFlagsEqualFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldEqualFold(FieldSystemChannelFlags, v))
 }
 
 // SystemChannelFlagsContainsFold applies the ContainsFold predicate on the "system_channel_flags" field.
 func SystemChannelFlagsContainsFold(v string) predicate.Guild {
-	return predicate.Guild(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldSystemChannelFlags), v))
-	})
+	return predicate.Guild(sql.FieldContainsFold(FieldSystemChannelFlags, v))
 }
 
 // HasGuildConfig applies the HasEdge predicate on the "guild_config" edge.
@@ -1214,7 +804,6 @@ func HasGuildConfig() predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GuildConfigTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, GuildConfigTable, GuildConfigColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1242,7 +831,6 @@ func HasGuildAdminConfig() predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GuildAdminConfigTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, GuildAdminConfigTable, GuildAdminConfigColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1270,7 +858,6 @@ func HasGuildEvents() predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GuildEventsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, GuildEventsTable, GuildEventsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1298,7 +885,6 @@ func HasAdmins() predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AdminsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, AdminsTable, AdminsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)

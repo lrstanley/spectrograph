@@ -356,43 +356,10 @@ func (gu *GuildUpdate) RemoveAdmins(u ...*User) *GuildUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gu *GuildUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	if err := gu.defaults(); err != nil {
 		return 0, err
 	}
-	if len(gu.hooks) == 0 {
-		if err = gu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = gu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gu.check(); err != nil {
-				return 0, err
-			}
-			gu.mutation = mutation
-			affected, err = gu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(gu.hooks) - 1; i >= 0; i-- {
-			if gu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GuildMutation](ctx, gu.sqlSave, gu.mutation, gu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -455,16 +422,10 @@ func (gu *GuildUpdate) check() error {
 }
 
 func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   guild.Table,
-			Columns: guild.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guild.FieldID,
-			},
-		},
+	if err := gu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(guild.Table, guild.Columns, sqlgraph.NewFieldSpec(guild.FieldID, field.TypeInt))
 	if ps := gu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -548,10 +509,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{guild.GuildConfigColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildconfig.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildconfig.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -564,10 +522,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{guild.GuildConfigColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildconfig.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildconfig.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -583,10 +538,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{guild.GuildAdminConfigColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildadminconfig.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildadminconfig.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -599,10 +551,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{guild.GuildAdminConfigColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildadminconfig.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildadminconfig.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -618,10 +567,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{guild.GuildEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildevent.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -634,10 +580,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{guild.GuildEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildevent.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -653,10 +596,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{guild.GuildEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildevent.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -672,10 +612,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: guild.AdminsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -688,10 +625,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: guild.AdminsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -707,10 +641,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: guild.AdminsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -726,6 +657,7 @@ func (gu *GuildUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	gu.mutation.done = true
 	return n, nil
 }
 
@@ -1054,6 +986,12 @@ func (guo *GuildUpdateOne) RemoveAdmins(u ...*User) *GuildUpdateOne {
 	return guo.RemoveAdminIDs(ids...)
 }
 
+// Where appends a list predicates to the GuildUpdate builder.
+func (guo *GuildUpdateOne) Where(ps ...predicate.Guild) *GuildUpdateOne {
+	guo.mutation.Where(ps...)
+	return guo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (guo *GuildUpdateOne) Select(field string, fields ...string) *GuildUpdateOne {
@@ -1063,49 +1001,10 @@ func (guo *GuildUpdateOne) Select(field string, fields ...string) *GuildUpdateOn
 
 // Save executes the query and returns the updated Guild entity.
 func (guo *GuildUpdateOne) Save(ctx context.Context) (*Guild, error) {
-	var (
-		err  error
-		node *Guild
-	)
 	if err := guo.defaults(); err != nil {
 		return nil, err
 	}
-	if len(guo.hooks) == 0 {
-		if err = guo.check(); err != nil {
-			return nil, err
-		}
-		node, err = guo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GuildMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = guo.check(); err != nil {
-				return nil, err
-			}
-			guo.mutation = mutation
-			node, err = guo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(guo.hooks) - 1; i >= 0; i-- {
-			if guo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = guo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, guo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Guild)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GuildMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Guild, GuildMutation](ctx, guo.sqlSave, guo.mutation, guo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1168,16 +1067,10 @@ func (guo *GuildUpdateOne) check() error {
 }
 
 func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   guild.Table,
-			Columns: guild.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: guild.FieldID,
-			},
-		},
+	if err := guo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(guild.Table, guild.Columns, sqlgraph.NewFieldSpec(guild.FieldID, field.TypeInt))
 	id, ok := guo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Guild.id" for update`)}
@@ -1278,10 +1171,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Columns: []string{guild.GuildConfigColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildconfig.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildconfig.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1294,10 +1184,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Columns: []string{guild.GuildConfigColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildconfig.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildconfig.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1313,10 +1200,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Columns: []string{guild.GuildAdminConfigColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildadminconfig.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildadminconfig.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1329,10 +1213,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Columns: []string{guild.GuildAdminConfigColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildadminconfig.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildadminconfig.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1348,10 +1229,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Columns: []string{guild.GuildEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildevent.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1364,10 +1242,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Columns: []string{guild.GuildEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildevent.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1383,10 +1258,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Columns: []string{guild.GuildEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: guildevent.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(guildevent.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1402,10 +1274,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Columns: guild.AdminsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1418,10 +1287,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Columns: guild.AdminsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1437,10 +1303,7 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 			Columns: guild.AdminsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1459,5 +1322,6 @@ func (guo *GuildUpdateOne) sqlSave(ctx context.Context) (_node *Guild, err error
 		}
 		return nil, err
 	}
+	guo.mutation.done = true
 	return _node, nil
 }
