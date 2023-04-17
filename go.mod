@@ -5,7 +5,7 @@ go 1.19
 require (
 	entgo.io/contrib v0.3.5
 	entgo.io/ent v0.11.10
-	github.com/99designs/gqlgen v0.17.26
+	github.com/99designs/gqlgen v0.17.29
 	github.com/andersfylling/disgord v0.36.2
 	github.com/andersfylling/snowflake/v5 v5.0.1
 	github.com/apex/log v1.9.0
