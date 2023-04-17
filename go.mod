@@ -20,7 +20,7 @@ require (
 	github.com/lrstanley/chix v0.0.0-20230303230253-03aa1b49614f
 	github.com/lrstanley/clix v0.0.0-20230303230251-0337facc7277
 	github.com/markbates/goth v1.76.1
-	github.com/prometheus/client_golang v1.14.0
+	github.com/prometheus/client_golang v1.15.0
 	github.com/vektah/gqlparser/v2 v2.5.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	golang.org/x/exp v0.0.0-20230310171629-522b1b587ee0
@@ -87,7 +87,7 @@ require (
 	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.29.0 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 )
