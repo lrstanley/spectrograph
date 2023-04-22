@@ -41,7 +41,7 @@
     aria-label="page footer"
   >
     <p class="text-base text-gray-400" aria-hidden="true">
-      <a href="https://liam.sh/" target="_blank"> &copy; {{ new Date().getFullYear() }} Spectrograph </a>
+      <a href="https://liam.sh/" target="_blank">&copy; {{ new Date().getFullYear() }} Spectrograph</a>
     </p>
     <nav class="flex justify-center mt-6 space-x-8 md:mt-0" aria-label="social links">
       <a

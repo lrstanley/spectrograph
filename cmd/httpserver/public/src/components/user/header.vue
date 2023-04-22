@@ -37,7 +37,7 @@
 
   <FeedbackAlert v-if="user.banned" type="error" class="mt-10">
     User has been banned by an administrator
-    <span v-if="user.banReason" class="rounded badge"> reason: {{ user.banReason }} </span>
+    <span v-if="user.banReason" class="rounded badge">reason: {{ user.banReason }}</span>
   </FeedbackAlert>
 </template>
 

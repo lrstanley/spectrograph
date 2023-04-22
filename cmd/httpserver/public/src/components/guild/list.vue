@@ -54,8 +54,8 @@
       <p class="text-lg">You are not an owner or administrator of any Discord guilds.</p>
       <p class="mt-2">
         Create a guild or become a guild administrator, and
-        <a class="link link-primary" href="/-/auth/logout">logout</a> and back in to add Spectrograph to
-        them here.
+        <a class="link link-primary" href="/-/auth/logout">logout</a>
+        and back in to add Spectrograph to them here.
       </p>
     </div>
   </div>

@@ -1,26 +1,26 @@
 {
-    "extends": "@vue/tsconfig/tsconfig.json",
-    "compilerOptions": {
-        "allowJs": true,
-        "outDir": "./dist",
-        "paths": {
-            "@/*": [
-                "./src/*",
-                "./*"
-            ]
-        },
-        "strict": false,
-        "types": [
-            "vite/client",
-            "vite-plugin-vue-layouts/client",
-        ],
+  "extends": "@vue/tsconfig/tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "outDir": "./dist",
+    "paths": {
+      "@/*": [
+        "./src/*",
+        "./*"
+      ]
     },
-    "exclude": [
-        "node_modules",
-        "dist",
-        ".git",
-        "./src/lib/api/graphql.ts",
-        "./src/*.config.js",
-        "./src/*.config.ts",
-    ],
+    "strict": false,
+    "types": [
+      "vite/client",
+      "vite-plugin-vue-layouts/client"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".git",
+    "./src/lib/api/graphql.ts",
+    "./src/*.config.js",
+    "./src/*.config.ts"
+  ]
 }

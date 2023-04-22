@@ -20,7 +20,9 @@ meta:
               </h1>
               <p class="mt-3 text-base text-gray-300 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
                 Spectrograph is a Discord bot that manages creating/destroying voice channels depending
-                on occupancy, <span class="text-dnd-400">so you don't have to</span>.
+                on occupancy,
+                <span class="text-dnd-400">so you don't have to</span>
+                .
               </p>
               <div class="flex flex-col flex-auto w-full gap-2 mt-10 lg:flex-row sm:mt-12">
                 <a class="h-10 min-h-0 btn btn-primary" href="#more-info">
