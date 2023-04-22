@@ -7,9 +7,7 @@
 import { createClient as createWSClient } from "graphql-ws"
 import { loadingBar } from "@/lib/core/status"
 import { retryExchange } from "@urql/exchange-retry"
-import {
-  cacheExchange, createClient, dedupExchange, fetchExchange, subscriptionExchange
-} from "@urql/vue"
+import { cacheExchange, createClient, fetchExchange, subscriptionExchange } from "@urql/vue"
 
 export * from "@/lib/api/graphql"
 
@@ -49,7 +47,6 @@ export const client = createClient({
   requestPolicy: "cache-and-network",
   fetch: fetchWithTimeout,
   exchanges: [
-    dedupExchange,
     cacheExchange,
     retryExchange({
       initialDelayMs: 1000,
@@ -60,13 +57,13 @@ export const client = createClient({
     }),
     fetchExchange,
     subscriptionExchange({
-      forwardSubscription(operation) {
+      forwardSubscription(request) {
+        const input = { ...request, query: request.query || "" }
+
         return {
-          subscribe: (sink) => {
-            const dispose = wsClient.subscribe(operation, sink)
-            return {
-              unsubscribe: dispose,
-            }
+          subscribe(sink) {
+            const unsubscribe = wsClient.subscribe(input, sink)
+            return { unsubscribe }
           },
         }
       },
