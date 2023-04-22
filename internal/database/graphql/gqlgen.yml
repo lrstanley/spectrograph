@@ -28,12 +28,12 @@ resolver:
 # autobind tells gqlgen to search for any type names in the GraphQL schema in the
 # provided Go package. If they match it will use them, otherwise it will generate new ones.
 autobind:
-  - github.com/lrstanley/spectrograph/internal/ent
-  - github.com/lrstanley/spectrograph/internal/ent/user
-  - github.com/lrstanley/spectrograph/internal/ent/guild
-  - github.com/lrstanley/spectrograph/internal/ent/guildconfig
-  - github.com/lrstanley/spectrograph/internal/ent/guildadminconfig
-  - github.com/lrstanley/spectrograph/internal/ent/guildevent
+  - github.com/lrstanley/spectrograph/internal/database/ent
+  - github.com/lrstanley/spectrograph/internal/database/ent/user
+  - github.com/lrstanley/spectrograph/internal/database/ent/guild
+  - github.com/lrstanley/spectrograph/internal/database/ent/guildconfig
+  - github.com/lrstanley/spectrograph/internal/database/ent/guildadminconfig
+  - github.com/lrstanley/spectrograph/internal/database/ent/guildevent
   - github.com/lrstanley/spectrograph/internal/models
 
 # This section declares type mapping between the GraphQL and Go type systems.
@@ -43,7 +43,7 @@ models:
       - github.com/99designs/gqlgen/graphql.IntID
   Node:
     model:
-      - github.com/lrstanley/spectrograph/internal/ent.Noder
+      - github.com/lrstanley/spectrograph/internal/database/ent.Noder
   Uint64:
     model:
       - github.com/99designs/gqlgen/graphql.Uint64

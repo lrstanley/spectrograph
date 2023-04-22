@@ -16,9 +16,9 @@ import (
 	"entgo.io/ent/dialect/sql/schema"
 	"github.com/apex/log"
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/lrstanley/spectrograph/internal/ent"
-	"github.com/lrstanley/spectrograph/internal/ent/migrate"
-	_ "github.com/lrstanley/spectrograph/internal/ent/runtime"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
+	"github.com/lrstanley/spectrograph/internal/database/ent/migrate"
+	_ "github.com/lrstanley/spectrograph/internal/database/ent/runtime"
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 

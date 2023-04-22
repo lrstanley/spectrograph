@@ -15,8 +15,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/lrstanley/spectrograph/internal/ent"
-	"github.com/lrstanley/spectrograph/internal/ent/guildevent"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildevent"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -1525,7 +1525,7 @@ enum GuildEventOrderField {
   UPDATED_AT
 }
 """GuildEventType is enum for the field type"""
-enum GuildEventType @goModel(model: "github.com/lrstanley/spectrograph/internal/ent/guildevent.Type") {
+enum GuildEventType @goModel(model: "github.com/lrstanley/spectrograph/internal/database/ent/guildevent.Type") {
   INFO
   WARNING
   ERROR
@@ -1783,7 +1783,7 @@ scalar Map
 An object with an ID.
 Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
 """
-interface Node @goModel(model: "github.com/lrstanley/spectrograph/internal/ent.Noder") {
+interface Node @goModel(model: "github.com/lrstanley/spectrograph/internal/database/ent.Noder") {
   """The id of the object."""
   id: ID!
 }
@@ -2298,7 +2298,7 @@ func (ec *executionContext) field_Guild_admins_args(ctx context.Context, rawArgs
 	var arg0 *ent.Cursor
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2316,7 +2316,7 @@ func (ec *executionContext) field_Guild_admins_args(ctx context.Context, rawArgs
 	var arg2 *ent.Cursor
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2334,7 +2334,7 @@ func (ec *executionContext) field_Guild_admins_args(ctx context.Context, rawArgs
 	var arg4 *ent.UserOrder
 	if tmp, ok := rawArgs["orderBy"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("orderBy"))
-		arg4, err = ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserOrder(ctx, tmp)
+		arg4, err = ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserOrder(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2343,7 +2343,7 @@ func (ec *executionContext) field_Guild_admins_args(ctx context.Context, rawArgs
 	var arg5 *ent.UserWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg5, err = ec.unmarshalOUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInput(ctx, tmp)
+		arg5, err = ec.unmarshalOUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2421,7 +2421,7 @@ func (ec *executionContext) field_Mutation_updateGuildAdminConfig_args(ctx conte
 	var arg1 ent.UpdateGuildAdminConfigInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg1, err = ec.unmarshalNUpdateGuildAdminConfigInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUpdateGuildAdminConfigInput(ctx, tmp)
+		arg1, err = ec.unmarshalNUpdateGuildAdminConfigInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUpdateGuildAdminConfigInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2445,7 +2445,7 @@ func (ec *executionContext) field_Mutation_updateGuildConfig_args(ctx context.Co
 	var arg1 ent.UpdateGuildConfigInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg1, err = ec.unmarshalNUpdateGuildConfigInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUpdateGuildConfigInput(ctx, tmp)
+		arg1, err = ec.unmarshalNUpdateGuildConfigInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUpdateGuildConfigInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2475,7 +2475,7 @@ func (ec *executionContext) field_Query_guildAdminConfigs_args(ctx context.Conte
 	var arg0 *ent.Cursor
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2493,7 +2493,7 @@ func (ec *executionContext) field_Query_guildAdminConfigs_args(ctx context.Conte
 	var arg2 *ent.Cursor
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2511,7 +2511,7 @@ func (ec *executionContext) field_Query_guildAdminConfigs_args(ctx context.Conte
 	var arg4 *ent.GuildAdminConfigWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg4, err = ec.unmarshalOGuildAdminConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigWhereInput(ctx, tmp)
+		arg4, err = ec.unmarshalOGuildAdminConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2526,7 +2526,7 @@ func (ec *executionContext) field_Query_guildConfigs_args(ctx context.Context, r
 	var arg0 *ent.Cursor
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2544,7 +2544,7 @@ func (ec *executionContext) field_Query_guildConfigs_args(ctx context.Context, r
 	var arg2 *ent.Cursor
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2562,7 +2562,7 @@ func (ec *executionContext) field_Query_guildConfigs_args(ctx context.Context, r
 	var arg4 *ent.GuildConfigWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg4, err = ec.unmarshalOGuildConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigWhereInput(ctx, tmp)
+		arg4, err = ec.unmarshalOGuildConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2577,7 +2577,7 @@ func (ec *executionContext) field_Query_guildEvents_args(ctx context.Context, ra
 	var arg0 *ent.Cursor
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2595,7 +2595,7 @@ func (ec *executionContext) field_Query_guildEvents_args(ctx context.Context, ra
 	var arg2 *ent.Cursor
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2613,7 +2613,7 @@ func (ec *executionContext) field_Query_guildEvents_args(ctx context.Context, ra
 	var arg4 *ent.GuildEventOrder
 	if tmp, ok := rawArgs["orderBy"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("orderBy"))
-		arg4, err = ec.unmarshalOGuildEventOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventOrder(ctx, tmp)
+		arg4, err = ec.unmarshalOGuildEventOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventOrder(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2622,7 +2622,7 @@ func (ec *executionContext) field_Query_guildEvents_args(ctx context.Context, ra
 	var arg5 *ent.GuildEventWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg5, err = ec.unmarshalOGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx, tmp)
+		arg5, err = ec.unmarshalOGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2637,7 +2637,7 @@ func (ec *executionContext) field_Query_guilds_args(ctx context.Context, rawArgs
 	var arg0 *ent.Cursor
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2655,7 +2655,7 @@ func (ec *executionContext) field_Query_guilds_args(ctx context.Context, rawArgs
 	var arg2 *ent.Cursor
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2673,7 +2673,7 @@ func (ec *executionContext) field_Query_guilds_args(ctx context.Context, rawArgs
 	var arg4 *ent.GuildOrder
 	if tmp, ok := rawArgs["orderBy"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("orderBy"))
-		arg4, err = ec.unmarshalOGuildOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildOrder(ctx, tmp)
+		arg4, err = ec.unmarshalOGuildOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildOrder(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2682,7 +2682,7 @@ func (ec *executionContext) field_Query_guilds_args(ctx context.Context, rawArgs
 	var arg5 *ent.GuildWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg5, err = ec.unmarshalOGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInput(ctx, tmp)
+		arg5, err = ec.unmarshalOGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2727,7 +2727,7 @@ func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs 
 	var arg0 *ent.Cursor
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2745,7 +2745,7 @@ func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs 
 	var arg2 *ent.Cursor
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2763,7 +2763,7 @@ func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs 
 	var arg4 *ent.UserOrder
 	if tmp, ok := rawArgs["orderBy"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("orderBy"))
-		arg4, err = ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserOrder(ctx, tmp)
+		arg4, err = ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserOrder(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2772,7 +2772,7 @@ func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs 
 	var arg5 *ent.UserWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg5, err = ec.unmarshalOUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInput(ctx, tmp)
+		arg5, err = ec.unmarshalOUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2787,7 +2787,7 @@ func (ec *executionContext) field_Subscription_guildEventAdded_args(ctx context.
 	var arg0 ent.GuildEventWhereInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGuildEventWhereInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx, tmp)
+		arg0, err = ec.unmarshalNGuildEventWhereInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2802,7 +2802,7 @@ func (ec *executionContext) field_User_userGuilds_args(ctx context.Context, rawA
 	var arg0 *ent.Cursor
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2820,7 +2820,7 @@ func (ec *executionContext) field_User_userGuilds_args(ctx context.Context, rawA
 	var arg2 *ent.Cursor
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, tmp)
+		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2838,7 +2838,7 @@ func (ec *executionContext) field_User_userGuilds_args(ctx context.Context, rawA
 	var arg4 *ent.GuildOrder
 	if tmp, ok := rawArgs["orderBy"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("orderBy"))
-		arg4, err = ec.unmarshalOGuildOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildOrder(ctx, tmp)
+		arg4, err = ec.unmarshalOGuildOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildOrder(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2847,7 +2847,7 @@ func (ec *executionContext) field_User_userGuilds_args(ctx context.Context, rawA
 	var arg5 *ent.GuildWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg5, err = ec.unmarshalOGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInput(ctx, tmp)
+		arg5, err = ec.unmarshalOGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3511,7 +3511,7 @@ func (ec *executionContext) _Guild_guildConfig(ctx context.Context, field graphq
 	}
 	res := resTmp.(*ent.GuildConfig)
 	fc.Result = res
-	return ec.marshalOGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfig(ctx, field.Selections, res)
+	return ec.marshalOGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfig(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Guild_guildConfig(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3570,7 +3570,7 @@ func (ec *executionContext) _Guild_guildAdminConfig(ctx context.Context, field g
 	}
 	res := resTmp.(*ent.GuildAdminConfig)
 	fc.Result = res
-	return ec.marshalOGuildAdminConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfig(ctx, field.Selections, res)
+	return ec.marshalOGuildAdminConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfig(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Guild_guildAdminConfig(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3629,7 +3629,7 @@ func (ec *executionContext) _Guild_guildEvents(ctx context.Context, field graphq
 	}
 	res := resTmp.([]*ent.GuildEvent)
 	fc.Result = res
-	return ec.marshalOGuildEvent2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventᚄ(ctx, field.Selections, res)
+	return ec.marshalOGuildEvent2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Guild_guildEvents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3689,7 +3689,7 @@ func (ec *executionContext) _Guild_admins(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*ent.UserConnection)
 	fc.Result = res
-	return ec.marshalNUserConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserConnection(ctx, field.Selections, res)
+	return ec.marshalNUserConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Guild_admins(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4048,7 +4048,7 @@ func (ec *executionContext) _GuildAdminConfig_guild(ctx context.Context, field g
 	}
 	res := resTmp.(*ent.Guild)
 	fc.Result = res
-	return ec.marshalNGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuild(ctx, field.Selections, res)
+	return ec.marshalNGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuild(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildAdminConfig_guild(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4127,7 +4127,7 @@ func (ec *executionContext) _GuildAdminConfigConnection_edges(ctx context.Contex
 	}
 	res := resTmp.([]*ent.GuildAdminConfigEdge)
 	fc.Result = res
-	return ec.marshalOGuildAdminConfigEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigEdge(ctx, field.Selections, res)
+	return ec.marshalOGuildAdminConfigEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildAdminConfigConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4177,7 +4177,7 @@ func (ec *executionContext) _GuildAdminConfigConnection_pageInfo(ctx context.Con
 	}
 	res := resTmp.(ent.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildAdminConfigConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4272,7 +4272,7 @@ func (ec *executionContext) _GuildAdminConfigEdge_node(ctx context.Context, fiel
 	}
 	res := resTmp.(*ent.GuildAdminConfig)
 	fc.Result = res
-	return ec.marshalOGuildAdminConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfig(ctx, field.Selections, res)
+	return ec.marshalOGuildAdminConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfig(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildAdminConfigEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4334,7 +4334,7 @@ func (ec *executionContext) _GuildAdminConfigEdge_cursor(ctx context.Context, fi
 	}
 	res := resTmp.(ent.Cursor)
 	fc.Result = res
-	return ec.marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildAdminConfigEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4674,7 +4674,7 @@ func (ec *executionContext) _GuildConfig_guild(ctx context.Context, field graphq
 	}
 	res := resTmp.(*ent.Guild)
 	fc.Result = res
-	return ec.marshalNGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuild(ctx, field.Selections, res)
+	return ec.marshalNGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuild(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildConfig_guild(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4753,7 +4753,7 @@ func (ec *executionContext) _GuildConfigConnection_edges(ctx context.Context, fi
 	}
 	res := resTmp.([]*ent.GuildConfigEdge)
 	fc.Result = res
-	return ec.marshalOGuildConfigEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigEdge(ctx, field.Selections, res)
+	return ec.marshalOGuildConfigEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildConfigConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4803,7 +4803,7 @@ func (ec *executionContext) _GuildConfigConnection_pageInfo(ctx context.Context,
 	}
 	res := resTmp.(ent.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildConfigConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4898,7 +4898,7 @@ func (ec *executionContext) _GuildConfigEdge_node(ctx context.Context, field gra
 	}
 	res := resTmp.(*ent.GuildConfig)
 	fc.Result = res
-	return ec.marshalOGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfig(ctx, field.Selections, res)
+	return ec.marshalOGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfig(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildConfigEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4960,7 +4960,7 @@ func (ec *executionContext) _GuildConfigEdge_cursor(ctx context.Context, field g
 	}
 	res := resTmp.(ent.Cursor)
 	fc.Result = res
-	return ec.marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildConfigEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5001,7 +5001,7 @@ func (ec *executionContext) _GuildConnection_edges(ctx context.Context, field gr
 	}
 	res := resTmp.([]*ent.GuildEdge)
 	fc.Result = res
-	return ec.marshalOGuildEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEdge(ctx, field.Selections, res)
+	return ec.marshalOGuildEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5051,7 +5051,7 @@ func (ec *executionContext) _GuildConnection_pageInfo(ctx context.Context, field
 	}
 	res := resTmp.(ent.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5146,7 +5146,7 @@ func (ec *executionContext) _GuildEdge_node(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*ent.Guild)
 	fc.Result = res
-	return ec.marshalOGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuild(ctx, field.Selections, res)
+	return ec.marshalOGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuild(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5228,7 +5228,7 @@ func (ec *executionContext) _GuildEdge_cursor(ctx context.Context, field graphql
 	}
 	res := resTmp.(ent.Cursor)
 	fc.Result = res
-	return ec.marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5404,7 +5404,7 @@ func (ec *executionContext) _GuildEvent_type(ctx context.Context, field graphql.
 	}
 	res := resTmp.(guildevent.Type)
 	fc.Result = res
-	return ec.marshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx, field.Selections, res)
+	return ec.marshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildEvent_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5533,7 +5533,7 @@ func (ec *executionContext) _GuildEvent_guild(ctx context.Context, field graphql
 	}
 	res := resTmp.(*ent.Guild)
 	fc.Result = res
-	return ec.marshalNGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuild(ctx, field.Selections, res)
+	return ec.marshalNGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuild(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildEvent_guild(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5612,7 +5612,7 @@ func (ec *executionContext) _GuildEventConnection_edges(ctx context.Context, fie
 	}
 	res := resTmp.([]*ent.GuildEventEdge)
 	fc.Result = res
-	return ec.marshalOGuildEventEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventEdge(ctx, field.Selections, res)
+	return ec.marshalOGuildEventEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildEventConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5662,7 +5662,7 @@ func (ec *executionContext) _GuildEventConnection_pageInfo(ctx context.Context, 
 	}
 	res := resTmp.(ent.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildEventConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5757,7 +5757,7 @@ func (ec *executionContext) _GuildEventEdge_node(ctx context.Context, field grap
 	}
 	res := resTmp.(*ent.GuildEvent)
 	fc.Result = res
-	return ec.marshalOGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEvent(ctx, field.Selections, res)
+	return ec.marshalOGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildEventEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5817,7 +5817,7 @@ func (ec *executionContext) _GuildEventEdge_cursor(ctx context.Context, field gr
 	}
 	res := resTmp.(ent.Cursor)
 	fc.Result = res
-	return ec.marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GuildEventEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5902,7 +5902,7 @@ func (ec *executionContext) _Mutation_updateGuildConfig(ctx context.Context, fie
 	}
 	res := resTmp.(*ent.GuildConfig)
 	fc.Result = res
-	return ec.marshalNGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfig(ctx, field.Selections, res)
+	return ec.marshalNGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfig(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateGuildConfig(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5975,7 +5975,7 @@ func (ec *executionContext) _Mutation_updateGuildAdminConfig(ctx context.Context
 	}
 	res := resTmp.(*ent.GuildAdminConfig)
 	fc.Result = res
-	return ec.marshalNGuildAdminConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfig(ctx, field.Selections, res)
+	return ec.marshalNGuildAdminConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfig(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateGuildAdminConfig(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6298,7 +6298,7 @@ func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field gra
 	}
 	res := resTmp.(*ent.Cursor)
 	fc.Result = res
-	return ec.marshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PageInfo_startCursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6339,7 +6339,7 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 	}
 	res := resTmp.(*ent.Cursor)
 	fc.Result = res
-	return ec.marshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PageInfo_endCursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6380,7 +6380,7 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(ent.Noder)
 	fc.Result = res
-	return ec.marshalONode2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐNoder(ctx, field.Selections, res)
+	return ec.marshalONode2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐNoder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6435,7 +6435,7 @@ func (ec *executionContext) _Query_nodes(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]ent.Noder)
 	fc.Result = res
-	return ec.marshalNNode2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐNoder(ctx, field.Selections, res)
+	return ec.marshalNNode2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐNoder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_nodes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6490,7 +6490,7 @@ func (ec *executionContext) _Query_guilds(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*ent.GuildConnection)
 	fc.Result = res
-	return ec.marshalNGuildConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConnection(ctx, field.Selections, res)
+	return ec.marshalNGuildConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_guilds(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6553,7 +6553,7 @@ func (ec *executionContext) _Query_guildAdminConfigs(ctx context.Context, field 
 	}
 	res := resTmp.(*ent.GuildAdminConfigConnection)
 	fc.Result = res
-	return ec.marshalNGuildAdminConfigConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigConnection(ctx, field.Selections, res)
+	return ec.marshalNGuildAdminConfigConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_guildAdminConfigs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6616,7 +6616,7 @@ func (ec *executionContext) _Query_guildConfigs(ctx context.Context, field graph
 	}
 	res := resTmp.(*ent.GuildConfigConnection)
 	fc.Result = res
-	return ec.marshalNGuildConfigConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigConnection(ctx, field.Selections, res)
+	return ec.marshalNGuildConfigConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_guildConfigs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6679,7 +6679,7 @@ func (ec *executionContext) _Query_guildEvents(ctx context.Context, field graphq
 	}
 	res := resTmp.(*ent.GuildEventConnection)
 	fc.Result = res
-	return ec.marshalNGuildEventConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventConnection(ctx, field.Selections, res)
+	return ec.marshalNGuildEventConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_guildEvents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6742,7 +6742,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*ent.UserConnection)
 	fc.Result = res
-	return ec.marshalNUserConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserConnection(ctx, field.Selections, res)
+	return ec.marshalNUserConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6802,7 +6802,7 @@ func (ec *executionContext) _Query_self(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*ent.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_self(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7031,7 +7031,7 @@ func (ec *executionContext) _Subscription_guildEventAdded(ctx context.Context, f
 				w.Write([]byte{'{'})
 				graphql.MarshalString(field.Alias).MarshalGQL(w)
 				w.Write([]byte{':'})
-				ec.marshalNGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEvent(ctx, field.Selections, res).MarshalGQL(w)
+				ec.marshalNGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEvent(ctx, field.Selections, res).MarshalGQL(w)
 				w.Write([]byte{'}'})
 			})
 		case <-ctx.Done():
@@ -7952,7 +7952,7 @@ func (ec *executionContext) _User_userGuilds(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*ent.GuildConnection)
 	fc.Result = res
-	return ec.marshalNGuildConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConnection(ctx, field.Selections, res)
+	return ec.marshalNGuildConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_userGuilds(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8012,7 +8012,7 @@ func (ec *executionContext) _User_bannedUsers(ctx context.Context, field graphql
 	}
 	res := resTmp.([]*ent.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_bannedUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8101,7 +8101,7 @@ func (ec *executionContext) _User_bannedBy(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*ent.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_bannedBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8190,7 +8190,7 @@ func (ec *executionContext) _UserConnection_edges(ctx context.Context, field gra
 	}
 	res := resTmp.([]*ent.UserEdge)
 	fc.Result = res
-	return ec.marshalOUserEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserEdge(ctx, field.Selections, res)
+	return ec.marshalOUserEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8240,7 +8240,7 @@ func (ec *executionContext) _UserConnection_pageInfo(ctx context.Context, field 
 	}
 	res := resTmp.(ent.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8335,7 +8335,7 @@ func (ec *executionContext) _UserEdge_node(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*ent.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8427,7 +8427,7 @@ func (ec *executionContext) _UserEdge_cursor(ctx context.Context, field graphql.
 	}
 	res := resTmp.(ent.Cursor)
 	fc.Result = res
-	return ec.marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -10234,7 +10234,7 @@ func (ec *executionContext) unmarshalInputGuildAdminConfigWhereInput(ctx context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			it.Not, err = ec.unmarshalOGuildAdminConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigWhereInput(ctx, v)
+			it.Not, err = ec.unmarshalOGuildAdminConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10242,7 +10242,7 @@ func (ec *executionContext) unmarshalInputGuildAdminConfigWhereInput(ctx context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			it.And, err = ec.unmarshalOGuildAdminConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigWhereInputᚄ(ctx, v)
+			it.And, err = ec.unmarshalOGuildAdminConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10250,7 +10250,7 @@ func (ec *executionContext) unmarshalInputGuildAdminConfigWhereInput(ctx context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			it.Or, err = ec.unmarshalOGuildAdminConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigWhereInputᚄ(ctx, v)
+			it.Or, err = ec.unmarshalOGuildAdminConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10770,7 +10770,7 @@ func (ec *executionContext) unmarshalInputGuildAdminConfigWhereInput(ctx context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasGuildWith"))
-			it.HasGuildWith, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInputᚄ(ctx, v)
+			it.HasGuildWith, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10798,7 +10798,7 @@ func (ec *executionContext) unmarshalInputGuildConfigWhereInput(ctx context.Cont
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			it.Not, err = ec.unmarshalOGuildConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigWhereInput(ctx, v)
+			it.Not, err = ec.unmarshalOGuildConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10806,7 +10806,7 @@ func (ec *executionContext) unmarshalInputGuildConfigWhereInput(ctx context.Cont
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			it.And, err = ec.unmarshalOGuildConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigWhereInputᚄ(ctx, v)
+			it.And, err = ec.unmarshalOGuildConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10814,7 +10814,7 @@ func (ec *executionContext) unmarshalInputGuildConfigWhereInput(ctx context.Cont
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			it.Or, err = ec.unmarshalOGuildConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigWhereInputᚄ(ctx, v)
+			it.Or, err = ec.unmarshalOGuildConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11374,7 +11374,7 @@ func (ec *executionContext) unmarshalInputGuildConfigWhereInput(ctx context.Cont
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasGuildWith"))
-			it.HasGuildWith, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInputᚄ(ctx, v)
+			it.HasGuildWith, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11406,7 +11406,7 @@ func (ec *executionContext) unmarshalInputGuildEventOrder(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			it.Direction, err = ec.unmarshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐOrderDirection(ctx, v)
+			it.Direction, err = ec.unmarshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐOrderDirection(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11414,7 +11414,7 @@ func (ec *executionContext) unmarshalInputGuildEventOrder(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			it.Field, err = ec.unmarshalNGuildEventOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventOrderField(ctx, v)
+			it.Field, err = ec.unmarshalNGuildEventOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventOrderField(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11442,7 +11442,7 @@ func (ec *executionContext) unmarshalInputGuildEventWhereInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			it.Not, err = ec.unmarshalOGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx, v)
+			it.Not, err = ec.unmarshalOGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11450,7 +11450,7 @@ func (ec *executionContext) unmarshalInputGuildEventWhereInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			it.And, err = ec.unmarshalOGuildEventWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInputᚄ(ctx, v)
+			it.And, err = ec.unmarshalOGuildEventWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11458,7 +11458,7 @@ func (ec *executionContext) unmarshalInputGuildEventWhereInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			it.Or, err = ec.unmarshalOGuildEventWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInputᚄ(ctx, v)
+			it.Or, err = ec.unmarshalOGuildEventWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11658,7 +11658,7 @@ func (ec *executionContext) unmarshalInputGuildEventWhereInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			it.Type, err = ec.unmarshalOGuildEventType2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx, v)
+			it.Type, err = ec.unmarshalOGuildEventType2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11666,7 +11666,7 @@ func (ec *executionContext) unmarshalInputGuildEventWhereInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeNEQ"))
-			it.TypeNEQ, err = ec.unmarshalOGuildEventType2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx, v)
+			it.TypeNEQ, err = ec.unmarshalOGuildEventType2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11674,7 +11674,7 @@ func (ec *executionContext) unmarshalInputGuildEventWhereInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeIn"))
-			it.TypeIn, err = ec.unmarshalOGuildEventType2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐTypeᚄ(ctx, v)
+			it.TypeIn, err = ec.unmarshalOGuildEventType2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11682,7 +11682,7 @@ func (ec *executionContext) unmarshalInputGuildEventWhereInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeNotIn"))
-			it.TypeNotIn, err = ec.unmarshalOGuildEventType2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐTypeᚄ(ctx, v)
+			it.TypeNotIn, err = ec.unmarshalOGuildEventType2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11802,7 +11802,7 @@ func (ec *executionContext) unmarshalInputGuildEventWhereInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasGuildWith"))
-			it.HasGuildWith, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInputᚄ(ctx, v)
+			it.HasGuildWith, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11834,7 +11834,7 @@ func (ec *executionContext) unmarshalInputGuildOrder(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			it.Direction, err = ec.unmarshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐOrderDirection(ctx, v)
+			it.Direction, err = ec.unmarshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐOrderDirection(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11842,7 +11842,7 @@ func (ec *executionContext) unmarshalInputGuildOrder(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			it.Field, err = ec.unmarshalNGuildOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildOrderField(ctx, v)
+			it.Field, err = ec.unmarshalNGuildOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildOrderField(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11870,7 +11870,7 @@ func (ec *executionContext) unmarshalInputGuildWhereInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			it.Not, err = ec.unmarshalOGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInput(ctx, v)
+			it.Not, err = ec.unmarshalOGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11878,7 +11878,7 @@ func (ec *executionContext) unmarshalInputGuildWhereInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			it.And, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInputᚄ(ctx, v)
+			it.And, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11886,7 +11886,7 @@ func (ec *executionContext) unmarshalInputGuildWhereInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			it.Or, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInputᚄ(ctx, v)
+			it.Or, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13038,7 +13038,7 @@ func (ec *executionContext) unmarshalInputGuildWhereInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasGuildConfigWith"))
-			it.HasGuildConfigWith, err = ec.unmarshalOGuildConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigWhereInputᚄ(ctx, v)
+			it.HasGuildConfigWith, err = ec.unmarshalOGuildConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13054,7 +13054,7 @@ func (ec *executionContext) unmarshalInputGuildWhereInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasGuildAdminConfigWith"))
-			it.HasGuildAdminConfigWith, err = ec.unmarshalOGuildAdminConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigWhereInputᚄ(ctx, v)
+			it.HasGuildAdminConfigWith, err = ec.unmarshalOGuildAdminConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13070,7 +13070,7 @@ func (ec *executionContext) unmarshalInputGuildWhereInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasGuildEventsWith"))
-			it.HasGuildEventsWith, err = ec.unmarshalOGuildEventWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInputᚄ(ctx, v)
+			it.HasGuildEventsWith, err = ec.unmarshalOGuildEventWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13086,7 +13086,7 @@ func (ec *executionContext) unmarshalInputGuildWhereInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAdminsWith"))
-			it.HasAdminsWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInputᚄ(ctx, v)
+			it.HasAdminsWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13302,7 +13302,7 @@ func (ec *executionContext) unmarshalInputUserOrder(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			it.Direction, err = ec.unmarshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐOrderDirection(ctx, v)
+			it.Direction, err = ec.unmarshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐOrderDirection(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13310,7 +13310,7 @@ func (ec *executionContext) unmarshalInputUserOrder(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			it.Field, err = ec.unmarshalNUserOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserOrderField(ctx, v)
+			it.Field, err = ec.unmarshalNUserOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserOrderField(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13338,7 +13338,7 @@ func (ec *executionContext) unmarshalInputUserWhereInput(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			it.Not, err = ec.unmarshalOUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInput(ctx, v)
+			it.Not, err = ec.unmarshalOUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13346,7 +13346,7 @@ func (ec *executionContext) unmarshalInputUserWhereInput(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			it.And, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInputᚄ(ctx, v)
+			it.And, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -13354,7 +13354,7 @@ func (ec *executionContext) unmarshalInputUserWhereInput(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			it.Or, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInputᚄ(ctx, v)
+			it.Or, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -14874,7 +14874,7 @@ func (ec *executionContext) unmarshalInputUserWhereInput(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasUserGuildsWith"))
-			it.HasUserGuildsWith, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInputᚄ(ctx, v)
+			it.HasUserGuildsWith, err = ec.unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -14890,7 +14890,7 @@ func (ec *executionContext) unmarshalInputUserWhereInput(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasBannedUsersWith"))
-			it.HasBannedUsersWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInputᚄ(ctx, v)
+			it.HasBannedUsersWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -14906,7 +14906,7 @@ func (ec *executionContext) unmarshalInputUserWhereInput(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasBannedByWith"))
-			it.HasBannedByWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInputᚄ(ctx, v)
+			it.HasBannedByWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -16591,17 +16591,17 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx context.Context, v interface{}) (ent.Cursor, error) {
+func (ec *executionContext) unmarshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx context.Context, v interface{}) (ent.Cursor, error) {
 	var res ent.Cursor
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v ent.Cursor) graphql.Marshaler {
+func (ec *executionContext) marshalNCursor2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v ent.Cursor) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuild(ctx context.Context, sel ast.SelectionSet, v *ent.Guild) graphql.Marshaler {
+func (ec *executionContext) marshalNGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuild(ctx context.Context, sel ast.SelectionSet, v *ent.Guild) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16611,11 +16611,11 @@ func (ec *executionContext) marshalNGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrog
 	return ec._Guild(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGuildAdminConfig2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfig(ctx context.Context, sel ast.SelectionSet, v ent.GuildAdminConfig) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildAdminConfig2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfig(ctx context.Context, sel ast.SelectionSet, v ent.GuildAdminConfig) graphql.Marshaler {
 	return ec._GuildAdminConfig(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGuildAdminConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfig(ctx context.Context, sel ast.SelectionSet, v *ent.GuildAdminConfig) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildAdminConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfig(ctx context.Context, sel ast.SelectionSet, v *ent.GuildAdminConfig) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16625,11 +16625,11 @@ func (ec *executionContext) marshalNGuildAdminConfig2ᚖgithubᚗcomᚋlrstanley
 	return ec._GuildAdminConfig(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGuildAdminConfigConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigConnection(ctx context.Context, sel ast.SelectionSet, v ent.GuildAdminConfigConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildAdminConfigConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigConnection(ctx context.Context, sel ast.SelectionSet, v ent.GuildAdminConfigConnection) graphql.Marshaler {
 	return ec._GuildAdminConfigConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGuildAdminConfigConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigConnection(ctx context.Context, sel ast.SelectionSet, v *ent.GuildAdminConfigConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildAdminConfigConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigConnection(ctx context.Context, sel ast.SelectionSet, v *ent.GuildAdminConfigConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16639,16 +16639,16 @@ func (ec *executionContext) marshalNGuildAdminConfigConnection2ᚖgithubᚗcom�
 	return ec._GuildAdminConfigConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNGuildAdminConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigWhereInput(ctx context.Context, v interface{}) (*ent.GuildAdminConfigWhereInput, error) {
+func (ec *executionContext) unmarshalNGuildAdminConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigWhereInput(ctx context.Context, v interface{}) (*ent.GuildAdminConfigWhereInput, error) {
 	res, err := ec.unmarshalInputGuildAdminConfigWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNGuildConfig2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfig(ctx context.Context, sel ast.SelectionSet, v ent.GuildConfig) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildConfig2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfig(ctx context.Context, sel ast.SelectionSet, v ent.GuildConfig) graphql.Marshaler {
 	return ec._GuildConfig(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfig(ctx context.Context, sel ast.SelectionSet, v *ent.GuildConfig) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfig(ctx context.Context, sel ast.SelectionSet, v *ent.GuildConfig) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16658,11 +16658,11 @@ func (ec *executionContext) marshalNGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋsp
 	return ec._GuildConfig(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGuildConfigConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigConnection(ctx context.Context, sel ast.SelectionSet, v ent.GuildConfigConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildConfigConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigConnection(ctx context.Context, sel ast.SelectionSet, v ent.GuildConfigConnection) graphql.Marshaler {
 	return ec._GuildConfigConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGuildConfigConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigConnection(ctx context.Context, sel ast.SelectionSet, v *ent.GuildConfigConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildConfigConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigConnection(ctx context.Context, sel ast.SelectionSet, v *ent.GuildConfigConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16672,16 +16672,16 @@ func (ec *executionContext) marshalNGuildConfigConnection2ᚖgithubᚗcomᚋlrst
 	return ec._GuildConfigConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNGuildConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigWhereInput(ctx context.Context, v interface{}) (*ent.GuildConfigWhereInput, error) {
+func (ec *executionContext) unmarshalNGuildConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigWhereInput(ctx context.Context, v interface{}) (*ent.GuildConfigWhereInput, error) {
 	res, err := ec.unmarshalInputGuildConfigWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNGuildConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConnection(ctx context.Context, sel ast.SelectionSet, v ent.GuildConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConnection(ctx context.Context, sel ast.SelectionSet, v ent.GuildConnection) graphql.Marshaler {
 	return ec._GuildConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGuildConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConnection(ctx context.Context, sel ast.SelectionSet, v *ent.GuildConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConnection(ctx context.Context, sel ast.SelectionSet, v *ent.GuildConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16691,11 +16691,11 @@ func (ec *executionContext) marshalNGuildConnection2ᚖgithubᚗcomᚋlrstanley�
 	return ec._GuildConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGuildEvent2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEvent(ctx context.Context, sel ast.SelectionSet, v ent.GuildEvent) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildEvent2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEvent(ctx context.Context, sel ast.SelectionSet, v ent.GuildEvent) graphql.Marshaler {
 	return ec._GuildEvent(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEvent(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEvent) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEvent(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEvent) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16705,11 +16705,11 @@ func (ec *executionContext) marshalNGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspe
 	return ec._GuildEvent(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGuildEventConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventConnection(ctx context.Context, sel ast.SelectionSet, v ent.GuildEventConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildEventConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventConnection(ctx context.Context, sel ast.SelectionSet, v ent.GuildEventConnection) graphql.Marshaler {
 	return ec._GuildEventConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGuildEventConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventConnection(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEventConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildEventConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventConnection(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEventConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16719,13 +16719,13 @@ func (ec *executionContext) marshalNGuildEventConnection2ᚖgithubᚗcomᚋlrsta
 	return ec._GuildEventConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNGuildEventOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventOrderField(ctx context.Context, v interface{}) (*ent.GuildEventOrderField, error) {
+func (ec *executionContext) unmarshalNGuildEventOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventOrderField(ctx context.Context, v interface{}) (*ent.GuildEventOrderField, error) {
 	var res = new(ent.GuildEventOrderField)
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNGuildEventOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventOrderField(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEventOrderField) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildEventOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventOrderField(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEventOrderField) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16735,33 +16735,33 @@ func (ec *executionContext) marshalNGuildEventOrderField2ᚖgithubᚗcomᚋlrsta
 	return v
 }
 
-func (ec *executionContext) unmarshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx context.Context, v interface{}) (guildevent.Type, error) {
+func (ec *executionContext) unmarshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐType(ctx context.Context, v interface{}) (guildevent.Type, error) {
 	var res guildevent.Type
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx context.Context, sel ast.SelectionSet, v guildevent.Type) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐType(ctx context.Context, sel ast.SelectionSet, v guildevent.Type) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNGuildEventWhereInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx context.Context, v interface{}) (ent.GuildEventWhereInput, error) {
+func (ec *executionContext) unmarshalNGuildEventWhereInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInput(ctx context.Context, v interface{}) (ent.GuildEventWhereInput, error) {
 	res, err := ec.unmarshalInputGuildEventWhereInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx context.Context, v interface{}) (*ent.GuildEventWhereInput, error) {
+func (ec *executionContext) unmarshalNGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInput(ctx context.Context, v interface{}) (*ent.GuildEventWhereInput, error) {
 	res, err := ec.unmarshalInputGuildEventWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNGuildOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildOrderField(ctx context.Context, v interface{}) (*ent.GuildOrderField, error) {
+func (ec *executionContext) unmarshalNGuildOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildOrderField(ctx context.Context, v interface{}) (*ent.GuildOrderField, error) {
 	var res = new(ent.GuildOrderField)
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNGuildOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildOrderField(ctx context.Context, sel ast.SelectionSet, v *ent.GuildOrderField) graphql.Marshaler {
+func (ec *executionContext) marshalNGuildOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildOrderField(ctx context.Context, sel ast.SelectionSet, v *ent.GuildOrderField) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16771,7 +16771,7 @@ func (ec *executionContext) marshalNGuildOrderField2ᚖgithubᚗcomᚋlrstanley�
 	return v
 }
 
-func (ec *executionContext) unmarshalNGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInput(ctx context.Context, v interface{}) (*ent.GuildWhereInput, error) {
+func (ec *executionContext) unmarshalNGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInput(ctx context.Context, v interface{}) (*ent.GuildWhereInput, error) {
 	res, err := ec.unmarshalInputGuildWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -16838,7 +16838,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v []ent.Noder) graphql.Marshaler {
+func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v []ent.Noder) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -16862,7 +16862,7 @@ func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋlrstanleyᚋspectrogr
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalONode2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐNoder(ctx, sel, v[i])
+			ret[i] = ec.marshalONode2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐNoder(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -16876,17 +16876,17 @@ func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋlrstanleyᚋspectrogr
 	return ret
 }
 
-func (ec *executionContext) unmarshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐOrderDirection(ctx context.Context, v interface{}) (ent.OrderDirection, error) {
+func (ec *executionContext) unmarshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐOrderDirection(ctx context.Context, v interface{}) (ent.OrderDirection, error) {
 	var res ent.OrderDirection
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐOrderDirection(ctx context.Context, sel ast.SelectionSet, v ent.OrderDirection) graphql.Marshaler {
+func (ec *executionContext) marshalNOrderDirection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐOrderDirection(ctx context.Context, sel ast.SelectionSet, v ent.OrderDirection) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v ent.PageInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNPageInfo2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v ent.PageInfo) graphql.Marshaler {
 	return ec._PageInfo(ctx, sel, &v)
 }
 
@@ -16935,17 +16935,17 @@ func (ec *executionContext) marshalNUint642uint64(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateGuildAdminConfigInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUpdateGuildAdminConfigInput(ctx context.Context, v interface{}) (ent.UpdateGuildAdminConfigInput, error) {
+func (ec *executionContext) unmarshalNUpdateGuildAdminConfigInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUpdateGuildAdminConfigInput(ctx context.Context, v interface{}) (ent.UpdateGuildAdminConfigInput, error) {
 	res, err := ec.unmarshalInputUpdateGuildAdminConfigInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateGuildConfigInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUpdateGuildConfigInput(ctx context.Context, v interface{}) (ent.UpdateGuildConfigInput, error) {
+func (ec *executionContext) unmarshalNUpdateGuildConfigInput2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUpdateGuildConfigInput(ctx context.Context, v interface{}) (ent.UpdateGuildConfigInput, error) {
 	res, err := ec.unmarshalInputUpdateGuildConfigInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUser(ctx context.Context, sel ast.SelectionSet, v *ent.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUser(ctx context.Context, sel ast.SelectionSet, v *ent.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16955,11 +16955,11 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrogr
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserConnection(ctx context.Context, sel ast.SelectionSet, v ent.UserConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNUserConnection2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserConnection(ctx context.Context, sel ast.SelectionSet, v ent.UserConnection) graphql.Marshaler {
 	return ec._UserConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserConnection(ctx context.Context, sel ast.SelectionSet, v *ent.UserConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNUserConnection2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserConnection(ctx context.Context, sel ast.SelectionSet, v *ent.UserConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16969,13 +16969,13 @@ func (ec *executionContext) marshalNUserConnection2ᚖgithubᚗcomᚋlrstanley�
 	return ec._UserConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserOrderField(ctx context.Context, v interface{}) (*ent.UserOrderField, error) {
+func (ec *executionContext) unmarshalNUserOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserOrderField(ctx context.Context, v interface{}) (*ent.UserOrderField, error) {
 	var res = new(ent.UserOrderField)
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUserOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserOrderField(ctx context.Context, sel ast.SelectionSet, v *ent.UserOrderField) graphql.Marshaler {
+func (ec *executionContext) marshalNUserOrderField2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserOrderField(ctx context.Context, sel ast.SelectionSet, v *ent.UserOrderField) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -16985,7 +16985,7 @@ func (ec *executionContext) marshalNUserOrderField2ᚖgithubᚗcomᚋlrstanley�
 	return v
 }
 
-func (ec *executionContext) unmarshalNUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInput(ctx context.Context, v interface{}) (*ent.UserWhereInput, error) {
+func (ec *executionContext) unmarshalNUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInput(ctx context.Context, v interface{}) (*ent.UserWhereInput, error) {
 	res, err := ec.unmarshalInputUserWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -17269,7 +17269,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx context.Context, v interface{}) (*ent.Cursor, error) {
+func (ec *executionContext) unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx context.Context, v interface{}) (*ent.Cursor, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17278,28 +17278,28 @@ func (ec *executionContext) unmarshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspect
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v *ent.Cursor) graphql.Marshaler {
+func (ec *executionContext) marshalOCursor2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v *ent.Cursor) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) marshalOGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuild(ctx context.Context, sel ast.SelectionSet, v *ent.Guild) graphql.Marshaler {
+func (ec *executionContext) marshalOGuild2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuild(ctx context.Context, sel ast.SelectionSet, v *ent.Guild) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Guild(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOGuildAdminConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfig(ctx context.Context, sel ast.SelectionSet, v *ent.GuildAdminConfig) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildAdminConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfig(ctx context.Context, sel ast.SelectionSet, v *ent.GuildAdminConfig) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._GuildAdminConfig(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOGuildAdminConfigEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.GuildAdminConfigEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildAdminConfigEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.GuildAdminConfigEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -17326,7 +17326,7 @@ func (ec *executionContext) marshalOGuildAdminConfigEdge2ᚕᚖgithubᚗcomᚋlr
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOGuildAdminConfigEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOGuildAdminConfigEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -17340,14 +17340,14 @@ func (ec *executionContext) marshalOGuildAdminConfigEdge2ᚕᚖgithubᚗcomᚋlr
 	return ret
 }
 
-func (ec *executionContext) marshalOGuildAdminConfigEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigEdge(ctx context.Context, sel ast.SelectionSet, v *ent.GuildAdminConfigEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildAdminConfigEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigEdge(ctx context.Context, sel ast.SelectionSet, v *ent.GuildAdminConfigEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._GuildAdminConfigEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOGuildAdminConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.GuildAdminConfigWhereInput, error) {
+func (ec *executionContext) unmarshalOGuildAdminConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.GuildAdminConfigWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17359,7 +17359,7 @@ func (ec *executionContext) unmarshalOGuildAdminConfigWhereInput2ᚕᚖgithubᚗ
 	res := make([]*ent.GuildAdminConfigWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNGuildAdminConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNGuildAdminConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -17367,7 +17367,7 @@ func (ec *executionContext) unmarshalOGuildAdminConfigWhereInput2ᚕᚖgithubᚗ
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOGuildAdminConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildAdminConfigWhereInput(ctx context.Context, v interface{}) (*ent.GuildAdminConfigWhereInput, error) {
+func (ec *executionContext) unmarshalOGuildAdminConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildAdminConfigWhereInput(ctx context.Context, v interface{}) (*ent.GuildAdminConfigWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17375,14 +17375,14 @@ func (ec *executionContext) unmarshalOGuildAdminConfigWhereInput2ᚖgithubᚗcom
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfig(ctx context.Context, sel ast.SelectionSet, v *ent.GuildConfig) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildConfig2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfig(ctx context.Context, sel ast.SelectionSet, v *ent.GuildConfig) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._GuildConfig(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOGuildConfigEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.GuildConfigEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildConfigEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.GuildConfigEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -17409,7 +17409,7 @@ func (ec *executionContext) marshalOGuildConfigEdge2ᚕᚖgithubᚗcomᚋlrstanl
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOGuildConfigEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOGuildConfigEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -17423,14 +17423,14 @@ func (ec *executionContext) marshalOGuildConfigEdge2ᚕᚖgithubᚗcomᚋlrstanl
 	return ret
 }
 
-func (ec *executionContext) marshalOGuildConfigEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigEdge(ctx context.Context, sel ast.SelectionSet, v *ent.GuildConfigEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildConfigEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigEdge(ctx context.Context, sel ast.SelectionSet, v *ent.GuildConfigEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._GuildConfigEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOGuildConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.GuildConfigWhereInput, error) {
+func (ec *executionContext) unmarshalOGuildConfigWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.GuildConfigWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17442,7 +17442,7 @@ func (ec *executionContext) unmarshalOGuildConfigWhereInput2ᚕᚖgithubᚗcom�
 	res := make([]*ent.GuildConfigWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNGuildConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNGuildConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -17450,7 +17450,7 @@ func (ec *executionContext) unmarshalOGuildConfigWhereInput2ᚕᚖgithubᚗcom�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOGuildConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildConfigWhereInput(ctx context.Context, v interface{}) (*ent.GuildConfigWhereInput, error) {
+func (ec *executionContext) unmarshalOGuildConfigWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildConfigWhereInput(ctx context.Context, v interface{}) (*ent.GuildConfigWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17458,7 +17458,7 @@ func (ec *executionContext) unmarshalOGuildConfigWhereInput2ᚖgithubᚗcomᚋlr
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOGuildEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.GuildEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.GuildEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -17485,7 +17485,7 @@ func (ec *executionContext) marshalOGuildEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋs
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOGuildEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOGuildEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -17499,14 +17499,14 @@ func (ec *executionContext) marshalOGuildEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋs
 	return ret
 }
 
-func (ec *executionContext) marshalOGuildEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEdge(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEdge(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._GuildEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOGuildEvent2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.GuildEvent) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildEvent2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.GuildEvent) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -17533,7 +17533,7 @@ func (ec *executionContext) marshalOGuildEvent2ᚕᚖgithubᚗcomᚋlrstanleyᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEvent(ctx, sel, v[i])
+			ret[i] = ec.marshalNGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEvent(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -17553,14 +17553,14 @@ func (ec *executionContext) marshalOGuildEvent2ᚕᚖgithubᚗcomᚋlrstanleyᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalOGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEvent(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEvent) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildEvent2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEvent(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEvent) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._GuildEvent(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOGuildEventEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.GuildEventEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildEventEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.GuildEventEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -17587,7 +17587,7 @@ func (ec *executionContext) marshalOGuildEventEdge2ᚕᚖgithubᚗcomᚋlrstanle
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOGuildEventEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOGuildEventEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -17601,14 +17601,14 @@ func (ec *executionContext) marshalOGuildEventEdge2ᚕᚖgithubᚗcomᚋlrstanle
 	return ret
 }
 
-func (ec *executionContext) marshalOGuildEventEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventEdge(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEventEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildEventEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventEdge(ctx context.Context, sel ast.SelectionSet, v *ent.GuildEventEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._GuildEventEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOGuildEventOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventOrder(ctx context.Context, v interface{}) (*ent.GuildEventOrder, error) {
+func (ec *executionContext) unmarshalOGuildEventOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventOrder(ctx context.Context, v interface{}) (*ent.GuildEventOrder, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17616,7 +17616,7 @@ func (ec *executionContext) unmarshalOGuildEventOrder2ᚖgithubᚗcomᚋlrstanle
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOGuildEventType2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐTypeᚄ(ctx context.Context, v interface{}) ([]guildevent.Type, error) {
+func (ec *executionContext) unmarshalOGuildEventType2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐTypeᚄ(ctx context.Context, v interface{}) ([]guildevent.Type, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17628,7 +17628,7 @@ func (ec *executionContext) unmarshalOGuildEventType2ᚕgithubᚗcomᚋlrstanley
 	res := make([]guildevent.Type, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐType(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -17636,7 +17636,7 @@ func (ec *executionContext) unmarshalOGuildEventType2ᚕgithubᚗcomᚋlrstanley
 	return res, nil
 }
 
-func (ec *executionContext) marshalOGuildEventType2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []guildevent.Type) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildEventType2ᚕgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []guildevent.Type) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -17663,7 +17663,7 @@ func (ec *executionContext) marshalOGuildEventType2ᚕgithubᚗcomᚋlrstanley�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx, sel, v[i])
+			ret[i] = ec.marshalNGuildEventType2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐType(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -17683,7 +17683,7 @@ func (ec *executionContext) marshalOGuildEventType2ᚕgithubᚗcomᚋlrstanley�
 	return ret
 }
 
-func (ec *executionContext) unmarshalOGuildEventType2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx context.Context, v interface{}) (*guildevent.Type, error) {
+func (ec *executionContext) unmarshalOGuildEventType2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐType(ctx context.Context, v interface{}) (*guildevent.Type, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17692,14 +17692,14 @@ func (ec *executionContext) unmarshalOGuildEventType2ᚖgithubᚗcomᚋlrstanley
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOGuildEventType2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚋguildeventᚐType(ctx context.Context, sel ast.SelectionSet, v *guildevent.Type) graphql.Marshaler {
+func (ec *executionContext) marshalOGuildEventType2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚋguildeventᚐType(ctx context.Context, sel ast.SelectionSet, v *guildevent.Type) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) unmarshalOGuildEventWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.GuildEventWhereInput, error) {
+func (ec *executionContext) unmarshalOGuildEventWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.GuildEventWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17711,7 +17711,7 @@ func (ec *executionContext) unmarshalOGuildEventWhereInput2ᚕᚖgithubᚗcomᚋ
 	res := make([]*ent.GuildEventWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -17719,7 +17719,7 @@ func (ec *executionContext) unmarshalOGuildEventWhereInput2ᚕᚖgithubᚗcomᚋ
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildEventWhereInput(ctx context.Context, v interface{}) (*ent.GuildEventWhereInput, error) {
+func (ec *executionContext) unmarshalOGuildEventWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildEventWhereInput(ctx context.Context, v interface{}) (*ent.GuildEventWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17727,7 +17727,7 @@ func (ec *executionContext) unmarshalOGuildEventWhereInput2ᚖgithubᚗcomᚋlrs
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOGuildOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildOrder(ctx context.Context, v interface{}) (*ent.GuildOrder, error) {
+func (ec *executionContext) unmarshalOGuildOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildOrder(ctx context.Context, v interface{}) (*ent.GuildOrder, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17735,7 +17735,7 @@ func (ec *executionContext) unmarshalOGuildOrder2ᚖgithubᚗcomᚋlrstanleyᚋs
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.GuildWhereInput, error) {
+func (ec *executionContext) unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.GuildWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17747,7 +17747,7 @@ func (ec *executionContext) unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrsta
 	res := make([]*ent.GuildWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -17755,7 +17755,7 @@ func (ec *executionContext) unmarshalOGuildWhereInput2ᚕᚖgithubᚗcomᚋlrsta
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐGuildWhereInput(ctx context.Context, v interface{}) (*ent.GuildWhereInput, error) {
+func (ec *executionContext) unmarshalOGuildWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐGuildWhereInput(ctx context.Context, v interface{}) (*ent.GuildWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -17897,7 +17897,7 @@ func (ec *executionContext) marshalOMap2map(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalONode2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v ent.Noder) graphql.Marshaler {
+func (ec *executionContext) marshalONode2githubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v ent.Noder) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -18086,7 +18086,7 @@ func (ec *executionContext) marshalOUint642ᚖuint64(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -18113,7 +18113,7 @@ func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectr
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -18133,14 +18133,14 @@ func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectr
 	return ret
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUser(ctx context.Context, sel ast.SelectionSet, v *ent.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUser(ctx context.Context, sel ast.SelectionSet, v *ent.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOUserEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.UserEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOUserEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.UserEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -18167,7 +18167,7 @@ func (ec *executionContext) marshalOUserEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋsp
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOUserEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOUserEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -18181,14 +18181,14 @@ func (ec *executionContext) marshalOUserEdge2ᚕᚖgithubᚗcomᚋlrstanleyᚋsp
 	return ret
 }
 
-func (ec *executionContext) marshalOUserEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v *ent.UserEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOUserEdge2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v *ent.UserEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._UserEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOUserOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserOrder(ctx context.Context, v interface{}) (*ent.UserOrder, error) {
+func (ec *executionContext) unmarshalOUserOrder2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserOrder(ctx context.Context, v interface{}) (*ent.UserOrder, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -18196,7 +18196,7 @@ func (ec *executionContext) unmarshalOUserOrder2ᚖgithubᚗcomᚋlrstanleyᚋsp
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.UserWhereInput, error) {
+func (ec *executionContext) unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.UserWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -18208,7 +18208,7 @@ func (ec *executionContext) unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstan
 	res := make([]*ent.UserWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -18216,7 +18216,7 @@ func (ec *executionContext) unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋlrstan
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋentᚐUserWhereInput(ctx context.Context, v interface{}) (*ent.UserWhereInput, error) {
+func (ec *executionContext) unmarshalOUserWhereInput2ᚖgithubᚗcomᚋlrstanleyᚋspectrographᚋinternalᚋdatabaseᚋentᚐUserWhereInput(ctx context.Context, v interface{}) (*ent.UserWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}

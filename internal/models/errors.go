@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/lrstanley/chix"
-	"github.com/lrstanley/spectrograph/internal/ent"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
 )
 
 func init() {

@@ -11,8 +11,8 @@ import (
 	"github.com/lrstanley/chix"
 	"github.com/lrstanley/clix"
 	"github.com/lrstanley/spectrograph/internal/database"
-	"github.com/lrstanley/spectrograph/internal/ent"
-	_ "github.com/lrstanley/spectrograph/internal/ent/runtime"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
+	_ "github.com/lrstanley/spectrograph/internal/database/ent/runtime"
 	"github.com/lrstanley/spectrograph/internal/models"
 	"github.com/lrstanley/spectrograph/internal/worker"
 )

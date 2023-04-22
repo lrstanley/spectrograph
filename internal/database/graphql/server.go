@@ -16,8 +16,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/lrstanley/clix"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
 	"github.com/lrstanley/spectrograph/internal/database/graphql/resolver"
-	"github.com/lrstanley/spectrograph/internal/ent"
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 

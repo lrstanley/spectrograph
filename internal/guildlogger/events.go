@@ -13,9 +13,9 @@ import (
 	"github.com/apex/log"
 	"github.com/lrstanley/spectrograph/internal/cache"
 	"github.com/lrstanley/spectrograph/internal/database"
-	"github.com/lrstanley/spectrograph/internal/ent"
-	"github.com/lrstanley/spectrograph/internal/ent/guild"
-	"github.com/lrstanley/spectrograph/internal/ent/guildevent"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guild"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildevent"
 )
 
 type event struct {

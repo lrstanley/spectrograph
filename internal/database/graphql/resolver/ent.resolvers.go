@@ -7,8 +7,8 @@ package resolver
 import (
 	"context"
 
+	"github.com/lrstanley/spectrograph/internal/database/ent"
 	"github.com/lrstanley/spectrograph/internal/database/graphql/gqlhandler"
-	"github.com/lrstanley/spectrograph/internal/ent"
 )
 
 // Node is the resolver for the node field.

@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/apex/log"
-	"github.com/lrstanley/spectrograph/internal/ent"
-	"github.com/lrstanley/spectrograph/internal/ent/guildevent"
-	"github.com/lrstanley/spectrograph/internal/ent/predicate"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildevent"
+	"github.com/lrstanley/spectrograph/internal/database/ent/predicate"
 )
 
 type guildEventStream struct {

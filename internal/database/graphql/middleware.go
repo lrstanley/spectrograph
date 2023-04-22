@@ -11,8 +11,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/apex/log"
-	"github.com/lrstanley/spectrograph/internal/ent"
-	"github.com/lrstanley/spectrograph/internal/ent/privacy"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
+	"github.com/lrstanley/spectrograph/internal/database/ent/privacy"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 

@@ -7,11 +7,11 @@ package worker
 import (
 	"github.com/andersfylling/disgord"
 	"github.com/lrstanley/spectrograph/internal/database"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guild"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildadminconfig"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildconfig"
 	"github.com/lrstanley/spectrograph/internal/discordapi"
-	"github.com/lrstanley/spectrograph/internal/ent"
-	"github.com/lrstanley/spectrograph/internal/ent/guild"
-	"github.com/lrstanley/spectrograph/internal/ent/guildadminconfig"
-	"github.com/lrstanley/spectrograph/internal/ent/guildconfig"
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 

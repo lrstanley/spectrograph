@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/apex/log"
-	"github.com/lrstanley/spectrograph/internal/ent"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
 )
 
 // Commit will commit the transaction, unless the provided error is non-nil, in

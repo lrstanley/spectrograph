@@ -339,7 +339,7 @@ enum GuildEventOrderField {
   UPDATED_AT
 }
 """GuildEventType is enum for the field type"""
-enum GuildEventType @goModel(model: "github.com/lrstanley/spectrograph/internal/ent/guildevent.Type") {
+enum GuildEventType @goModel(model: "github.com/lrstanley/spectrograph/internal/database/ent/guildevent.Type") {
   INFO
   WARNING
   ERROR
@@ -597,7 +597,7 @@ scalar Map
 An object with an ID.
 Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
 """
-interface Node @goModel(model: "github.com/lrstanley/spectrograph/internal/ent.Noder") {
+interface Node @goModel(model: "github.com/lrstanley/spectrograph/internal/database/ent.Noder") {
   """The id of the object."""
   id: ID!
 }

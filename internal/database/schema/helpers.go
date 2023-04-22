@@ -9,13 +9,13 @@ import (
 	"strings"
 
 	"github.com/lrstanley/chix"
-	"github.com/lrstanley/spectrograph/internal/ent"
-	"github.com/lrstanley/spectrograph/internal/ent/guild"
-	"github.com/lrstanley/spectrograph/internal/ent/guildadminconfig"
-	"github.com/lrstanley/spectrograph/internal/ent/guildconfig"
-	"github.com/lrstanley/spectrograph/internal/ent/guildevent"
-	"github.com/lrstanley/spectrograph/internal/ent/privacy"
-	"github.com/lrstanley/spectrograph/internal/ent/user"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guild"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildadminconfig"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildconfig"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildevent"
+	"github.com/lrstanley/spectrograph/internal/database/ent/privacy"
+	"github.com/lrstanley/spectrograph/internal/database/ent/user"
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 

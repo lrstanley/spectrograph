@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
-	"github.com/lrstanley/spectrograph/internal/ent/privacy"
+	"github.com/lrstanley/spectrograph/internal/database/ent/privacy"
 	"github.com/lrstanley/spectrograph/internal/models"
 )
 

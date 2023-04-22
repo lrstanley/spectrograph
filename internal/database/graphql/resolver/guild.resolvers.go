@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/lrstanley/spectrograph/internal/database"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
 	"github.com/lrstanley/spectrograph/internal/database/graphql/gqlhandler"
-	"github.com/lrstanley/spectrograph/internal/ent"
 )
 
 // UpdateGuildConfig is the resolver for the updateGuildConfig field.

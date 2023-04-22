@@ -9,7 +9,7 @@ import (
 	"errors"
 
 	"github.com/lrstanley/chix"
-	"github.com/lrstanley/spectrograph/internal/ent"
+	"github.com/lrstanley/spectrograph/internal/database/ent"
 )
 
 // BanUser is the resolver for the banUser field.
