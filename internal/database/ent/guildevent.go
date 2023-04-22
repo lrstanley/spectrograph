@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/lrstanley/spectrograph/internal/database/ent/guild"
 	"github.com/lrstanley/spectrograph/internal/database/ent/guildevent"
@@ -36,6 +37,7 @@ type GuildEvent struct {
 	// The values are being populated by the GuildEventQuery when eager-loading is set.
 	Edges              GuildEventEdges `json:"edges"`
 	guild_guild_events *int
+	selectValues       sql.SelectValues
 }
 
 // GuildEventEdges holds the relations/edges for other nodes in the graph.
@@ -78,7 +80,7 @@ func (*GuildEvent) scanValues(columns []string) ([]any, error) {
 		case guildevent.ForeignKeys[0]: // guild_guild_events
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type GuildEvent", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -137,9 +139,17 @@ func (ge *GuildEvent) assignValues(columns []string, values []any) error {
 				ge.guild_guild_events = new(int)
 				*ge.guild_guild_events = int(value.Int64)
 			}
+		default:
+			ge.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the GuildEvent.
+// This includes values selected through modifiers, order, etc.
+func (ge *GuildEvent) Value(name string) (ent.Value, error) {
+	return ge.selectValues.Get(name)
 }
 
 // QueryGuild queries the "guild" edge of the GuildEvent entity.

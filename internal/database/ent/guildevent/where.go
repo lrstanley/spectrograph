@@ -263,11 +263,7 @@ func HasGuild() predicate.GuildEvent {
 // HasGuildWith applies the HasEdge predicate on the "guild" edge with a given conditions (other predicates).
 func HasGuildWith(preds ...predicate.Guild) predicate.GuildEvent {
 	return predicate.GuildEvent(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GuildInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, GuildTable, GuildColumn),
-		)
+		step := newGuildStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -65,6 +65,7 @@ type GuildAdminConfig implements Node {
   defaultMaxClones: Int
   """Admin comment for the guild."""
   comment: String
+  """The guild these settings belong to."""
   guild: Guild!
 }
 """A connection to a list of items."""
@@ -177,6 +178,7 @@ type GuildConfig implements Node {
   regexMatch: String
   """Contact email for the guild."""
   contactEmail: String
+  """The guild these settings belong to."""
   guild: Guild!
 }
 """A connection to a list of items."""
@@ -308,6 +310,7 @@ type GuildEvent implements Node {
   message: String!
   """Additional metadata associated with the event."""
   metadata: Map
+  """The guild these events belong to."""
   guild: Guild!
 }
 """A connection to a list of items."""
@@ -821,7 +824,9 @@ type User implements Node {
     """Filtering options for Guilds returned from the connection."""
     where: GuildWhereInput
   ): GuildConnection!
+  """Users that were banned by this user."""
   bannedUsers: [User!]
+  """User that banned this user."""
   bannedBy: User
 }
 """A connection to a list of items."""

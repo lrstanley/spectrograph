@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -146,3 +148,141 @@ var (
 	// SystemChannelFlagsValidator is a validator for the "system_channel_flags" field. It is called by the builders before save.
 	SystemChannelFlagsValidator func(string) error
 )
+
+// OrderOption defines the ordering options for the Guild queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+}
+
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
+}
+
+// ByGuildID orders the results by the guild_id field.
+func ByGuildID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGuildID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByIconHash orders the results by the icon_hash field.
+func ByIconHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIconHash, opts...).ToFunc()
+}
+
+// ByIconURL orders the results by the icon_url field.
+func ByIconURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIconURL, opts...).ToFunc()
+}
+
+// ByJoinedAt orders the results by the joined_at field.
+func ByJoinedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldJoinedAt, opts...).ToFunc()
+}
+
+// ByLarge orders the results by the large field.
+func ByLarge(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLarge, opts...).ToFunc()
+}
+
+// ByMemberCount orders the results by the member_count field.
+func ByMemberCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMemberCount, opts...).ToFunc()
+}
+
+// ByOwnerID orders the results by the owner_id field.
+func ByOwnerID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOwnerID, opts...).ToFunc()
+}
+
+// ByPermissions orders the results by the permissions field.
+func ByPermissions(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPermissions, opts...).ToFunc()
+}
+
+// BySystemChannelFlags orders the results by the system_channel_flags field.
+func BySystemChannelFlags(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSystemChannelFlags, opts...).ToFunc()
+}
+
+// ByGuildConfigField orders the results by guild_config field.
+func ByGuildConfigField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGuildConfigStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByGuildAdminConfigField orders the results by guild_admin_config field.
+func ByGuildAdminConfigField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGuildAdminConfigStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByGuildEventsCount orders the results by guild_events count.
+func ByGuildEventsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGuildEventsStep(), opts...)
+	}
+}
+
+// ByGuildEvents orders the results by guild_events terms.
+func ByGuildEvents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGuildEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByAdminsCount orders the results by admins count.
+func ByAdminsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAdminsStep(), opts...)
+	}
+}
+
+// ByAdmins orders the results by admins terms.
+func ByAdmins(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAdminsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newGuildConfigStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GuildConfigInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, GuildConfigTable, GuildConfigColumn),
+	)
+}
+func newGuildAdminConfigStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GuildAdminConfigInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, GuildAdminConfigTable, GuildAdminConfigColumn),
+	)
+}
+func newGuildEventsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GuildEventsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, GuildEventsTable, GuildEventsColumn),
+	)
+}
+func newAdminsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AdminsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, AdminsTable, AdminsPrimaryKey...),
+	)
+}

@@ -50,7 +50,7 @@ func (gu *Guild) Admins(
 	alias := graphql.GetFieldContext(ctx).Field.Alias
 	totalCount, hasTotalCount := gu.Edges.totalCount[3][alias]
 	if nodes, err := gu.NamedAdmins(alias); err == nil || hasTotalCount {
-		pager, err := newUserPager(opts)
+		pager, err := newUserPager(opts, last != nil)
 		if err != nil {
 			return nil, err
 		}
@@ -95,7 +95,7 @@ func (u *User) UserGuilds(
 	alias := graphql.GetFieldContext(ctx).Field.Alias
 	totalCount, hasTotalCount := u.Edges.totalCount[0][alias]
 	if nodes, err := u.NamedUserGuilds(alias); err == nil || hasTotalCount {
-		pager, err := newGuildPager(opts)
+		pager, err := newGuildPager(opts, last != nil)
 		if err != nil {
 			return nil, err
 		}

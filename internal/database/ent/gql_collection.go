@@ -11,9 +11,13 @@ import (
 	"database/sql/driver"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/lrstanley/spectrograph/internal/database/ent/guild"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildadminconfig"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildconfig"
+	"github.com/lrstanley/spectrograph/internal/database/ent/guildevent"
 	"github.com/lrstanley/spectrograph/internal/database/ent/user"
 )
 
@@ -29,9 +33,14 @@ func (gu *GuildQuery) CollectFields(ctx context.Context, satisfies ...string) (*
 	return gu, nil
 }
 
-func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (gu *GuildQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(guild.Columns))
+		selectedFields = []string{guild.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "guildConfig":
 			var (
@@ -39,7 +48,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 				path  = append(path, alias)
 				query = (&GuildConfigClient{config: gu.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			gu.withGuildConfig = query
@@ -49,7 +58,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 				path  = append(path, alias)
 				query = (&GuildAdminConfigClient{config: gu.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			gu.withGuildAdminConfig = query
@@ -59,7 +68,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 				path  = append(path, alias)
 				query = (&GuildEventClient{config: gu.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			gu.WithNamedGuildEvents(alias, func(wq *GuildEventQuery) {
@@ -75,7 +84,7 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 			if err := validateFirstLast(args.first, args.last); err != nil {
 				return fmt.Errorf("validate first and last in path %q: %w", path, err)
 			}
-			pager, err := newUserPager(args.opts)
+			pager, err := newUserPager(args.opts, args.last != nil)
 			if err != nil {
 				return fmt.Errorf("create new pager in path %q: %w", path, err)
 			}
@@ -135,24 +144,97 @@ func (gu *GuildQuery) collectField(ctx context.Context, op *graphql.OperationCon
 			if ignoredEdges || (args.first != nil && *args.first == 0) || (args.last != nil && *args.last == 0) {
 				continue
 			}
-
-			query = pager.applyCursors(query, args.after, args.before)
-			if limit := paginateLimit(args.first, args.last); limit > 0 {
-				modify := limitRows(guild.AdminsPrimaryKey[1], limit, pager.orderExpr(args.last != nil))
-				query.modifiers = append(query.modifiers, modify)
-			} else {
-				query = pager.applyOrder(query, args.last != nil)
+			if query, err = pager.applyCursors(query, args.after, args.before); err != nil {
+				return err
 			}
 			path = append(path, edgesField, nodeField)
 			if field := collectedField(ctx, path...); field != nil {
-				if err := query.collectField(ctx, op, *field, path, satisfies...); err != nil {
+				if err := query.collectField(ctx, opCtx, *field, path, satisfies...); err != nil {
 					return err
 				}
+			}
+			if limit := paginateLimit(args.first, args.last); limit > 0 {
+				modify := limitRows(guild.AdminsPrimaryKey[1], limit, pager.orderExpr(query))
+				query.modifiers = append(query.modifiers, modify)
+			} else {
+				query = pager.applyOrder(query)
 			}
 			gu.WithNamedAdmins(alias, func(wq *UserQuery) {
 				*wq = *query
 			})
+		case "createTime":
+			if _, ok := fieldSeen[guild.FieldCreateTime]; !ok {
+				selectedFields = append(selectedFields, guild.FieldCreateTime)
+				fieldSeen[guild.FieldCreateTime] = struct{}{}
+			}
+		case "updateTime":
+			if _, ok := fieldSeen[guild.FieldUpdateTime]; !ok {
+				selectedFields = append(selectedFields, guild.FieldUpdateTime)
+				fieldSeen[guild.FieldUpdateTime] = struct{}{}
+			}
+		case "guildID":
+			if _, ok := fieldSeen[guild.FieldGuildID]; !ok {
+				selectedFields = append(selectedFields, guild.FieldGuildID)
+				fieldSeen[guild.FieldGuildID] = struct{}{}
+			}
+		case "name":
+			if _, ok := fieldSeen[guild.FieldName]; !ok {
+				selectedFields = append(selectedFields, guild.FieldName)
+				fieldSeen[guild.FieldName] = struct{}{}
+			}
+		case "features":
+			if _, ok := fieldSeen[guild.FieldFeatures]; !ok {
+				selectedFields = append(selectedFields, guild.FieldFeatures)
+				fieldSeen[guild.FieldFeatures] = struct{}{}
+			}
+		case "iconHash":
+			if _, ok := fieldSeen[guild.FieldIconHash]; !ok {
+				selectedFields = append(selectedFields, guild.FieldIconHash)
+				fieldSeen[guild.FieldIconHash] = struct{}{}
+			}
+		case "iconURL":
+			if _, ok := fieldSeen[guild.FieldIconURL]; !ok {
+				selectedFields = append(selectedFields, guild.FieldIconURL)
+				fieldSeen[guild.FieldIconURL] = struct{}{}
+			}
+		case "joinedAt":
+			if _, ok := fieldSeen[guild.FieldJoinedAt]; !ok {
+				selectedFields = append(selectedFields, guild.FieldJoinedAt)
+				fieldSeen[guild.FieldJoinedAt] = struct{}{}
+			}
+		case "large":
+			if _, ok := fieldSeen[guild.FieldLarge]; !ok {
+				selectedFields = append(selectedFields, guild.FieldLarge)
+				fieldSeen[guild.FieldLarge] = struct{}{}
+			}
+		case "memberCount":
+			if _, ok := fieldSeen[guild.FieldMemberCount]; !ok {
+				selectedFields = append(selectedFields, guild.FieldMemberCount)
+				fieldSeen[guild.FieldMemberCount] = struct{}{}
+			}
+		case "ownerID":
+			if _, ok := fieldSeen[guild.FieldOwnerID]; !ok {
+				selectedFields = append(selectedFields, guild.FieldOwnerID)
+				fieldSeen[guild.FieldOwnerID] = struct{}{}
+			}
+		case "permissions":
+			if _, ok := fieldSeen[guild.FieldPermissions]; !ok {
+				selectedFields = append(selectedFields, guild.FieldPermissions)
+				fieldSeen[guild.FieldPermissions] = struct{}{}
+			}
+		case "systemChannelFlags":
+			if _, ok := fieldSeen[guild.FieldSystemChannelFlags]; !ok {
+				selectedFields = append(selectedFields, guild.FieldSystemChannelFlags)
+				fieldSeen[guild.FieldSystemChannelFlags] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		gu.Select(selectedFields...)
 	}
 	return nil
 }
@@ -185,7 +267,7 @@ func newGuildPaginateArgs(rv map[string]interface{}) *guildPaginateArgs {
 		case map[string]interface{}:
 			var (
 				err1, err2 error
-				order      = &GuildOrder{Field: &GuildOrderField{}}
+				order      = &GuildOrder{Field: &GuildOrderField{}, Direction: entgql.OrderDirectionAsc}
 			)
 			if d, ok := v[directionField]; ok {
 				err1 = order.Direction.UnmarshalGQL(d)
@@ -220,9 +302,14 @@ func (gac *GuildAdminConfigQuery) CollectFields(ctx context.Context, satisfies .
 	return gac, nil
 }
 
-func (gac *GuildAdminConfigQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (gac *GuildAdminConfigQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(guildadminconfig.Columns))
+		selectedFields = []string{guildadminconfig.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "guild":
 			var (
@@ -230,11 +317,48 @@ func (gac *GuildAdminConfigQuery) collectField(ctx context.Context, op *graphql.
 				path  = append(path, alias)
 				query = (&GuildClient{config: gac.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			gac.withGuild = query
+		case "createTime":
+			if _, ok := fieldSeen[guildadminconfig.FieldCreateTime]; !ok {
+				selectedFields = append(selectedFields, guildadminconfig.FieldCreateTime)
+				fieldSeen[guildadminconfig.FieldCreateTime] = struct{}{}
+			}
+		case "updateTime":
+			if _, ok := fieldSeen[guildadminconfig.FieldUpdateTime]; !ok {
+				selectedFields = append(selectedFields, guildadminconfig.FieldUpdateTime)
+				fieldSeen[guildadminconfig.FieldUpdateTime] = struct{}{}
+			}
+		case "enabled":
+			if _, ok := fieldSeen[guildadminconfig.FieldEnabled]; !ok {
+				selectedFields = append(selectedFields, guildadminconfig.FieldEnabled)
+				fieldSeen[guildadminconfig.FieldEnabled] = struct{}{}
+			}
+		case "defaultMaxChannels":
+			if _, ok := fieldSeen[guildadminconfig.FieldDefaultMaxChannels]; !ok {
+				selectedFields = append(selectedFields, guildadminconfig.FieldDefaultMaxChannels)
+				fieldSeen[guildadminconfig.FieldDefaultMaxChannels] = struct{}{}
+			}
+		case "defaultMaxClones":
+			if _, ok := fieldSeen[guildadminconfig.FieldDefaultMaxClones]; !ok {
+				selectedFields = append(selectedFields, guildadminconfig.FieldDefaultMaxClones)
+				fieldSeen[guildadminconfig.FieldDefaultMaxClones] = struct{}{}
+			}
+		case "comment":
+			if _, ok := fieldSeen[guildadminconfig.FieldComment]; !ok {
+				selectedFields = append(selectedFields, guildadminconfig.FieldComment)
+				fieldSeen[guildadminconfig.FieldComment] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		gac.Select(selectedFields...)
 	}
 	return nil
 }
@@ -280,9 +404,14 @@ func (gc *GuildConfigQuery) CollectFields(ctx context.Context, satisfies ...stri
 	return gc, nil
 }
 
-func (gc *GuildConfigQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (gc *GuildConfigQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(guildconfig.Columns))
+		selectedFields = []string{guildconfig.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "guild":
 			var (
@@ -290,11 +419,48 @@ func (gc *GuildConfigQuery) collectField(ctx context.Context, op *graphql.Operat
 				path  = append(path, alias)
 				query = (&GuildClient{config: gc.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			gc.withGuild = query
+		case "createTime":
+			if _, ok := fieldSeen[guildconfig.FieldCreateTime]; !ok {
+				selectedFields = append(selectedFields, guildconfig.FieldCreateTime)
+				fieldSeen[guildconfig.FieldCreateTime] = struct{}{}
+			}
+		case "updateTime":
+			if _, ok := fieldSeen[guildconfig.FieldUpdateTime]; !ok {
+				selectedFields = append(selectedFields, guildconfig.FieldUpdateTime)
+				fieldSeen[guildconfig.FieldUpdateTime] = struct{}{}
+			}
+		case "enabled":
+			if _, ok := fieldSeen[guildconfig.FieldEnabled]; !ok {
+				selectedFields = append(selectedFields, guildconfig.FieldEnabled)
+				fieldSeen[guildconfig.FieldEnabled] = struct{}{}
+			}
+		case "defaultMaxClones":
+			if _, ok := fieldSeen[guildconfig.FieldDefaultMaxClones]; !ok {
+				selectedFields = append(selectedFields, guildconfig.FieldDefaultMaxClones)
+				fieldSeen[guildconfig.FieldDefaultMaxClones] = struct{}{}
+			}
+		case "regexMatch":
+			if _, ok := fieldSeen[guildconfig.FieldRegexMatch]; !ok {
+				selectedFields = append(selectedFields, guildconfig.FieldRegexMatch)
+				fieldSeen[guildconfig.FieldRegexMatch] = struct{}{}
+			}
+		case "contactEmail":
+			if _, ok := fieldSeen[guildconfig.FieldContactEmail]; !ok {
+				selectedFields = append(selectedFields, guildconfig.FieldContactEmail)
+				fieldSeen[guildconfig.FieldContactEmail] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		gc.Select(selectedFields...)
 	}
 	return nil
 }
@@ -340,9 +506,14 @@ func (ge *GuildEventQuery) CollectFields(ctx context.Context, satisfies ...strin
 	return ge, nil
 }
 
-func (ge *GuildEventQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (ge *GuildEventQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(guildevent.Columns))
+		selectedFields = []string{guildevent.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "guild":
 			var (
@@ -350,11 +521,43 @@ func (ge *GuildEventQuery) collectField(ctx context.Context, op *graphql.Operati
 				path  = append(path, alias)
 				query = (&GuildClient{config: ge.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			ge.withGuild = query
+		case "createTime":
+			if _, ok := fieldSeen[guildevent.FieldCreateTime]; !ok {
+				selectedFields = append(selectedFields, guildevent.FieldCreateTime)
+				fieldSeen[guildevent.FieldCreateTime] = struct{}{}
+			}
+		case "updateTime":
+			if _, ok := fieldSeen[guildevent.FieldUpdateTime]; !ok {
+				selectedFields = append(selectedFields, guildevent.FieldUpdateTime)
+				fieldSeen[guildevent.FieldUpdateTime] = struct{}{}
+			}
+		case "type":
+			if _, ok := fieldSeen[guildevent.FieldType]; !ok {
+				selectedFields = append(selectedFields, guildevent.FieldType)
+				fieldSeen[guildevent.FieldType] = struct{}{}
+			}
+		case "message":
+			if _, ok := fieldSeen[guildevent.FieldMessage]; !ok {
+				selectedFields = append(selectedFields, guildevent.FieldMessage)
+				fieldSeen[guildevent.FieldMessage] = struct{}{}
+			}
+		case "metadata":
+			if _, ok := fieldSeen[guildevent.FieldMetadata]; !ok {
+				selectedFields = append(selectedFields, guildevent.FieldMetadata)
+				fieldSeen[guildevent.FieldMetadata] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		ge.Select(selectedFields...)
 	}
 	return nil
 }
@@ -387,7 +590,7 @@ func newGuildEventPaginateArgs(rv map[string]interface{}) *guildeventPaginateArg
 		case map[string]interface{}:
 			var (
 				err1, err2 error
-				order      = &GuildEventOrder{Field: &GuildEventOrderField{}}
+				order      = &GuildEventOrder{Field: &GuildEventOrderField{}, Direction: entgql.OrderDirectionAsc}
 			)
 			if d, ok := v[directionField]; ok {
 				err1 = order.Direction.UnmarshalGQL(d)
@@ -422,9 +625,14 @@ func (u *UserQuery) CollectFields(ctx context.Context, satisfies ...string) (*Us
 	return u, nil
 }
 
-func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (u *UserQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(user.Columns))
+		selectedFields = []string{user.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "userGuilds":
 			var (
@@ -436,7 +644,7 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 			if err := validateFirstLast(args.first, args.last); err != nil {
 				return fmt.Errorf("validate first and last in path %q: %w", path, err)
 			}
-			pager, err := newGuildPager(args.opts)
+			pager, err := newGuildPager(args.opts, args.last != nil)
 			if err != nil {
 				return fmt.Errorf("create new pager in path %q: %w", path, err)
 			}
@@ -496,19 +704,20 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 			if ignoredEdges || (args.first != nil && *args.first == 0) || (args.last != nil && *args.last == 0) {
 				continue
 			}
-
-			query = pager.applyCursors(query, args.after, args.before)
-			if limit := paginateLimit(args.first, args.last); limit > 0 {
-				modify := limitRows(user.UserGuildsPrimaryKey[0], limit, pager.orderExpr(args.last != nil))
-				query.modifiers = append(query.modifiers, modify)
-			} else {
-				query = pager.applyOrder(query, args.last != nil)
+			if query, err = pager.applyCursors(query, args.after, args.before); err != nil {
+				return err
 			}
 			path = append(path, edgesField, nodeField)
 			if field := collectedField(ctx, path...); field != nil {
-				if err := query.collectField(ctx, op, *field, path, satisfies...); err != nil {
+				if err := query.collectField(ctx, opCtx, *field, path, satisfies...); err != nil {
 					return err
 				}
+			}
+			if limit := paginateLimit(args.first, args.last); limit > 0 {
+				modify := limitRows(user.UserGuildsPrimaryKey[0], limit, pager.orderExpr(query))
+				query.modifiers = append(query.modifiers, modify)
+			} else {
+				query = pager.applyOrder(query)
 			}
 			u.WithNamedUserGuilds(alias, func(wq *GuildQuery) {
 				*wq = *query
@@ -519,7 +728,7 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 				path  = append(path, alias)
 				query = (&UserClient{config: u.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			u.WithNamedBannedUsers(alias, func(wq *UserQuery) {
@@ -531,11 +740,113 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 				path  = append(path, alias)
 				query = (&UserClient{config: u.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			u.withBannedBy = query
+		case "createTime":
+			if _, ok := fieldSeen[user.FieldCreateTime]; !ok {
+				selectedFields = append(selectedFields, user.FieldCreateTime)
+				fieldSeen[user.FieldCreateTime] = struct{}{}
+			}
+		case "updateTime":
+			if _, ok := fieldSeen[user.FieldUpdateTime]; !ok {
+				selectedFields = append(selectedFields, user.FieldUpdateTime)
+				fieldSeen[user.FieldUpdateTime] = struct{}{}
+			}
+		case "userID":
+			if _, ok := fieldSeen[user.FieldUserID]; !ok {
+				selectedFields = append(selectedFields, user.FieldUserID)
+				fieldSeen[user.FieldUserID] = struct{}{}
+			}
+		case "admin":
+			if _, ok := fieldSeen[user.FieldAdmin]; !ok {
+				selectedFields = append(selectedFields, user.FieldAdmin)
+				fieldSeen[user.FieldAdmin] = struct{}{}
+			}
+		case "banned":
+			if _, ok := fieldSeen[user.FieldBanned]; !ok {
+				selectedFields = append(selectedFields, user.FieldBanned)
+				fieldSeen[user.FieldBanned] = struct{}{}
+			}
+		case "banReason":
+			if _, ok := fieldSeen[user.FieldBanReason]; !ok {
+				selectedFields = append(selectedFields, user.FieldBanReason)
+				fieldSeen[user.FieldBanReason] = struct{}{}
+			}
+		case "username":
+			if _, ok := fieldSeen[user.FieldUsername]; !ok {
+				selectedFields = append(selectedFields, user.FieldUsername)
+				fieldSeen[user.FieldUsername] = struct{}{}
+			}
+		case "discriminator":
+			if _, ok := fieldSeen[user.FieldDiscriminator]; !ok {
+				selectedFields = append(selectedFields, user.FieldDiscriminator)
+				fieldSeen[user.FieldDiscriminator] = struct{}{}
+			}
+		case "email":
+			if _, ok := fieldSeen[user.FieldEmail]; !ok {
+				selectedFields = append(selectedFields, user.FieldEmail)
+				fieldSeen[user.FieldEmail] = struct{}{}
+			}
+		case "avatarHash":
+			if _, ok := fieldSeen[user.FieldAvatarHash]; !ok {
+				selectedFields = append(selectedFields, user.FieldAvatarHash)
+				fieldSeen[user.FieldAvatarHash] = struct{}{}
+			}
+		case "avatarURL":
+			if _, ok := fieldSeen[user.FieldAvatarURL]; !ok {
+				selectedFields = append(selectedFields, user.FieldAvatarURL)
+				fieldSeen[user.FieldAvatarURL] = struct{}{}
+			}
+		case "locale":
+			if _, ok := fieldSeen[user.FieldLocale]; !ok {
+				selectedFields = append(selectedFields, user.FieldLocale)
+				fieldSeen[user.FieldLocale] = struct{}{}
+			}
+		case "bot":
+			if _, ok := fieldSeen[user.FieldBot]; !ok {
+				selectedFields = append(selectedFields, user.FieldBot)
+				fieldSeen[user.FieldBot] = struct{}{}
+			}
+		case "system":
+			if _, ok := fieldSeen[user.FieldSystem]; !ok {
+				selectedFields = append(selectedFields, user.FieldSystem)
+				fieldSeen[user.FieldSystem] = struct{}{}
+			}
+		case "mfaEnabled":
+			if _, ok := fieldSeen[user.FieldMfaEnabled]; !ok {
+				selectedFields = append(selectedFields, user.FieldMfaEnabled)
+				fieldSeen[user.FieldMfaEnabled] = struct{}{}
+			}
+		case "verified":
+			if _, ok := fieldSeen[user.FieldVerified]; !ok {
+				selectedFields = append(selectedFields, user.FieldVerified)
+				fieldSeen[user.FieldVerified] = struct{}{}
+			}
+		case "flags":
+			if _, ok := fieldSeen[user.FieldFlags]; !ok {
+				selectedFields = append(selectedFields, user.FieldFlags)
+				fieldSeen[user.FieldFlags] = struct{}{}
+			}
+		case "premiumType":
+			if _, ok := fieldSeen[user.FieldPremiumType]; !ok {
+				selectedFields = append(selectedFields, user.FieldPremiumType)
+				fieldSeen[user.FieldPremiumType] = struct{}{}
+			}
+		case "publicFlags":
+			if _, ok := fieldSeen[user.FieldPublicFlags]; !ok {
+				selectedFields = append(selectedFields, user.FieldPublicFlags)
+				fieldSeen[user.FieldPublicFlags] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		u.Select(selectedFields...)
 	}
 	return nil
 }
@@ -568,7 +879,7 @@ func newUserPaginateArgs(rv map[string]interface{}) *userPaginateArgs {
 		case map[string]interface{}:
 			var (
 				err1, err2 error
-				order      = &UserOrder{Field: &UserOrderField{}}
+				order      = &UserOrder{Field: &UserOrderField{}, Direction: entgql.OrderDirectionAsc}
 			)
 			if d, ok := v[directionField]; ok {
 				err1 = order.Direction.UnmarshalGQL(d)

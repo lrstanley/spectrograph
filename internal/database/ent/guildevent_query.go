@@ -24,7 +24,7 @@ import (
 type GuildEventQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []guildevent.OrderOption
 	inters     []Interceptor
 	predicates []predicate.GuildEvent
 	withGuild  *GuildQuery
@@ -62,7 +62,7 @@ func (geq *GuildEventQuery) Unique(unique bool) *GuildEventQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (geq *GuildEventQuery) Order(o ...OrderFunc) *GuildEventQuery {
+func (geq *GuildEventQuery) Order(o ...guildevent.OrderOption) *GuildEventQuery {
 	geq.order = append(geq.order, o...)
 	return geq
 }
@@ -278,7 +278,7 @@ func (geq *GuildEventQuery) Clone() *GuildEventQuery {
 	return &GuildEventQuery{
 		config:     geq.config,
 		ctx:        geq.ctx.Clone(),
-		order:      append([]OrderFunc{}, geq.order...),
+		order:      append([]guildevent.OrderOption{}, geq.order...),
 		inters:     append([]Interceptor{}, geq.inters...),
 		predicates: append([]predicate.GuildEvent{}, geq.predicates...),
 		withGuild:  geq.withGuild.Clone(),

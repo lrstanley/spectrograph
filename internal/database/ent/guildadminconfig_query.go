@@ -24,7 +24,7 @@ import (
 type GuildAdminConfigQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []guildadminconfig.OrderOption
 	inters     []Interceptor
 	predicates []predicate.GuildAdminConfig
 	withGuild  *GuildQuery
@@ -62,7 +62,7 @@ func (gacq *GuildAdminConfigQuery) Unique(unique bool) *GuildAdminConfigQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (gacq *GuildAdminConfigQuery) Order(o ...OrderFunc) *GuildAdminConfigQuery {
+func (gacq *GuildAdminConfigQuery) Order(o ...guildadminconfig.OrderOption) *GuildAdminConfigQuery {
 	gacq.order = append(gacq.order, o...)
 	return gacq
 }
@@ -278,7 +278,7 @@ func (gacq *GuildAdminConfigQuery) Clone() *GuildAdminConfigQuery {
 	return &GuildAdminConfigQuery{
 		config:     gacq.config,
 		ctx:        gacq.ctx.Clone(),
-		order:      append([]OrderFunc{}, gacq.order...),
+		order:      append([]guildadminconfig.OrderOption{}, gacq.order...),
 		inters:     append([]Interceptor{}, gacq.inters...),
 		predicates: append([]predicate.GuildAdminConfig{}, gacq.predicates...),
 		withGuild:  gacq.withGuild.Clone(),

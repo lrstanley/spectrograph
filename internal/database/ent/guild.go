@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/lrstanley/spectrograph/internal/database/ent/guild"
 	"github.com/lrstanley/spectrograph/internal/database/ent/guildadminconfig"
@@ -51,7 +52,8 @@ type Guild struct {
 	SystemChannelFlags string `json:"system_channel_flags,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GuildQuery when eager-loading is set.
-	Edges GuildEdges `json:"edges"`
+	Edges        GuildEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // GuildEdges holds the relations/edges for other nodes in the graph.
@@ -134,7 +136,7 @@ func (*Guild) scanValues(columns []string) ([]any, error) {
 		case guild.FieldCreateTime, guild.FieldUpdateTime, guild.FieldJoinedAt:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Guild", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -235,9 +237,17 @@ func (gu *Guild) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				gu.SystemChannelFlags = value.String
 			}
+		default:
+			gu.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Guild.
+// This includes values selected through modifiers, order, etc.
+func (gu *Guild) Value(name string) (ent.Value, error) {
+	return gu.selectValues.Get(name)
 }
 
 // QueryGuildConfig queries the "guild_config" edge of the Guild entity.

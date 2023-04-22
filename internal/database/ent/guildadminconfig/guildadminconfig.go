@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -101,3 +103,55 @@ var (
 	// DefaultComment holds the default value on creation for the "comment" field.
 	DefaultComment string
 )
+
+// OrderOption defines the ordering options for the GuildAdminConfig queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+}
+
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
+}
+
+// ByEnabled orders the results by the enabled field.
+func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
+}
+
+// ByDefaultMaxChannels orders the results by the default_max_channels field.
+func ByDefaultMaxChannels(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDefaultMaxChannels, opts...).ToFunc()
+}
+
+// ByDefaultMaxClones orders the results by the default_max_clones field.
+func ByDefaultMaxClones(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDefaultMaxClones, opts...).ToFunc()
+}
+
+// ByComment orders the results by the comment field.
+func ByComment(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldComment, opts...).ToFunc()
+}
+
+// ByGuildField orders the results by guild field.
+func ByGuildField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGuildStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newGuildStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GuildInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, GuildTable, GuildColumn),
+	)
+}

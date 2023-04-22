@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -103,3 +105,55 @@ var (
 	// ContactEmailValidator is a validator for the "contact_email" field. It is called by the builders before save.
 	ContactEmailValidator func(string) error
 )
+
+// OrderOption defines the ordering options for the GuildConfig queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+}
+
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
+}
+
+// ByEnabled orders the results by the enabled field.
+func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
+}
+
+// ByDefaultMaxClones orders the results by the default_max_clones field.
+func ByDefaultMaxClones(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDefaultMaxClones, opts...).ToFunc()
+}
+
+// ByRegexMatch orders the results by the regex_match field.
+func ByRegexMatch(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRegexMatch, opts...).ToFunc()
+}
+
+// ByContactEmail orders the results by the contact_email field.
+func ByContactEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContactEmail, opts...).ToFunc()
+}
+
+// ByGuildField orders the results by guild field.
+func ByGuildField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGuildStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newGuildStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GuildInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, GuildTable, GuildColumn),
+	)
+}

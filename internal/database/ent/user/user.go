@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -154,3 +156,162 @@ var (
 	// LocaleValidator is a validator for the "locale" field. It is called by the builders before save.
 	LocaleValidator func(string) error
 )
+
+// OrderOption defines the ordering options for the User queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+}
+
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
+}
+
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByAdmin orders the results by the admin field.
+func ByAdmin(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAdmin, opts...).ToFunc()
+}
+
+// ByBanned orders the results by the banned field.
+func ByBanned(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBanned, opts...).ToFunc()
+}
+
+// ByBanReason orders the results by the ban_reason field.
+func ByBanReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBanReason, opts...).ToFunc()
+}
+
+// ByUsername orders the results by the username field.
+func ByUsername(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUsername, opts...).ToFunc()
+}
+
+// ByDiscriminator orders the results by the discriminator field.
+func ByDiscriminator(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDiscriminator, opts...).ToFunc()
+}
+
+// ByEmail orders the results by the email field.
+func ByEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmail, opts...).ToFunc()
+}
+
+// ByAvatarHash orders the results by the avatar_hash field.
+func ByAvatarHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAvatarHash, opts...).ToFunc()
+}
+
+// ByAvatarURL orders the results by the avatar_url field.
+func ByAvatarURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAvatarURL, opts...).ToFunc()
+}
+
+// ByLocale orders the results by the locale field.
+func ByLocale(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLocale, opts...).ToFunc()
+}
+
+// ByBot orders the results by the bot field.
+func ByBot(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBot, opts...).ToFunc()
+}
+
+// BySystem orders the results by the system field.
+func BySystem(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSystem, opts...).ToFunc()
+}
+
+// ByMfaEnabled orders the results by the mfa_enabled field.
+func ByMfaEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMfaEnabled, opts...).ToFunc()
+}
+
+// ByVerified orders the results by the verified field.
+func ByVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerified, opts...).ToFunc()
+}
+
+// ByFlags orders the results by the flags field.
+func ByFlags(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFlags, opts...).ToFunc()
+}
+
+// ByPremiumType orders the results by the premium_type field.
+func ByPremiumType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPremiumType, opts...).ToFunc()
+}
+
+// ByPublicFlags orders the results by the public_flags field.
+func ByPublicFlags(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPublicFlags, opts...).ToFunc()
+}
+
+// ByUserGuildsCount orders the results by user_guilds count.
+func ByUserGuildsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newUserGuildsStep(), opts...)
+	}
+}
+
+// ByUserGuilds orders the results by user_guilds terms.
+func ByUserGuilds(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserGuildsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByBannedUsersCount orders the results by banned_users count.
+func ByBannedUsersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBannedUsersStep(), opts...)
+	}
+}
+
+// ByBannedUsers orders the results by banned_users terms.
+func ByBannedUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBannedUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByBannedByField orders the results by banned_by field.
+func ByBannedByField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBannedByStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newUserGuildsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserGuildsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, UserGuildsTable, UserGuildsPrimaryKey...),
+	)
+}
+func newBannedUsersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, BannedUsersTable, BannedUsersColumn),
+	)
+}
+func newBannedByStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, BannedByTable, BannedByColumn),
+	)
+}

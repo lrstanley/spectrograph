@@ -24,7 +24,7 @@ import (
 type GuildConfigQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []guildconfig.OrderOption
 	inters     []Interceptor
 	predicates []predicate.GuildConfig
 	withGuild  *GuildQuery
@@ -62,7 +62,7 @@ func (gcq *GuildConfigQuery) Unique(unique bool) *GuildConfigQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (gcq *GuildConfigQuery) Order(o ...OrderFunc) *GuildConfigQuery {
+func (gcq *GuildConfigQuery) Order(o ...guildconfig.OrderOption) *GuildConfigQuery {
 	gcq.order = append(gcq.order, o...)
 	return gcq
 }
@@ -278,7 +278,7 @@ func (gcq *GuildConfigQuery) Clone() *GuildConfigQuery {
 	return &GuildConfigQuery{
 		config:     gcq.config,
 		ctx:        gcq.ctx.Clone(),
-		order:      append([]OrderFunc{}, gcq.order...),
+		order:      append([]guildconfig.OrderOption{}, gcq.order...),
 		inters:     append([]Interceptor{}, gcq.inters...),
 		predicates: append([]predicate.GuildConfig{}, gcq.predicates...),
 		withGuild:  gcq.withGuild.Clone(),

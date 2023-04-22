@@ -28,7 +28,7 @@ import (
 type GuildQuery struct {
 	config
 	ctx                  *QueryContext
-	order                []OrderFunc
+	order                []guild.OrderOption
 	inters               []Interceptor
 	predicates           []predicate.Guild
 	withGuildConfig      *GuildConfigQuery
@@ -70,7 +70,7 @@ func (gq *GuildQuery) Unique(unique bool) *GuildQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (gq *GuildQuery) Order(o ...OrderFunc) *GuildQuery {
+func (gq *GuildQuery) Order(o ...guild.OrderOption) *GuildQuery {
 	gq.order = append(gq.order, o...)
 	return gq
 }
@@ -352,7 +352,7 @@ func (gq *GuildQuery) Clone() *GuildQuery {
 	return &GuildQuery{
 		config:               gq.config,
 		ctx:                  gq.ctx.Clone(),
-		order:                append([]OrderFunc{}, gq.order...),
+		order:                append([]guild.OrderOption{}, gq.order...),
 		inters:               append([]Interceptor{}, gq.inters...),
 		predicates:           append([]predicate.Guild{}, gq.predicates...),
 		withGuildConfig:      gq.withGuildConfig.Clone(),
@@ -578,7 +578,7 @@ func (gq *GuildQuery) loadGuildConfig(ctx context.Context, query *GuildConfigQue
 	}
 	query.withFKs = true
 	query.Where(predicate.GuildConfig(func(s *sql.Selector) {
-		s.Where(sql.InValues(guild.GuildConfigColumn, fks...))
+		s.Where(sql.InValues(s.C(guild.GuildConfigColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -591,7 +591,7 @@ func (gq *GuildQuery) loadGuildConfig(ctx context.Context, query *GuildConfigQue
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "guild_guild_config" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "guild_guild_config" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -606,7 +606,7 @@ func (gq *GuildQuery) loadGuildAdminConfig(ctx context.Context, query *GuildAdmi
 	}
 	query.withFKs = true
 	query.Where(predicate.GuildAdminConfig(func(s *sql.Selector) {
-		s.Where(sql.InValues(guild.GuildAdminConfigColumn, fks...))
+		s.Where(sql.InValues(s.C(guild.GuildAdminConfigColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -619,7 +619,7 @@ func (gq *GuildQuery) loadGuildAdminConfig(ctx context.Context, query *GuildAdmi
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "guild_guild_admin_config" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "guild_guild_admin_config" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -637,7 +637,7 @@ func (gq *GuildQuery) loadGuildEvents(ctx context.Context, query *GuildEventQuer
 	}
 	query.withFKs = true
 	query.Where(predicate.GuildEvent(func(s *sql.Selector) {
-		s.Where(sql.InValues(guild.GuildEventsColumn, fks...))
+		s.Where(sql.InValues(s.C(guild.GuildEventsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -650,7 +650,7 @@ func (gq *GuildQuery) loadGuildEvents(ctx context.Context, query *GuildEventQuer
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "guild_guild_events" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "guild_guild_events" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

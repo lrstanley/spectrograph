@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/lrstanley/spectrograph/internal/database/ent/guild"
 	"github.com/lrstanley/spectrograph/internal/database/ent/guildadminconfig"
@@ -37,6 +38,7 @@ type GuildAdminConfig struct {
 	// The values are being populated by the GuildAdminConfigQuery when eager-loading is set.
 	Edges                    GuildAdminConfigEdges `json:"edges"`
 	guild_guild_admin_config *int
+	selectValues             sql.SelectValues
 }
 
 // GuildAdminConfigEdges holds the relations/edges for other nodes in the graph.
@@ -79,7 +81,7 @@ func (*GuildAdminConfig) scanValues(columns []string) ([]any, error) {
 		case guildadminconfig.ForeignKeys[0]: // guild_guild_admin_config
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type GuildAdminConfig", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -142,9 +144,17 @@ func (gac *GuildAdminConfig) assignValues(columns []string, values []any) error 
 				gac.guild_guild_admin_config = new(int)
 				*gac.guild_guild_admin_config = int(value.Int64)
 			}
+		default:
+			gac.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the GuildAdminConfig.
+// This includes values selected through modifiers, order, etc.
+func (gac *GuildAdminConfig) Value(name string) (ent.Value, error) {
+	return gac.selectValues.Get(name)
 }
 
 // QueryGuild queries the "guild" edge of the GuildAdminConfig entity.

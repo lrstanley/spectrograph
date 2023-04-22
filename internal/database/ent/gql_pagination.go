@@ -8,13 +8,13 @@ package ent
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
 	"strconv"
-	"strings"
 
+	"entgo.io/contrib/entgql"
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/errcode"
@@ -24,163 +24,20 @@ import (
 	"github.com/lrstanley/spectrograph/internal/database/ent/guildevent"
 	"github.com/lrstanley/spectrograph/internal/database/ent/user"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"github.com/vmihailenco/msgpack/v5"
 )
 
-// OrderDirection defines the directions in which to order a list of items.
-type OrderDirection string
-
-const (
-	// OrderDirectionAsc specifies an ascending order.
-	OrderDirectionAsc OrderDirection = "ASC"
-	// OrderDirectionDesc specifies a descending order.
-	OrderDirectionDesc OrderDirection = "DESC"
+// Common entgql types.
+type (
+	Cursor         = entgql.Cursor[int]
+	PageInfo       = entgql.PageInfo[int]
+	OrderDirection = entgql.OrderDirection
 )
 
-// Validate the order direction value.
-func (o OrderDirection) Validate() error {
-	if o != OrderDirectionAsc && o != OrderDirectionDesc {
-		return fmt.Errorf("%s is not a valid OrderDirection", o)
-	}
-	return nil
-}
-
-// String implements fmt.Stringer interface.
-func (o OrderDirection) String() string {
-	return string(o)
-}
-
-// MarshalGQL implements graphql.Marshaler interface.
-func (o OrderDirection) MarshalGQL(w io.Writer) {
-	io.WriteString(w, strconv.Quote(o.String()))
-}
-
-// UnmarshalGQL implements graphql.Unmarshaler interface.
-func (o *OrderDirection) UnmarshalGQL(val interface{}) error {
-	str, ok := val.(string)
-	if !ok {
-		return fmt.Errorf("order direction %T must be a string", val)
-	}
-	*o = OrderDirection(str)
-	return o.Validate()
-}
-
-func (o OrderDirection) reverse() OrderDirection {
-	if o == OrderDirectionDesc {
-		return OrderDirectionAsc
-	}
-	return OrderDirectionDesc
-}
-
-func (o OrderDirection) orderFunc(field string) OrderFunc {
-	if o == OrderDirectionDesc {
+func orderFunc(o OrderDirection, field string) func(*sql.Selector) {
+	if o == entgql.OrderDirectionDesc {
 		return Desc(field)
 	}
 	return Asc(field)
-}
-
-func cursorsToPredicates(direction OrderDirection, after, before *Cursor, field, idField string) []func(s *sql.Selector) {
-	var predicates []func(s *sql.Selector)
-	if after != nil {
-		if after.Value != nil {
-			var predicate func([]string, ...interface{}) *sql.Predicate
-			if direction == OrderDirectionAsc {
-				predicate = sql.CompositeGT
-			} else {
-				predicate = sql.CompositeLT
-			}
-			predicates = append(predicates, func(s *sql.Selector) {
-				s.Where(predicate(
-					s.Columns(field, idField),
-					after.Value, after.ID,
-				))
-			})
-		} else {
-			var predicate func(string, interface{}) *sql.Predicate
-			if direction == OrderDirectionAsc {
-				predicate = sql.GT
-			} else {
-				predicate = sql.LT
-			}
-			predicates = append(predicates, func(s *sql.Selector) {
-				s.Where(predicate(
-					s.C(idField),
-					after.ID,
-				))
-			})
-		}
-	}
-	if before != nil {
-		if before.Value != nil {
-			var predicate func([]string, ...interface{}) *sql.Predicate
-			if direction == OrderDirectionAsc {
-				predicate = sql.CompositeLT
-			} else {
-				predicate = sql.CompositeGT
-			}
-			predicates = append(predicates, func(s *sql.Selector) {
-				s.Where(predicate(
-					s.Columns(field, idField),
-					before.Value, before.ID,
-				))
-			})
-		} else {
-			var predicate func(string, interface{}) *sql.Predicate
-			if direction == OrderDirectionAsc {
-				predicate = sql.LT
-			} else {
-				predicate = sql.GT
-			}
-			predicates = append(predicates, func(s *sql.Selector) {
-				s.Where(predicate(
-					s.C(idField),
-					before.ID,
-				))
-			})
-		}
-	}
-	return predicates
-}
-
-// PageInfo of a connection type.
-type PageInfo struct {
-	HasNextPage     bool    `json:"hasNextPage"`
-	HasPreviousPage bool    `json:"hasPreviousPage"`
-	StartCursor     *Cursor `json:"startCursor"`
-	EndCursor       *Cursor `json:"endCursor"`
-}
-
-// Cursor of an edge type.
-type Cursor struct {
-	ID    int   `msgpack:"i"`
-	Value Value `msgpack:"v,omitempty"`
-}
-
-// MarshalGQL implements graphql.Marshaler interface.
-func (c Cursor) MarshalGQL(w io.Writer) {
-	quote := []byte{'"'}
-	w.Write(quote)
-	defer w.Write(quote)
-	wc := base64.NewEncoder(base64.RawStdEncoding, w)
-	defer wc.Close()
-	_ = msgpack.NewEncoder(wc).Encode(c)
-}
-
-// UnmarshalGQL implements graphql.Unmarshaler interface.
-func (c *Cursor) UnmarshalGQL(v interface{}) error {
-	s, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("%T is not a string", v)
-	}
-	if err := msgpack.NewDecoder(
-		base64.NewDecoder(
-			base64.RawStdEncoding,
-			strings.NewReader(s),
-		),
-	).Decode(c); err != nil {
-		return fmt.Errorf("cannot decode cursor: %w", err)
-	}
-	return nil
 }
 
 const errInvalidPagination = "INVALID_PAGINATION"
@@ -333,12 +190,13 @@ func WithGuildFilter(filter func(*GuildQuery) (*GuildQuery, error)) GuildPaginat
 }
 
 type guildPager struct {
-	order  *GuildOrder
-	filter func(*GuildQuery) (*GuildQuery, error)
+	reverse bool
+	order   *GuildOrder
+	filter  func(*GuildQuery) (*GuildQuery, error)
 }
 
-func newGuildPager(opts []GuildPaginateOption) (*guildPager, error) {
-	pager := &guildPager{}
+func newGuildPager(opts []GuildPaginateOption, reverse bool) (*guildPager, error) {
+	pager := &guildPager{reverse: reverse}
 	for _, opt := range opts {
 		if err := opt(pager); err != nil {
 			return nil, err
@@ -361,37 +219,44 @@ func (p *guildPager) toCursor(gu *Guild) Cursor {
 	return p.order.Field.toCursor(gu)
 }
 
-func (p *guildPager) applyCursors(query *GuildQuery, after, before *Cursor) *GuildQuery {
-	for _, predicate := range cursorsToPredicates(
-		p.order.Direction, after, before,
-		p.order.Field.field, DefaultGuildOrder.Field.field,
-	) {
+func (p *guildPager) applyCursors(query *GuildQuery, after, before *Cursor) (*GuildQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultGuildOrder.Field.column, p.order.Field.column, direction) {
 		query = query.Where(predicate)
 	}
-	return query
+	return query, nil
 }
 
-func (p *guildPager) applyOrder(query *GuildQuery, reverse bool) *GuildQuery {
+func (p *guildPager) applyOrder(query *GuildQuery) *GuildQuery {
 	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
+	if p.reverse {
+		direction = direction.Reverse()
 	}
-	query = query.Order(direction.orderFunc(p.order.Field.field))
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
 	if p.order.Field != DefaultGuildOrder.Field {
-		query = query.Order(direction.orderFunc(DefaultGuildOrder.Field.field))
+		query = query.Order(DefaultGuildOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
 	}
 	return query
 }
 
-func (p *guildPager) orderExpr(reverse bool) sql.Querier {
+func (p *guildPager) orderExpr(query *GuildQuery) sql.Querier {
 	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
 	}
 	return sql.ExprFunc(func(b *sql.Builder) {
-		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
 		if p.order.Field != DefaultGuildOrder.Field {
-			b.Comma().Ident(DefaultGuildOrder.Field.field).Pad().WriteString(string(direction))
+			b.Comma().Ident(DefaultGuildOrder.Field.column).Pad().WriteString(string(direction))
 		}
 	})
 }
@@ -404,7 +269,7 @@ func (gu *GuildQuery) Paginate(
 	if err := validateFirstLast(first, last); err != nil {
 		return nil, err
 	}
-	pager, err := newGuildPager(opts)
+	pager, err := newGuildPager(opts, last != nil)
 	if err != nil {
 		return nil, err
 	}
@@ -426,9 +291,9 @@ func (gu *GuildQuery) Paginate(
 	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
 		return conn, nil
 	}
-
-	gu = pager.applyCursors(gu, after, before)
-	gu = pager.applyOrder(gu, last != nil)
+	if gu, err = pager.applyCursors(gu, after, before); err != nil {
+		return nil, err
+	}
 	if limit := paginateLimit(first, last); limit != 0 {
 		gu.Limit(limit)
 	}
@@ -437,7 +302,7 @@ func (gu *GuildQuery) Paginate(
 			return nil, err
 		}
 	}
-
+	gu = pager.applyOrder(gu)
 	nodes, err := gu.All(ctx)
 	if err != nil {
 		return nil, err
@@ -449,7 +314,11 @@ func (gu *GuildQuery) Paginate(
 var (
 	// GuildOrderFieldName orders Guild by name.
 	GuildOrderFieldName = &GuildOrderField{
-		field: guild.FieldName,
+		Value: func(gu *Guild) (ent.Value, error) {
+			return gu.Name, nil
+		},
+		column: guild.FieldName,
+		toTerm: guild.ByName,
 		toCursor: func(gu *Guild) Cursor {
 			return Cursor{
 				ID:    gu.ID,
@@ -459,7 +328,11 @@ var (
 	}
 	// GuildOrderFieldJoinedAt orders Guild by joined_at.
 	GuildOrderFieldJoinedAt = &GuildOrderField{
-		field: guild.FieldJoinedAt,
+		Value: func(gu *Guild) (ent.Value, error) {
+			return gu.JoinedAt, nil
+		},
+		column: guild.FieldJoinedAt,
+		toTerm: guild.ByJoinedAt,
 		toCursor: func(gu *Guild) Cursor {
 			return Cursor{
 				ID:    gu.ID,
@@ -472,10 +345,10 @@ var (
 // String implement fmt.Stringer interface.
 func (f GuildOrderField) String() string {
 	var str string
-	switch f.field {
-	case guild.FieldName:
+	switch f.column {
+	case GuildOrderFieldName.column:
 		str = "NAME"
-	case guild.FieldJoinedAt:
+	case GuildOrderFieldJoinedAt.column:
 		str = "JOINED_AT"
 	}
 	return str
@@ -505,7 +378,10 @@ func (f *GuildOrderField) UnmarshalGQL(v interface{}) error {
 
 // GuildOrderField defines the ordering field of Guild.
 type GuildOrderField struct {
-	field    string
+	// Value extracts the ordering value from the given Guild.
+	Value    func(*Guild) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) guild.OrderOption
 	toCursor func(*Guild) Cursor
 }
 
@@ -517,9 +393,13 @@ type GuildOrder struct {
 
 // DefaultGuildOrder is the default ordering of Guild.
 var DefaultGuildOrder = &GuildOrder{
-	Direction: OrderDirectionAsc,
+	Direction: entgql.OrderDirectionAsc,
 	Field: &GuildOrderField{
-		field: guild.FieldID,
+		Value: func(gu *Guild) (ent.Value, error) {
+			return gu.ID, nil
+		},
+		column: guild.FieldID,
+		toTerm: guild.ByID,
 		toCursor: func(gu *Guild) Cursor {
 			return Cursor{ID: gu.ID}
 		},
@@ -621,12 +501,13 @@ func WithGuildAdminConfigFilter(filter func(*GuildAdminConfigQuery) (*GuildAdmin
 }
 
 type guildadminconfigPager struct {
-	order  *GuildAdminConfigOrder
-	filter func(*GuildAdminConfigQuery) (*GuildAdminConfigQuery, error)
+	reverse bool
+	order   *GuildAdminConfigOrder
+	filter  func(*GuildAdminConfigQuery) (*GuildAdminConfigQuery, error)
 }
 
-func newGuildAdminConfigPager(opts []GuildAdminConfigPaginateOption) (*guildadminconfigPager, error) {
-	pager := &guildadminconfigPager{}
+func newGuildAdminConfigPager(opts []GuildAdminConfigPaginateOption, reverse bool) (*guildadminconfigPager, error) {
+	pager := &guildadminconfigPager{reverse: reverse}
 	for _, opt := range opts {
 		if err := opt(pager); err != nil {
 			return nil, err
@@ -649,37 +530,44 @@ func (p *guildadminconfigPager) toCursor(gac *GuildAdminConfig) Cursor {
 	return p.order.Field.toCursor(gac)
 }
 
-func (p *guildadminconfigPager) applyCursors(query *GuildAdminConfigQuery, after, before *Cursor) *GuildAdminConfigQuery {
-	for _, predicate := range cursorsToPredicates(
-		p.order.Direction, after, before,
-		p.order.Field.field, DefaultGuildAdminConfigOrder.Field.field,
-	) {
+func (p *guildadminconfigPager) applyCursors(query *GuildAdminConfigQuery, after, before *Cursor) (*GuildAdminConfigQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultGuildAdminConfigOrder.Field.column, p.order.Field.column, direction) {
 		query = query.Where(predicate)
 	}
-	return query
+	return query, nil
 }
 
-func (p *guildadminconfigPager) applyOrder(query *GuildAdminConfigQuery, reverse bool) *GuildAdminConfigQuery {
+func (p *guildadminconfigPager) applyOrder(query *GuildAdminConfigQuery) *GuildAdminConfigQuery {
 	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
+	if p.reverse {
+		direction = direction.Reverse()
 	}
-	query = query.Order(direction.orderFunc(p.order.Field.field))
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
 	if p.order.Field != DefaultGuildAdminConfigOrder.Field {
-		query = query.Order(direction.orderFunc(DefaultGuildAdminConfigOrder.Field.field))
+		query = query.Order(DefaultGuildAdminConfigOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
 	}
 	return query
 }
 
-func (p *guildadminconfigPager) orderExpr(reverse bool) sql.Querier {
+func (p *guildadminconfigPager) orderExpr(query *GuildAdminConfigQuery) sql.Querier {
 	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
 	}
 	return sql.ExprFunc(func(b *sql.Builder) {
-		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
 		if p.order.Field != DefaultGuildAdminConfigOrder.Field {
-			b.Comma().Ident(DefaultGuildAdminConfigOrder.Field.field).Pad().WriteString(string(direction))
+			b.Comma().Ident(DefaultGuildAdminConfigOrder.Field.column).Pad().WriteString(string(direction))
 		}
 	})
 }
@@ -692,7 +580,7 @@ func (gac *GuildAdminConfigQuery) Paginate(
 	if err := validateFirstLast(first, last); err != nil {
 		return nil, err
 	}
-	pager, err := newGuildAdminConfigPager(opts)
+	pager, err := newGuildAdminConfigPager(opts, last != nil)
 	if err != nil {
 		return nil, err
 	}
@@ -714,9 +602,9 @@ func (gac *GuildAdminConfigQuery) Paginate(
 	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
 		return conn, nil
 	}
-
-	gac = pager.applyCursors(gac, after, before)
-	gac = pager.applyOrder(gac, last != nil)
+	if gac, err = pager.applyCursors(gac, after, before); err != nil {
+		return nil, err
+	}
 	if limit := paginateLimit(first, last); limit != 0 {
 		gac.Limit(limit)
 	}
@@ -725,7 +613,7 @@ func (gac *GuildAdminConfigQuery) Paginate(
 			return nil, err
 		}
 	}
-
+	gac = pager.applyOrder(gac)
 	nodes, err := gac.All(ctx)
 	if err != nil {
 		return nil, err
@@ -736,7 +624,10 @@ func (gac *GuildAdminConfigQuery) Paginate(
 
 // GuildAdminConfigOrderField defines the ordering field of GuildAdminConfig.
 type GuildAdminConfigOrderField struct {
-	field    string
+	// Value extracts the ordering value from the given GuildAdminConfig.
+	Value    func(*GuildAdminConfig) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) guildadminconfig.OrderOption
 	toCursor func(*GuildAdminConfig) Cursor
 }
 
@@ -748,9 +639,13 @@ type GuildAdminConfigOrder struct {
 
 // DefaultGuildAdminConfigOrder is the default ordering of GuildAdminConfig.
 var DefaultGuildAdminConfigOrder = &GuildAdminConfigOrder{
-	Direction: OrderDirectionAsc,
+	Direction: entgql.OrderDirectionAsc,
 	Field: &GuildAdminConfigOrderField{
-		field: guildadminconfig.FieldID,
+		Value: func(gac *GuildAdminConfig) (ent.Value, error) {
+			return gac.ID, nil
+		},
+		column: guildadminconfig.FieldID,
+		toTerm: guildadminconfig.ByID,
 		toCursor: func(gac *GuildAdminConfig) Cursor {
 			return Cursor{ID: gac.ID}
 		},
@@ -852,12 +747,13 @@ func WithGuildConfigFilter(filter func(*GuildConfigQuery) (*GuildConfigQuery, er
 }
 
 type guildconfigPager struct {
-	order  *GuildConfigOrder
-	filter func(*GuildConfigQuery) (*GuildConfigQuery, error)
+	reverse bool
+	order   *GuildConfigOrder
+	filter  func(*GuildConfigQuery) (*GuildConfigQuery, error)
 }
 
-func newGuildConfigPager(opts []GuildConfigPaginateOption) (*guildconfigPager, error) {
-	pager := &guildconfigPager{}
+func newGuildConfigPager(opts []GuildConfigPaginateOption, reverse bool) (*guildconfigPager, error) {
+	pager := &guildconfigPager{reverse: reverse}
 	for _, opt := range opts {
 		if err := opt(pager); err != nil {
 			return nil, err
@@ -880,37 +776,44 @@ func (p *guildconfigPager) toCursor(gc *GuildConfig) Cursor {
 	return p.order.Field.toCursor(gc)
 }
 
-func (p *guildconfigPager) applyCursors(query *GuildConfigQuery, after, before *Cursor) *GuildConfigQuery {
-	for _, predicate := range cursorsToPredicates(
-		p.order.Direction, after, before,
-		p.order.Field.field, DefaultGuildConfigOrder.Field.field,
-	) {
+func (p *guildconfigPager) applyCursors(query *GuildConfigQuery, after, before *Cursor) (*GuildConfigQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultGuildConfigOrder.Field.column, p.order.Field.column, direction) {
 		query = query.Where(predicate)
 	}
-	return query
+	return query, nil
 }
 
-func (p *guildconfigPager) applyOrder(query *GuildConfigQuery, reverse bool) *GuildConfigQuery {
+func (p *guildconfigPager) applyOrder(query *GuildConfigQuery) *GuildConfigQuery {
 	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
+	if p.reverse {
+		direction = direction.Reverse()
 	}
-	query = query.Order(direction.orderFunc(p.order.Field.field))
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
 	if p.order.Field != DefaultGuildConfigOrder.Field {
-		query = query.Order(direction.orderFunc(DefaultGuildConfigOrder.Field.field))
+		query = query.Order(DefaultGuildConfigOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
 	}
 	return query
 }
 
-func (p *guildconfigPager) orderExpr(reverse bool) sql.Querier {
+func (p *guildconfigPager) orderExpr(query *GuildConfigQuery) sql.Querier {
 	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
 	}
 	return sql.ExprFunc(func(b *sql.Builder) {
-		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
 		if p.order.Field != DefaultGuildConfigOrder.Field {
-			b.Comma().Ident(DefaultGuildConfigOrder.Field.field).Pad().WriteString(string(direction))
+			b.Comma().Ident(DefaultGuildConfigOrder.Field.column).Pad().WriteString(string(direction))
 		}
 	})
 }
@@ -923,7 +826,7 @@ func (gc *GuildConfigQuery) Paginate(
 	if err := validateFirstLast(first, last); err != nil {
 		return nil, err
 	}
-	pager, err := newGuildConfigPager(opts)
+	pager, err := newGuildConfigPager(opts, last != nil)
 	if err != nil {
 		return nil, err
 	}
@@ -945,9 +848,9 @@ func (gc *GuildConfigQuery) Paginate(
 	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
 		return conn, nil
 	}
-
-	gc = pager.applyCursors(gc, after, before)
-	gc = pager.applyOrder(gc, last != nil)
+	if gc, err = pager.applyCursors(gc, after, before); err != nil {
+		return nil, err
+	}
 	if limit := paginateLimit(first, last); limit != 0 {
 		gc.Limit(limit)
 	}
@@ -956,7 +859,7 @@ func (gc *GuildConfigQuery) Paginate(
 			return nil, err
 		}
 	}
-
+	gc = pager.applyOrder(gc)
 	nodes, err := gc.All(ctx)
 	if err != nil {
 		return nil, err
@@ -967,7 +870,10 @@ func (gc *GuildConfigQuery) Paginate(
 
 // GuildConfigOrderField defines the ordering field of GuildConfig.
 type GuildConfigOrderField struct {
-	field    string
+	// Value extracts the ordering value from the given GuildConfig.
+	Value    func(*GuildConfig) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) guildconfig.OrderOption
 	toCursor func(*GuildConfig) Cursor
 }
 
@@ -979,9 +885,13 @@ type GuildConfigOrder struct {
 
 // DefaultGuildConfigOrder is the default ordering of GuildConfig.
 var DefaultGuildConfigOrder = &GuildConfigOrder{
-	Direction: OrderDirectionAsc,
+	Direction: entgql.OrderDirectionAsc,
 	Field: &GuildConfigOrderField{
-		field: guildconfig.FieldID,
+		Value: func(gc *GuildConfig) (ent.Value, error) {
+			return gc.ID, nil
+		},
+		column: guildconfig.FieldID,
+		toTerm: guildconfig.ByID,
 		toCursor: func(gc *GuildConfig) Cursor {
 			return Cursor{ID: gc.ID}
 		},
@@ -1083,12 +993,13 @@ func WithGuildEventFilter(filter func(*GuildEventQuery) (*GuildEventQuery, error
 }
 
 type guildeventPager struct {
-	order  *GuildEventOrder
-	filter func(*GuildEventQuery) (*GuildEventQuery, error)
+	reverse bool
+	order   *GuildEventOrder
+	filter  func(*GuildEventQuery) (*GuildEventQuery, error)
 }
 
-func newGuildEventPager(opts []GuildEventPaginateOption) (*guildeventPager, error) {
-	pager := &guildeventPager{}
+func newGuildEventPager(opts []GuildEventPaginateOption, reverse bool) (*guildeventPager, error) {
+	pager := &guildeventPager{reverse: reverse}
 	for _, opt := range opts {
 		if err := opt(pager); err != nil {
 			return nil, err
@@ -1111,37 +1022,44 @@ func (p *guildeventPager) toCursor(ge *GuildEvent) Cursor {
 	return p.order.Field.toCursor(ge)
 }
 
-func (p *guildeventPager) applyCursors(query *GuildEventQuery, after, before *Cursor) *GuildEventQuery {
-	for _, predicate := range cursorsToPredicates(
-		p.order.Direction, after, before,
-		p.order.Field.field, DefaultGuildEventOrder.Field.field,
-	) {
+func (p *guildeventPager) applyCursors(query *GuildEventQuery, after, before *Cursor) (*GuildEventQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultGuildEventOrder.Field.column, p.order.Field.column, direction) {
 		query = query.Where(predicate)
 	}
-	return query
+	return query, nil
 }
 
-func (p *guildeventPager) applyOrder(query *GuildEventQuery, reverse bool) *GuildEventQuery {
+func (p *guildeventPager) applyOrder(query *GuildEventQuery) *GuildEventQuery {
 	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
+	if p.reverse {
+		direction = direction.Reverse()
 	}
-	query = query.Order(direction.orderFunc(p.order.Field.field))
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
 	if p.order.Field != DefaultGuildEventOrder.Field {
-		query = query.Order(direction.orderFunc(DefaultGuildEventOrder.Field.field))
+		query = query.Order(DefaultGuildEventOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
 	}
 	return query
 }
 
-func (p *guildeventPager) orderExpr(reverse bool) sql.Querier {
+func (p *guildeventPager) orderExpr(query *GuildEventQuery) sql.Querier {
 	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
 	}
 	return sql.ExprFunc(func(b *sql.Builder) {
-		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
 		if p.order.Field != DefaultGuildEventOrder.Field {
-			b.Comma().Ident(DefaultGuildEventOrder.Field.field).Pad().WriteString(string(direction))
+			b.Comma().Ident(DefaultGuildEventOrder.Field.column).Pad().WriteString(string(direction))
 		}
 	})
 }
@@ -1154,7 +1072,7 @@ func (ge *GuildEventQuery) Paginate(
 	if err := validateFirstLast(first, last); err != nil {
 		return nil, err
 	}
-	pager, err := newGuildEventPager(opts)
+	pager, err := newGuildEventPager(opts, last != nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1176,9 +1094,9 @@ func (ge *GuildEventQuery) Paginate(
 	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
 		return conn, nil
 	}
-
-	ge = pager.applyCursors(ge, after, before)
-	ge = pager.applyOrder(ge, last != nil)
+	if ge, err = pager.applyCursors(ge, after, before); err != nil {
+		return nil, err
+	}
 	if limit := paginateLimit(first, last); limit != 0 {
 		ge.Limit(limit)
 	}
@@ -1187,7 +1105,7 @@ func (ge *GuildEventQuery) Paginate(
 			return nil, err
 		}
 	}
-
+	ge = pager.applyOrder(ge)
 	nodes, err := ge.All(ctx)
 	if err != nil {
 		return nil, err
@@ -1199,7 +1117,11 @@ func (ge *GuildEventQuery) Paginate(
 var (
 	// GuildEventOrderFieldCreateTime orders GuildEvent by create_time.
 	GuildEventOrderFieldCreateTime = &GuildEventOrderField{
-		field: guildevent.FieldCreateTime,
+		Value: func(ge *GuildEvent) (ent.Value, error) {
+			return ge.CreateTime, nil
+		},
+		column: guildevent.FieldCreateTime,
+		toTerm: guildevent.ByCreateTime,
 		toCursor: func(ge *GuildEvent) Cursor {
 			return Cursor{
 				ID:    ge.ID,
@@ -1209,7 +1131,11 @@ var (
 	}
 	// GuildEventOrderFieldUpdateTime orders GuildEvent by update_time.
 	GuildEventOrderFieldUpdateTime = &GuildEventOrderField{
-		field: guildevent.FieldUpdateTime,
+		Value: func(ge *GuildEvent) (ent.Value, error) {
+			return ge.UpdateTime, nil
+		},
+		column: guildevent.FieldUpdateTime,
+		toTerm: guildevent.ByUpdateTime,
 		toCursor: func(ge *GuildEvent) Cursor {
 			return Cursor{
 				ID:    ge.ID,
@@ -1222,10 +1148,10 @@ var (
 // String implement fmt.Stringer interface.
 func (f GuildEventOrderField) String() string {
 	var str string
-	switch f.field {
-	case guildevent.FieldCreateTime:
+	switch f.column {
+	case GuildEventOrderFieldCreateTime.column:
 		str = "CREATED_AT"
-	case guildevent.FieldUpdateTime:
+	case GuildEventOrderFieldUpdateTime.column:
 		str = "UPDATED_AT"
 	}
 	return str
@@ -1255,7 +1181,10 @@ func (f *GuildEventOrderField) UnmarshalGQL(v interface{}) error {
 
 // GuildEventOrderField defines the ordering field of GuildEvent.
 type GuildEventOrderField struct {
-	field    string
+	// Value extracts the ordering value from the given GuildEvent.
+	Value    func(*GuildEvent) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) guildevent.OrderOption
 	toCursor func(*GuildEvent) Cursor
 }
 
@@ -1267,9 +1196,13 @@ type GuildEventOrder struct {
 
 // DefaultGuildEventOrder is the default ordering of GuildEvent.
 var DefaultGuildEventOrder = &GuildEventOrder{
-	Direction: OrderDirectionAsc,
+	Direction: entgql.OrderDirectionAsc,
 	Field: &GuildEventOrderField{
-		field: guildevent.FieldID,
+		Value: func(ge *GuildEvent) (ent.Value, error) {
+			return ge.ID, nil
+		},
+		column: guildevent.FieldID,
+		toTerm: guildevent.ByID,
 		toCursor: func(ge *GuildEvent) Cursor {
 			return Cursor{ID: ge.ID}
 		},
@@ -1371,12 +1304,13 @@ func WithUserFilter(filter func(*UserQuery) (*UserQuery, error)) UserPaginateOpt
 }
 
 type userPager struct {
-	order  *UserOrder
-	filter func(*UserQuery) (*UserQuery, error)
+	reverse bool
+	order   *UserOrder
+	filter  func(*UserQuery) (*UserQuery, error)
 }
 
-func newUserPager(opts []UserPaginateOption) (*userPager, error) {
-	pager := &userPager{}
+func newUserPager(opts []UserPaginateOption, reverse bool) (*userPager, error) {
+	pager := &userPager{reverse: reverse}
 	for _, opt := range opts {
 		if err := opt(pager); err != nil {
 			return nil, err
@@ -1399,37 +1333,44 @@ func (p *userPager) toCursor(u *User) Cursor {
 	return p.order.Field.toCursor(u)
 }
 
-func (p *userPager) applyCursors(query *UserQuery, after, before *Cursor) *UserQuery {
-	for _, predicate := range cursorsToPredicates(
-		p.order.Direction, after, before,
-		p.order.Field.field, DefaultUserOrder.Field.field,
-	) {
+func (p *userPager) applyCursors(query *UserQuery, after, before *Cursor) (*UserQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultUserOrder.Field.column, p.order.Field.column, direction) {
 		query = query.Where(predicate)
 	}
-	return query
+	return query, nil
 }
 
-func (p *userPager) applyOrder(query *UserQuery, reverse bool) *UserQuery {
+func (p *userPager) applyOrder(query *UserQuery) *UserQuery {
 	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
+	if p.reverse {
+		direction = direction.Reverse()
 	}
-	query = query.Order(direction.orderFunc(p.order.Field.field))
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
 	if p.order.Field != DefaultUserOrder.Field {
-		query = query.Order(direction.orderFunc(DefaultUserOrder.Field.field))
+		query = query.Order(DefaultUserOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
 	}
 	return query
 }
 
-func (p *userPager) orderExpr(reverse bool) sql.Querier {
+func (p *userPager) orderExpr(query *UserQuery) sql.Querier {
 	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
 	}
 	return sql.ExprFunc(func(b *sql.Builder) {
-		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
 		if p.order.Field != DefaultUserOrder.Field {
-			b.Comma().Ident(DefaultUserOrder.Field.field).Pad().WriteString(string(direction))
+			b.Comma().Ident(DefaultUserOrder.Field.column).Pad().WriteString(string(direction))
 		}
 	})
 }
@@ -1442,7 +1383,7 @@ func (u *UserQuery) Paginate(
 	if err := validateFirstLast(first, last); err != nil {
 		return nil, err
 	}
-	pager, err := newUserPager(opts)
+	pager, err := newUserPager(opts, last != nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1464,9 +1405,9 @@ func (u *UserQuery) Paginate(
 	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
 		return conn, nil
 	}
-
-	u = pager.applyCursors(u, after, before)
-	u = pager.applyOrder(u, last != nil)
+	if u, err = pager.applyCursors(u, after, before); err != nil {
+		return nil, err
+	}
 	if limit := paginateLimit(first, last); limit != 0 {
 		u.Limit(limit)
 	}
@@ -1475,7 +1416,7 @@ func (u *UserQuery) Paginate(
 			return nil, err
 		}
 	}
-
+	u = pager.applyOrder(u)
 	nodes, err := u.All(ctx)
 	if err != nil {
 		return nil, err
@@ -1487,7 +1428,11 @@ func (u *UserQuery) Paginate(
 var (
 	// UserOrderFieldUsername orders User by username.
 	UserOrderFieldUsername = &UserOrderField{
-		field: user.FieldUsername,
+		Value: func(u *User) (ent.Value, error) {
+			return u.Username, nil
+		},
+		column: user.FieldUsername,
+		toTerm: user.ByUsername,
 		toCursor: func(u *User) Cursor {
 			return Cursor{
 				ID:    u.ID,
@@ -1497,7 +1442,11 @@ var (
 	}
 	// UserOrderFieldDiscriminator orders User by discriminator.
 	UserOrderFieldDiscriminator = &UserOrderField{
-		field: user.FieldDiscriminator,
+		Value: func(u *User) (ent.Value, error) {
+			return u.Discriminator, nil
+		},
+		column: user.FieldDiscriminator,
+		toTerm: user.ByDiscriminator,
 		toCursor: func(u *User) Cursor {
 			return Cursor{
 				ID:    u.ID,
@@ -1507,7 +1456,11 @@ var (
 	}
 	// UserOrderFieldEmail orders User by email.
 	UserOrderFieldEmail = &UserOrderField{
-		field: user.FieldEmail,
+		Value: func(u *User) (ent.Value, error) {
+			return u.Email, nil
+		},
+		column: user.FieldEmail,
+		toTerm: user.ByEmail,
 		toCursor: func(u *User) Cursor {
 			return Cursor{
 				ID:    u.ID,
@@ -1520,12 +1473,12 @@ var (
 // String implement fmt.Stringer interface.
 func (f UserOrderField) String() string {
 	var str string
-	switch f.field {
-	case user.FieldUsername:
+	switch f.column {
+	case UserOrderFieldUsername.column:
 		str = "USERNAME"
-	case user.FieldDiscriminator:
+	case UserOrderFieldDiscriminator.column:
 		str = "DISCRIMINATOR"
-	case user.FieldEmail:
+	case UserOrderFieldEmail.column:
 		str = "EMAIL"
 	}
 	return str
@@ -1557,7 +1510,10 @@ func (f *UserOrderField) UnmarshalGQL(v interface{}) error {
 
 // UserOrderField defines the ordering field of User.
 type UserOrderField struct {
-	field    string
+	// Value extracts the ordering value from the given User.
+	Value    func(*User) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) user.OrderOption
 	toCursor func(*User) Cursor
 }
 
@@ -1569,9 +1525,13 @@ type UserOrder struct {
 
 // DefaultUserOrder is the default ordering of User.
 var DefaultUserOrder = &UserOrder{
-	Direction: OrderDirectionAsc,
+	Direction: entgql.OrderDirectionAsc,
 	Field: &UserOrderField{
-		field: user.FieldID,
+		Value: func(u *User) (ent.Value, error) {
+			return u.ID, nil
+		},
+		column: user.FieldID,
+		toTerm: user.ByID,
 		toCursor: func(u *User) Cursor {
 			return Cursor{ID: u.ID}
 		},

@@ -25,7 +25,7 @@ import (
 type UserQuery struct {
 	config
 	ctx                  *QueryContext
-	order                []OrderFunc
+	order                []user.OrderOption
 	inters               []Interceptor
 	predicates           []predicate.User
 	withUserGuilds       *GuildQuery
@@ -67,7 +67,7 @@ func (uq *UserQuery) Unique(unique bool) *UserQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
+func (uq *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
 }
@@ -327,7 +327,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 	return &UserQuery{
 		config:          uq.config,
 		ctx:             uq.ctx.Clone(),
-		order:           append([]OrderFunc{}, uq.order...),
+		order:           append([]user.OrderOption{}, uq.order...),
 		inters:          append([]Interceptor{}, uq.inters...),
 		predicates:      append([]predicate.User{}, uq.predicates...),
 		withUserGuilds:  uq.withUserGuilds.Clone(),
@@ -605,7 +605,7 @@ func (uq *UserQuery) loadBannedUsers(ctx context.Context, query *UserQuery, node
 	}
 	query.withFKs = true
 	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.BannedUsersColumn, fks...))
+		s.Where(sql.InValues(s.C(user.BannedUsersColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -618,7 +618,7 @@ func (uq *UserQuery) loadBannedUsers(ctx context.Context, query *UserQuery, node
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_banned_users" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_banned_users" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

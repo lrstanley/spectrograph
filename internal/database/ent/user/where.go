@@ -1068,11 +1068,7 @@ func HasUserGuilds() predicate.User {
 // HasUserGuildsWith applies the HasEdge predicate on the "user_guilds" edge with a given conditions (other predicates).
 func HasUserGuildsWith(preds ...predicate.Guild) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserGuildsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, UserGuildsTable, UserGuildsPrimaryKey...),
-		)
+		step := newUserGuildsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -1095,11 +1091,7 @@ func HasBannedUsers() predicate.User {
 // HasBannedUsersWith applies the HasEdge predicate on the "banned_users" edge with a given conditions (other predicates).
 func HasBannedUsersWith(preds ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, BannedUsersTable, BannedUsersColumn),
-		)
+		step := newBannedUsersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -1122,11 +1114,7 @@ func HasBannedBy() predicate.User {
 // HasBannedByWith applies the HasEdge predicate on the "banned_by" edge with a given conditions (other predicates).
 func HasBannedByWith(preds ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, BannedByTable, BannedByColumn),
-		)
+		step := newBannedByStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

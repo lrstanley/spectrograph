@@ -813,11 +813,7 @@ func HasGuildConfig() predicate.Guild {
 // HasGuildConfigWith applies the HasEdge predicate on the "guild_config" edge with a given conditions (other predicates).
 func HasGuildConfigWith(preds ...predicate.GuildConfig) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GuildConfigInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, GuildConfigTable, GuildConfigColumn),
-		)
+		step := newGuildConfigStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -840,11 +836,7 @@ func HasGuildAdminConfig() predicate.Guild {
 // HasGuildAdminConfigWith applies the HasEdge predicate on the "guild_admin_config" edge with a given conditions (other predicates).
 func HasGuildAdminConfigWith(preds ...predicate.GuildAdminConfig) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GuildAdminConfigInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, GuildAdminConfigTable, GuildAdminConfigColumn),
-		)
+		step := newGuildAdminConfigStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -867,11 +859,7 @@ func HasGuildEvents() predicate.Guild {
 // HasGuildEventsWith applies the HasEdge predicate on the "guild_events" edge with a given conditions (other predicates).
 func HasGuildEventsWith(preds ...predicate.GuildEvent) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GuildEventsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, GuildEventsTable, GuildEventsColumn),
-		)
+		step := newGuildEventsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -894,11 +882,7 @@ func HasAdmins() predicate.Guild {
 // HasAdminsWith applies the HasEdge predicate on the "admins" edge with a given conditions (other predicates).
 func HasAdminsWith(preds ...predicate.User) predicate.Guild {
 	return predicate.Guild(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AdminsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, AdminsTable, AdminsPrimaryKey...),
-		)
+		step := newAdminsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
