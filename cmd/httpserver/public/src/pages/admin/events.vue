@@ -8,12 +8,12 @@ meta:
   <div class="p-2">
     <DataTable v-model="table">
       <template
-        v-if="data?.guildevents.pageInfo.hasNextPage || data?.guildevents.pageInfo.hasPreviousPage"
+        v-if="data?.guildEvents.pageInfo.hasNextPage || data?.guildEvents.pageInfo.hasPreviousPage"
         #footer
       >
         <CorePagination
           v-model="table.cursor.value"
-          :page-info="data?.guildevents.pageInfo"
+          :page-info="data?.guildEvents.pageInfo"
           class="ml-auto"
         />
       </template>
@@ -112,6 +112,6 @@ const { data } = useGetAllGuildEventsQuery({
   variables: computed(() => table.queryState.value),
 })
 table.data = computed(
-  () => (data.value?.guildevents.edges?.map(({ node }) => node) ?? []) as GuildEvent[]
+  () => (data.value?.guildEvents.edges?.map(({ node }) => node) ?? []) as GuildEvent[]
 )
 </script>
