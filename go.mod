@@ -17,7 +17,7 @@ require (
 	github.com/jackc/pgconn v1.14.0
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v4 v4.18.1
-	github.com/lrstanley/chix v0.0.0-20230402152728-7bd69ca2cd1d
+	github.com/lrstanley/chix v1.0.0
 	github.com/lrstanley/clix v0.0.0-20230402152634-af9e9bf92363
 	github.com/markbates/goth v1.77.0
 	github.com/prometheus/client_golang v1.15.0
@@ -63,7 +63,7 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/leodido/go-urn v1.2.3 // indirect
-	github.com/lrstanley/go-bogon v0.0.0-20230303230239-e33fb462737f // indirect
+	github.com/lrstanley/go-bogon v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
