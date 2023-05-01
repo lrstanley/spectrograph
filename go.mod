@@ -3,7 +3,7 @@ module github.com/lrstanley/spectrograph
 go 1.19
 
 require (
-	entgo.io/contrib v0.4.3
+	entgo.io/contrib v0.4.5
 	entgo.io/ent v0.12.2
 	github.com/99designs/gqlgen v0.17.30
 	github.com/andersfylling/disgord v0.36.2
