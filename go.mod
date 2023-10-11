@@ -18,7 +18,7 @@ require (
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/lrstanley/chix v0.0.0-20230402152728-7bd69ca2cd1d
-	github.com/lrstanley/clix v0.0.0-20230402152634-af9e9bf92363
+	github.com/lrstanley/clix v1.0.0
 	github.com/markbates/goth v1.77.0
 	github.com/prometheus/client_golang v1.15.0
 	github.com/vektah/gqlparser/v2 v2.5.1
