@@ -568,7 +568,6 @@ func (_q *UserQuery) loadUserGuilds(ctx context.Context, query *GuildQuery, node
 	}
 	return nil
 }
-
 func (_q *UserQuery) loadBannedUsers(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*User)
@@ -600,7 +599,6 @@ func (_q *UserQuery) loadBannedUsers(ctx context.Context, query *UserQuery, node
 	}
 	return nil
 }
-
 func (_q *UserQuery) loadBannedBy(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*User)

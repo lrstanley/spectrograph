@@ -572,7 +572,6 @@ func (_q *GuildQuery) loadGuildConfig(ctx context.Context, query *GuildConfigQue
 	}
 	return nil
 }
-
 func (_q *GuildQuery) loadGuildAdminConfig(ctx context.Context, query *GuildAdminConfigQuery, nodes []*Guild, init func(*Guild), assign func(*Guild, *GuildAdminConfig)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Guild)
@@ -601,7 +600,6 @@ func (_q *GuildQuery) loadGuildAdminConfig(ctx context.Context, query *GuildAdmi
 	}
 	return nil
 }
-
 func (_q *GuildQuery) loadGuildEvents(ctx context.Context, query *GuildEventQuery, nodes []*Guild, init func(*Guild), assign func(*Guild, *GuildEvent)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Guild)
@@ -633,7 +631,6 @@ func (_q *GuildQuery) loadGuildEvents(ctx context.Context, query *GuildEventQuer
 	}
 	return nil
 }
-
 func (_q *GuildQuery) loadAdmins(ctx context.Context, query *UserQuery, nodes []*Guild, init func(*Guild), assign func(*Guild, *User)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Guild)

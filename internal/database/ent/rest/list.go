@@ -204,8 +204,10 @@ const (
 	FilterOperationOr  FilterOperation = "or"  // Represents the "or" predicate, applying against any number of filters.
 )
 
-// FilterOperations defines the available filter methods.
-var FilterOperations = []FilterOperation{FilterOperationAnd, FilterOperationOr}
+var (
+	// FilterOperations defines the available filter methods.
+	FilterOperations = []FilterOperation{FilterOperationAnd, FilterOperationOr}
+)
 
 type Filtered[P ~func(*sql.Selector)] struct {
 	// FilterOperation controls how multiple predicates are applied together.

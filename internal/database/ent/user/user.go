@@ -113,9 +113,11 @@ var ForeignKeys = []string{
 	"user_banned_users",
 }
 
-// UserGuildsPrimaryKey and UserGuildsColumn2 are the table columns denoting the
-// primary key for the user_guilds relation (M2M).
-var UserGuildsPrimaryKey = []string{"user_id", "guild_id"}
+var (
+	// UserGuildsPrimaryKey and UserGuildsColumn2 are the table columns denoting the
+	// primary key for the user_guilds relation (M2M).
+	UserGuildsPrimaryKey = []string{"user_id", "guild_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -302,7 +304,6 @@ func ByBannedByField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newBannedByStep(), sql.OrderByField(field, opts...))
 	}
 }
-
 func newUserGuildsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -310,7 +311,6 @@ func newUserGuildsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2M, false, UserGuildsTable, UserGuildsPrimaryKey...),
 	)
 }
-
 func newBannedUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -318,7 +318,6 @@ func newBannedUsersStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, BannedUsersTable, BannedUsersColumn),
 	)
 }
-
 func newBannedByStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

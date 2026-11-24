@@ -186,9 +186,11 @@ func writeRequestEntityTooLarge(w http.ResponseWriter, r *http.Request, err erro
 	})
 }
 
-// DefaultDecoder is the default decoder used by Bind. You can either override
-// this, or provide your own. Make sure it is set before Bind is called.
-var DefaultDecoder = form.NewDecoder()
+var (
+	// DefaultDecoder is the default decoder used by Bind. You can either override
+	// this, or provide your own. Make sure it is set before Bind is called.
+	DefaultDecoder = form.NewDecoder()
+)
 
 // Bind decodes the request body to the given struct. At this time the only supported
 // content-types are application/json, application/x-www-form-urlencoded, as well as

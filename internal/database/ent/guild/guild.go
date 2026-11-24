@@ -101,9 +101,11 @@ var Columns = []string{
 	FieldSystemChannelFlags,
 }
 
-// AdminsPrimaryKey and AdminsColumn2 are the table columns denoting the
-// primary key for the admins relation (M2M).
-var AdminsPrimaryKey = []string{"user_id", "guild_id"}
+var (
+	// AdminsPrimaryKey and AdminsColumn2 are the table columns denoting the
+	// primary key for the admins relation (M2M).
+	AdminsPrimaryKey = []string{"user_id", "guild_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -256,7 +258,6 @@ func ByAdmins(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAdminsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
 func newGuildConfigStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -264,7 +265,6 @@ func newGuildConfigStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2O, false, GuildConfigTable, GuildConfigColumn),
 	)
 }
-
 func newGuildAdminConfigStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -272,7 +272,6 @@ func newGuildAdminConfigStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2O, false, GuildAdminConfigTable, GuildAdminConfigColumn),
 	)
 }
-
 func newGuildEventsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -280,7 +279,6 @@ func newGuildEventsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, GuildEventsTable, GuildEventsColumn),
 	)
 }
-
 func newAdminsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
