@@ -1,5 +1,5 @@
-// Copyright (c) Liam Stanley <me@liamstanley.io>. All rights reserved. Use
-// of this source code is governed by the MIT license that can be found in
+// Copyright (c) Liam Stanley <liam@liam.sh>. All rights reserved. Use of
+// this source code is governed by the MIT license that can be found in
 // the LICENSE file.
 //
 // Copyright 2015-2016 Bruce Marriner <bruce@sqls.net>.  All rights reserved.
@@ -12,31 +12,52 @@
 package models
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"strconv"
 )
 
+// DiscordUser is the subset of the Discord user object returned from the
+// "/users/@me" endpoint, when authenticated with the "identify" and "email" scopes.
+//
+// https://discord.com/developers/docs/resources/user#user-object
+type DiscordUser struct {
+	ID            string `json:"id"`
+	Username      string `json:"username"`
+	GlobalName    string `json:"global_name"`   // Display name, if set.
+	Discriminator string `json:"discriminator"` // "0" for migrated users.
+	Avatar        string `json:"avatar"`
+	Bot           bool   `json:"bot"`
+	System        bool   `json:"system"`
+	MFAEnabled    bool   `json:"mfa_enabled"`
+	Locale        string `json:"locale"`
+	Verified      bool   `json:"verified"`
+	Email         string `json:"email"`
+	Flags         uint64 `json:"flags"`
+	PremiumType   int    `json:"premium_type"`
+	PublicFlags   uint64 `json:"public_flags"`
+}
+
+// UserGuildResponse is a partial guild object, as returned by the
+// "/users/@me/guilds" endpoint (API v10).
+//
 //	{
-//	    "features": [
-//	        "WELCOME_SCREEN_ENABLED", "NEWS", "COMMUNITY"
-//	    ],
-//	    "icon":"3a0892e2c181bd2fe877e6c4341d163e",
-//	    "id":"679506910449500196",
-//	    "name":"bytecord",
-//	    "owner":true,
-//	    "permissions":2.147483647e+09,
-//	    "permissions_new":"8589934591"
+//	    "features": ["WELCOME_SCREEN_ENABLED", "NEWS", "COMMUNITY"],
+//	    "icon": "3a0892e2c181bd2fe877e6c4341d163e",
+//	    "id": "679506910449500196",
+//	    "name": "bytecord",
+//	    "owner": true,
+//	    "permissions": "8589934591"
 //	}
 //
-// https://discord.com/developers/docs/resources/guild#guild-object
+// https://discord.com/developers/docs/resources/user#get-current-user-guilds
 type UserGuildResponse struct {
-	ID          string             `json:"id"`              // Guild id.
-	Name        string             `json:"name"`            // Guild name (2-100 chars, excl. trailing/leading spaces).
-	Owner       bool               `json:"owner"`           // True if the user is the owner of the guild
-	Features    []string           `json:"features"`        // Enabled guild features.
-	Icon        string             `json:"icon"`            // Icon hash.
-	Permissions DiscordPermissions `json:"permissions_new"` // Permissions for the user (excludes overrides).
+	ID          string             `json:"id"`          // Guild id.
+	Name        string             `json:"name"`        // Guild name (2-100 chars, excl. trailing/leading spaces).
+	Owner       bool               `json:"owner"`       // True if the user is the owner of the guild
+	Features    []string           `json:"features"`    // Enabled guild features.
+	Icon        string             `json:"icon"`        // Icon hash.
+	Permissions DiscordPermissions `json:"permissions"` // Permissions for the user (excludes overrides).
 }
 
 // DiscordPermissions is used to convert Discord permission bits to Go bitwise-able
@@ -46,11 +67,13 @@ type DiscordPermissions uint64
 
 // Do type validation against the DiscordPermissions struct to ensure it matches
 // the Marshaler/Unmarshaler interfaces.
-var _ json.Marshaler = (*DiscordPermissions)(nil)
-var _ json.Unmarshaler = (*DiscordPermissions)(nil)
+var (
+	_ json.Marshaler   = (*DiscordPermissions)(nil)
+	_ json.Unmarshaler = (*DiscordPermissions)(nil)
+)
 
-func (b *DiscordPermissions) MarshalJSON() ([]byte, error) {
-	str := strconv.FormatUint(uint64(*b), 10)
+func (b DiscordPermissions) MarshalJSON() ([]byte, error) {
+	str := strconv.FormatUint(uint64(b), 10)
 	return []byte(strconv.Quote(str)), nil
 }
 

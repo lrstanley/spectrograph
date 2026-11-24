@@ -1,117 +1,188 @@
-// Copyright (c) Liam Stanley <me@liamstanley.io>. All rights reserved. Use
-// of this source code is governed by the MIT license that can be found in
+// Copyright (c) Liam Stanley <liam@liam.sh>. All rights reserved. Use of
+// this source code is governed by the MIT license that can be found in
 // the LICENSE file.
 
 package worker
 
 import (
-	"fmt"
+	"errors"
 
-	"github.com/andersfylling/disgord"
-	"github.com/lrstanley/spectrograph/internal/metrics"
+	"github.com/diamondburned/arikawa/v3/discord"
+	"github.com/diamondburned/arikawa/v3/gateway"
+	"github.com/diamondburned/arikawa/v3/state"
+	"github.com/diamondburned/arikawa/v3/state/store"
+	"github.com/diamondburned/arikawa/v3/utils/ws"
 )
 
-// botReady is called when the bot successfully connects to the websocket.
-func (w *Worker) botReady() {}
+// registerHandlers registers the gateway event handlers for the shard. The
+// handlers are synchronous (run in the gateway event loop, after the state
+// cache has been updated), so they must not block: they only record what
+// changed, and wake the guild's actor.
+func (w *Worker) registerHandlers(s *shard) {
+	st := s.state
 
-// guildMemberUpdate is sent for current-user updates regardless of whether
-// the GUILD_MEMBERS intent is set.
-func (w *Worker) guildMemberUpdate(s disgord.Session, h *disgord.GuildMemberUpdate) {
-	w.permissions.GuildMemberUpdate(s, h)
+	st.AddSyncHandler(func(ev *ws.BackgroundErrorEvent) {
+		// Discord regularly adds gateway events that arikawa doesn't know about
+		// yet (e.g. VOICE_CHANNEL_START_TIME_UPDATE). They're skipped, and none
+		// of them matter to the worker.
+		if isUnknownEvent(ev.Err) {
+			w.logger.Debug("skipping unknown gateway event", "shard_id", s.id, "error", ev.Err)
+			return
+		}
+		w.logger.Warn("gateway background error", "shard_id", s.id, "error", ev.Err)
+	})
+
+	st.AddSyncHandler(func(ev *gateway.ReadyEvent) {
+		w.logger.Info(
+			"gateway ready",
+			"shard_id", s.id,
+			"user", ev.User.Tag(),
+			"guilds", len(ev.Guilds),
+		)
+		w.shardReady(s, ev)
+		w.shardReadyCommands(s, ev.Application.ID)
+	})
+
+	// Slash commands, buttons, and modals.
+	st.AddSyncHandler(func(ev *gateway.InteractionCreateEvent) {
+		w.interactionCreated(s, &ev.InteractionEvent)
+	})
+
+	// Sent when the bot connects (once per guild), when a guild becomes
+	// available again after an outage, and when the bot joins a guild. See
+	// [state.GuildReadyEvent], [state.GuildAvailableEvent], and
+	// [state.GuildJoinEvent].
+	st.AddSyncHandler(func(ev *gateway.GuildCreateEvent) {
+		if ev.Unavailable {
+			return
+		}
+		syncGuildCache(st.Cabinet, ev)
+		if a := w.startActor(s, ev.ID); a != nil {
+			a.guildCreated(ev)
+		}
+	})
+
+	st.AddSyncHandler(func(ev *gateway.GuildUpdateEvent) {
+		if a := w.actor(ev.ID); a != nil {
+			a.guildUpdated()
+		}
+	})
+
+	st.AddSyncHandler(func(ev *state.GuildUnavailableEvent) {
+		if a := w.actor(ev.ID); a != nil {
+			a.stop(false)
+		}
+	})
+
+	// Sent when the bot leaves or is removed from a guild, or the guild is
+	// deleted.
+	st.AddSyncHandler(func(ev *state.GuildLeaveEvent) {
+		removeGuildCache(st.Cabinet, ev.ID)
+		w.guildLeft(s, ev.ID)
+	})
+
+	// Events which (may) change the desired state of a guild's channels, or
+	// the bot's permissions.
+	st.AddSyncHandler(func(ev *gateway.VoiceStateUpdateEvent) { w.pokeGuild(ev.GuildID) })
+	st.AddSyncHandler(func(ev *gateway.ChannelCreateEvent) { w.pokeGuild(ev.GuildID) })
+	st.AddSyncHandler(func(ev *gateway.ChannelUpdateEvent) { w.pokeGuild(ev.GuildID) })
+	st.AddSyncHandler(func(ev *gateway.ChannelDeleteEvent) { w.pokeGuild(ev.GuildID) })
+	st.AddSyncHandler(func(ev *gateway.GuildRoleCreateEvent) { w.pokeGuild(ev.GuildID) })
+	st.AddSyncHandler(func(ev *gateway.GuildRoleUpdateEvent) { w.pokeGuild(ev.GuildID) })
+	st.AddSyncHandler(func(ev *gateway.GuildRoleDeleteEvent) { w.pokeGuild(ev.GuildID) })
+
+	// Sent for the bot's own member, even without the guild members intent.
+	st.AddSyncHandler(func(ev *gateway.GuildMemberUpdateEvent) { w.pokeGuild(ev.GuildID) })
 }
 
-func (w *Worker) GuildRoleUpdate(s disgord.Session, h *disgord.GuildRoleUpdate) {
-	w.permissions.GuildRoleChange(s, h.GuildID)
-}
-
-func (w *Worker) GuildRoleDelete(s disgord.Session, h *disgord.GuildRoleDelete) {
-	w.permissions.GuildRoleChange(s, h.GuildID)
-}
-
-// This event can be sent in three different scenarios:
-//   - When a user is initially connecting, to lazily load and backfill
-//     information for all unavailable guilds sent in the Ready event. Guilds
-//     that are unavailable due to an outage will send a Guild Delete event.
-//   - When a Guild becomes available again to the client.
-//   - When the current user joins a new Guild.
-//   - The inner payload is a guild object, with all the extra fields specified.
-func (w *Worker) guildCreate(s disgord.Session, h *disgord.GuildCreate) {
-	permissions, err := w.permissions.GuildCreate(s, h)
-	if err != nil {
-		w.es.Guild(h.Guild).WithError(err).Error("unable to fetch permissions")
+// syncGuildCache makes the cached channels, roles, members, and voice states
+// of the guild match the guild create event. The state cache only adds entries
+// on guild create, without updating or removing existing ones, so without this,
+// anything changed while the guild was unavailable would be stale (e.g. a user
+// who moved to another channel would still appear in the old one, so the
+// channel they are in could be deleted), and anything removed would linger
+// (e.g. a stale voice state would keep a channel occupied).
+func syncGuildCache(cab *store.Cabinet, ev *gateway.GuildCreateEvent) {
+	channels := make(map[discord.ChannelID]struct{}, len(ev.Channels)+len(ev.Threads))
+	for _, ch := range ev.Channels {
+		channels[ch.ID] = struct{}{}
+	}
+	for _, ch := range ev.Threads {
+		channels[ch.ID] = struct{}{}
+	}
+	if cached, err := cab.Channels(ev.ID); err == nil {
+		for _, ch := range cached {
+			if _, ok := channels[ch.ID]; !ok {
+				_ = cab.ChannelRemove(&ch)
+			}
+		}
 	}
 
-	if err = w.dbUpdateGuild(h.Guild, permissions, true); err != nil {
-		w.es.Guild(h.Guild).WithError(err).Error("error querying db for guild id")
-		return
+	roles := make(map[discord.RoleID]struct{}, len(ev.Roles))
+	for _, r := range ev.Roles {
+		roles[r.ID] = struct{}{}
+		_ = cab.RoleSet(ev.ID, &r, true)
+	}
+	if cached, err := cab.Roles(ev.ID); err == nil {
+		for _, r := range cached {
+			if _, ok := roles[r.ID]; !ok {
+				_ = cab.RoleRemove(ev.ID, r.ID)
+			}
+		}
 	}
 
-	w.updateMu.Lock()
-	if _, ok := w.updates[h.Guild.ID]; !ok {
-		ch := make(chan *updateEvent)
-		w.updates[h.Guild.ID] = ch
-
-		// Process the first event.
-		w.processUpdateWorker(s, h.Guild.ID, &updateEvent{sess: s, event: h, guild: h.Guild})
-
-		// Then start the event watcher for all subsequent events.
-		metrics.WorkerGuildCount.WithLabelValues(fmt.Sprintf("%d", h.ShardID)).Inc()
-		go w.eventWatcher(s, h.Guild.ID, ch)
-	}
-	w.updateMu.Unlock()
-}
-
-// Sent when a guild is updated. The inner payload is a guild object.
-func (w *Worker) guildUpdate(s disgord.Session, h *disgord.GuildUpdate) {
-	permissions, err := w.permissions.GuildUpdate(s, h)
-	if err != nil {
-		w.es.Guild(h.Guild).WithError(err).Error("unable to fetch permissions")
+	// Without the guild members intent, only some members are sent (including
+	// the bot itself), so members which aren't in the event are kept.
+	for _, m := range ev.Members {
+		_ = cab.MemberSet(ev.ID, &m, true)
 	}
 
-	if err = w.dbUpdateGuild(h.Guild, permissions, true); err != nil {
-		w.es.Guild(h.Guild).WithError(err).Error("error querying db for guild id")
-		return
+	users := make(map[discord.UserID]struct{}, len(ev.VoiceStates))
+	for _, vs := range ev.VoiceStates {
+		users[vs.UserID] = struct{}{}
+		vs.GuildID = ev.ID
+		_ = cab.VoiceStateSet(ev.ID, &vs, true)
 	}
-}
-
-// Sent when a guild becomes or was already unavailable due to an outage, or
-// when the user leaves or is removed from a guild. The inner payload is an
-// unavailable guild object. If the unavailable field is not set, the user
-// was removed from the guild.
-func (w *Worker) guildDelete(s disgord.Session, h *disgord.GuildDelete) {
-	w.updateMu.Lock()
-	if ch, ok := w.updates[h.UnavailableGuild.ID]; ok {
-		metrics.WorkerGuildCount.WithLabelValues(fmt.Sprintf("%d", h.ShardID)).Dec()
-
-		close(ch)
-
-		delete(w.updates, h.UnavailableGuild.ID)
-	}
-	w.updateMu.Unlock()
-
-	if h.UserWasRemoved() {
-		w.es.GuildID(h.UnavailableGuild.ID.String()).Info("bot was removed from guild, disabling via configuration")
-		w.permissions.RemoveGuild(h.UnavailableGuild.ID)
-
-		// TODO: maybe have it send a notification?
-		if err := w.dbDisableGuild(h.UnavailableGuild.ID.String()); err != nil {
-			w.es.GuildID(h.UnavailableGuild.ID.String()).WithError(err).Error("error disabling guild")
+	if cached, err := cab.VoiceStates(ev.ID); err == nil {
+		for _, vs := range cached {
+			if _, ok := users[vs.UserID]; !ok {
+				_ = cab.VoiceStateRemove(ev.ID, vs.UserID)
+			}
 		}
 	}
 }
 
-func (w *Worker) voiceStateUpdate(s disgord.Session, h *disgord.VoiceStateUpdate) {
-	w.routeEvent(s, h, h.GuildID)
+// removeGuildCache removes everything cached for the guild (the state cache
+// only removes the guild itself).
+func removeGuildCache(cab *store.Cabinet, id discord.GuildID) {
+	if channels, err := cab.Channels(id); err == nil {
+		for _, ch := range channels {
+			_ = cab.ChannelRemove(&ch)
+		}
+	}
+	if roles, err := cab.Roles(id); err == nil {
+		for _, r := range roles {
+			_ = cab.RoleRemove(id, r.ID)
+		}
+	}
+	if states, err := cab.VoiceStates(id); err == nil {
+		for _, vs := range states {
+			_ = cab.VoiceStateRemove(id, vs.UserID)
+		}
+	}
+	if members, err := cab.Members(id); err == nil {
+		for _, m := range members {
+			_ = cab.MemberRemove(id, m.User.ID)
+		}
+	}
 }
 
-func (w *Worker) channelCreate(s disgord.Session, h *disgord.ChannelCreate) {
-	w.routeEvent(s, h, h.Channel.GuildID)
-}
-
-func (w *Worker) channelDelete(s disgord.Session, h *disgord.ChannelDelete) {
-	w.routeEvent(s, h, h.Channel.GuildID)
-}
-
-func (w *Worker) channelUpdate(s disgord.Session, h *disgord.ChannelUpdate) {
-	w.routeEvent(s, h, h.Channel.GuildID)
+// isUnknownEvent returns true if err is from a gateway event that arikawa
+// doesn't know how to decode. arikawa creates [ws.UnknownEventError] as a
+// value, while its own [ws.IsUnknownEvent] only matches a pointer, so both are
+// checked.
+func isUnknownEvent(err error) bool {
+	var unknown ws.UnknownEventError
+	var unknownPtr *ws.UnknownEventError
+	return errors.As(err, &unknown) || errors.As(err, &unknownPtr)
 }

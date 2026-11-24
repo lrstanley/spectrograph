@@ -1,300 +1,310 @@
-// Copyright (c) Liam Stanley <me@liamstanley.io>. All rights reserved. Use
-// of this source code is governed by the MIT license that can be found in
+// Copyright (c) Liam Stanley <liam@liam.sh>. All rights reserved. Use of
+// this source code is governed by the MIT license that can be found in
 // the LICENSE file.
 
+// Package guildlogger provides a logger which, in addition to logging through
+// [log/slog], persists guild-specific events to the database, so they can be
+// shown to guild admins.
 package guildlogger
 
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"maps"
+	"sync"
 	"time"
 
-	"github.com/andersfylling/disgord"
-	"github.com/apex/log"
-	"github.com/lrstanley/spectrograph/internal/cache"
 	"github.com/lrstanley/spectrograph/internal/database"
 	"github.com/lrstanley/spectrograph/internal/database/ent"
 	"github.com/lrstanley/spectrograph/internal/database/ent/guild"
 	"github.com/lrstanley/spectrograph/internal/database/ent/guildevent"
+	"github.com/lrstanley/spectrograph/internal/database/ent/privacy"
+	"github.com/lrstanley/x/sync/cache"
+	"github.com/lrstanley/x/sync/cache/policy/lru"
+)
+
+const (
+	queueSize      = 500
+	flushTimeout   = 10 * time.Second
+	fillTimeout    = 5 * time.Second
+	guildCacheSize = 1000
+	guildCacheTTL  = 10 * time.Minute
 )
 
 type event struct {
-	guild *ent.Guild
-	event *ent.GuildEvent
+	guildID  int
+	typ      guildevent.Type
+	message  string
+	metadata map[string]any
 }
 
+// EventStream is a chainable logger, which logs through [log/slog], and also
+// persists events associated with a guild to the database (flushed on an
+// interval). The zero value is not usable, see [NewEventStream].
 type EventStream struct {
-	logger        log.Interface
-	db            *ent.Client
-	gc            *cache.Cache[string, *ent.Guild]
-	workerCh      chan *event
-	flushInterval time.Duration
+	logger *slog.Logger
+	db     *ent.Client
+	gc     *cache.Cache[string, *ent.Guild] // Discord guild ID -> guild.
+	fill   context.Context                  //nolint:containedctx // Used to load guilds into gc.
+	queue  chan *event
+	full   chan struct{} // signaled when the queue is half full, to flush early.
 
-	// Internally used for chaining.
-	base *EventStream
+	stop     chan struct{} // closed by Close.
+	stopOnce *sync.Once
+	done     chan struct{} // closed when the flush loop exits.
 
-	logSend    bool
-	logFields  log.Fields
-	logGuildID string
-	logError   error
+	fields  map[string]any
+	guildID string
+	err     error
 }
 
 // NewEventStream returns a new EventStream for streaming guild logs/events to the
 // database with appropriate annotations. The events will be flushed at the interval
-// defined by flushInterval.
-//
-// When the context provided to the event stream is cancelled, the event stream
-// will close its worker and any pending events will be dropped (too lazy to bother).
-func NewEventStream(ctx context.Context, l log.Interface, db *ent.Client, flushInterval time.Duration) *EventStream {
-	es := &EventStream{
-		logger: l,
-		db:     db,
-		gc: cache.New[string, *ent.Guild](1000, 10*time.Minute, func(gid string) (*ent.Guild, bool) {
-			g, err := db.Guild.Query().Where(guild.GuildID(gid)).Only(ctx)
-			if err != nil {
-				l.WithError(err).Error("failed to fill guild cache from db")
-				return nil, false
-			}
+// defined by flushInterval, and once more when ctx is cancelled, or when
+// [EventStream.Close] is called.
+func NewEventStream(ctx context.Context, logger *slog.Logger, db *ent.Client, flushInterval time.Duration) *EventStream {
+	ctx = privacy.DecisionContext(ctx, privacy.Allow)
 
-			return g, true
-		}),
-		workerCh:      make(chan *event, 100),
-		flushInterval: flushInterval,
+	es := &EventStream{
+		logger: logger,
+		db:     db,
+		gc: cache.New(
+			ctx,
+			cache.WithLRU[string, *ent.Guild](lru.WithCapacity(guildCacheSize)),
+			cache.WithDefaultEntryOptions[string, *ent.Guild](cache.WithExpiration(guildCacheTTL)),
+		),
+		// Not cancelled with ctx, so events logged while shutting down (before
+		// Close) are still persisted.
+		fill:     context.WithoutCancel(ctx),
+		queue:    make(chan *event, queueSize),
+		full:     make(chan struct{}, 1),
+		stop:     make(chan struct{}),
+		stopOnce: &sync.Once{},
+		done:     make(chan struct{}),
 	}
 
-	// Spin up worker to send events to the database.
-	go es.worker(ctx)
+	go es.worker(ctx, flushInterval)
 
 	return es
 }
 
-func (es *EventStream) worker(ctx context.Context) {
-	ticker := time.NewTicker(es.flushInterval)
+func (es *EventStream) worker(ctx context.Context, flushInterval time.Duration) {
+	defer close(es.done)
+
+	ticker := time.NewTicker(flushInterval)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
+			es.flush(ctx)
+			return
+		case <-es.stop:
+			es.flush(ctx)
 			return
 		case <-ticker.C:
-			var events []*event
-
-			for {
-				select {
-				case evt, ok := <-es.workerCh:
-					if !ok {
-						goto next
-					}
-
-					events = append(events, evt)
-				default:
-					goto next
-				}
-			}
-
-		next:
-			if len(events) == 0 {
-				continue
-			}
-
-			tx, err := es.db.Tx(ctx)
-			if err != nil {
-				es.logger.WithError(err).Error("failed to flush logs to db, dropping events")
-				continue
-			}
-
-			var bulk []*ent.GuildEventCreate
-
-			for _, e := range events {
-				bulk = append(
-					bulk,
-					tx.GuildEvent.Create().
-						SetGuildID(e.guild.ID).
-						SetType(e.event.Type).
-						SetMessage(e.event.Message).
-						SetMetadata(e.event.Metadata),
-				)
-			}
-
-			_, err = tx.GuildEvent.CreateBulk(bulk...).Save(ctx)
-
-			err = database.Commit(tx, err)
-			if err != nil {
-				es.logger.WithError(err).Error("failed to flush logs to db, dropping events")
-				continue
-			}
+			es.flush(ctx)
+		case <-es.full:
+			es.flush(ctx)
 		}
 	}
 }
 
-// clone returns a new EventStream with the same base as the current one, so
-// additional fields can be annotated onto the event.
+// Close stops flushing events on an interval, and flushes all queued events,
+// including those queued after the context passed to [NewEventStream] was
+// cancelled. It blocks until the events are flushed, so it should be called
+// before the database is closed, once nothing else logs events (events logged
+// afterwards are only logged through slog).
+func (es *EventStream) Close() {
+	es.stopOnce.Do(func() { close(es.stop) })
+	<-es.done
+	es.flush(privacy.DecisionContext(context.Background(), privacy.Allow))
+}
+
+// flush writes all queued events to the database. Events are drained from the
+// queue first, so the write isn't cancelled with ctx (e.g. when shutting down
+// while flushing), only bounded by a timeout.
+func (es *EventStream) flush(ctx context.Context) {
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), flushTimeout)
+	defer cancel()
+
+	var events []*event
+
+drain:
+	for {
+		select {
+		case evt := <-es.queue:
+			events = append(events, evt)
+		default:
+			break drain
+		}
+	}
+
+	if len(events) == 0 {
+		return
+	}
+
+	err := database.RunWithTx(ctx, es.db, func(ctx context.Context, tx *ent.Tx) error {
+		bulk := make([]*ent.GuildEventCreate, 0, len(events))
+		for _, e := range events {
+			bulk = append(
+				bulk,
+				tx.GuildEvent.Create().
+					SetGuildID(e.guildID).
+					SetType(e.typ).
+					SetMessage(e.message).
+					SetMetadata(e.metadata),
+			)
+		}
+		return tx.GuildEvent.CreateBulk(bulk...).Exec(ctx)
+	})
+	if err != nil {
+		es.logger.ErrorContext(ctx, "failed to flush guild events to db, dropping events", "count", len(events), "error", err)
+	}
+}
+
+// clone returns a copy of the EventStream, so additional fields can be annotated
+// onto the event, without modifying the parent.
 func (es *EventStream) clone() *EventStream {
-	base := es.base
-
-	if es.base == nil {
-		base = es
-	}
-
-	return &EventStream{
-		logger: es.logger,
-		db:     es.db,
-		gc:     es.gc,
-
-		logFields:  es.logFields,
-		logGuildID: es.logGuildID,
-		logError:   es.logError,
-
-		base: base,
-	}
+	evt := *es
+	evt.fields = maps.Clone(es.fields)
+	return &evt
 }
 
-// Guild annotates a new event with the guild information.
-func (es *EventStream) Guild(dg *disgord.Guild) *EventStream {
-	evt := es.clone()
-	evt.logGuildID = dg.ID.String()
-	return evt
-}
-
-// GuildID annotates a new event with the guild information.
+// GuildID annotates a new event with the guild (Discord snowflake) ID. Events
+// without a guild ID are only logged, not persisted.
 func (es *EventStream) GuildID(gid string) *EventStream {
 	evt := es.clone()
-	evt.logGuildID = gid
+	evt.guildID = gid
 	return evt
 }
 
 // WithError annotates a new event with the provided error.
 func (es *EventStream) WithError(err error) *EventStream {
 	evt := es.clone()
-	evt.logError = err
+	evt.err = err
 	return evt
 }
 
 // WithField annotates a new event with the provided field.
 func (es *EventStream) WithField(key string, value any) *EventStream {
 	evt := es.clone()
-
-	if evt.logFields == nil {
-		evt.logFields = log.Fields{key: value}
-	} else {
-		evt.logFields[key] = value
+	if evt.fields == nil {
+		evt.fields = make(map[string]any, 1)
 	}
-
+	evt.fields[key] = value
 	return evt
 }
 
 // WithFields annotates a new event with the provided fields.
-func (es *EventStream) WithFields(fields log.Fields) *EventStream {
+func (es *EventStream) WithFields(fields map[string]any) *EventStream {
 	evt := es.clone()
-
-	if evt.logFields == nil {
-		evt.logFields = fields
-	} else {
-		for k, v := range fields {
-			evt.logFields[k] = v
-		}
+	if evt.fields == nil {
+		evt.fields = make(map[string]any, len(fields))
 	}
-
+	maps.Copy(evt.fields, fields)
 	return evt
 }
 
-// sendEvent writes the event to the EventStream queue to be sent to the db.
-func (es *EventStream) sendEvent(eventType guildevent.Type, msg string) {
-	if es.logGuildID == "" {
+// sendEvent queues the event to be persisted to the database.
+func (es *EventStream) sendEvent(typ guildevent.Type, msg string) {
+	if es.guildID == "" {
 		return
 	}
 
-	if es.logError != nil {
-		msg = fmt.Sprintf("%s: %s", msg, es.logError)
+	if es.err != nil {
+		msg = fmt.Sprintf("%s: %s", msg, es.err)
 	}
 
-	g := es.gc.Get(es.logGuildID)
+	g := es.guild()
 	if g == nil {
-		es.logger.Error("failed to get guild from cache when sending event")
 		return
 	}
 
-	evt := &event{
-		guild: g,
-		event: &ent.GuildEvent{
-			Type:     eventType,
-			Message:  msg,
-			Metadata: es.logFields,
-		},
-	}
-
-	if es.base != nil {
-		es.base.workerCh <- evt
-	} else {
-		es.workerCh <- evt
+	select {
+	case es.queue <- &event{guildID: g.ID, typ: typ, message: msg, metadata: maps.Clone(es.fields)}:
+		// Flush bursts (e.g. every guild syncing after a reconnect) early, rather
+		// than dropping events until the next interval.
+		if len(es.queue) >= queueSize/2 {
+			select {
+			case es.full <- struct{}{}:
+			default:
+			}
+		}
+	default:
+		es.logger.Warn("guild event queue full, dropping event", "guild_id", es.guildID)
 	}
 }
 
-// buildLog builds a log entry with the current EventStream's fields.
-func (es *EventStream) buildLog() log.Interface {
-	var l log.Interface
+// guild returns the (cached) guild for the event's guild ID, or nil if it can't
+// be loaded.
+func (es *EventStream) guild() *ent.Guild {
+	g, err := es.gc.GetOrLoad(es.fill, es.guildID, func(ctx context.Context, gid string) (*ent.Guild, error) {
+		ctx, cancel := context.WithTimeout(ctx, fillTimeout)
+		defer cancel()
+		return es.db.Guild.Query().Where(guild.GuildID(gid)).Only(ctx)
+	})
+	if err != nil {
+		es.logger.Error("failed to load guild for event", "guild_id", es.guildID, "error", err)
+		return nil
+	}
+	return g
+}
 
-	if es.logFields != nil {
-		l = es.logger.WithFields(es.logFields)
-	} else {
-		l = es.logger
+// log logs the message through slog, with the EventStream's annotations.
+func (es *EventStream) log(level slog.Level, msg string) {
+	attrs := make([]slog.Attr, 0, len(es.fields)+3)
+	for k, v := range es.fields {
+		attrs = append(attrs, slog.Any(k, v))
 	}
 
-	if es.logGuildID != "" {
-		l = l.WithField("guild_id", es.logGuildID)
+	if es.guildID != "" {
+		attrs = append(attrs, slog.String("guild_id", es.guildID))
+		if g := es.guild(); g != nil {
+			attrs = append(attrs, slog.String("guild_name", g.Name))
+		}
 	}
 
-	if es.logError != nil {
-		l = l.WithError(es.logError)
+	if es.err != nil {
+		attrs = append(attrs, slog.Any("error", es.err))
 	}
 
-	if g := es.gc.Get(es.logGuildID); g != nil {
-		l = l.WithField("guild_name", g.Name)
-	}
-
-	return l
+	es.logger.LogAttrs(context.Background(), level, msg, attrs...) //nolint:sloglint // dynamic by design.
 }
 
 func (es *EventStream) Info(msg string) {
 	es.sendEvent(guildevent.TypeINFO, msg)
-	es.buildLog().Info(msg)
+	es.log(slog.LevelInfo, msg)
 }
 
-func (es *EventStream) Infof(msg string, v ...any) {
-	msg = fmt.Sprintf(msg, v...)
-	es.sendEvent(guildevent.TypeINFO, msg)
-	es.buildLog().Info(msg)
+func (es *EventStream) Infof(format string, v ...any) {
+	es.Info(fmt.Sprintf(format, v...))
 }
 
 func (es *EventStream) Warn(msg string) {
 	es.sendEvent(guildevent.TypeWARNING, msg)
-	es.buildLog().Warn(msg)
+	es.log(slog.LevelWarn, msg)
 }
 
-func (es *EventStream) Warnf(msg string, v ...any) {
-	msg = fmt.Sprintf(msg, v...)
-	es.sendEvent(guildevent.TypeWARNING, msg)
-	es.buildLog().Warn(msg)
+func (es *EventStream) Warnf(format string, v ...any) {
+	es.Warn(fmt.Sprintf(format, v...))
 }
 
 func (es *EventStream) Error(msg string) {
 	es.sendEvent(guildevent.TypeERROR, msg)
-	es.buildLog().Error(msg)
+	es.log(slog.LevelError, msg)
 }
 
-func (es *EventStream) Errorf(msg string, v ...any) {
-	msg = fmt.Sprintf(msg, v...)
-	es.sendEvent(guildevent.TypeERROR, msg)
-	es.buildLog().Error(msg)
+func (es *EventStream) Errorf(format string, v ...any) {
+	es.Error(fmt.Sprintf(format, v...))
 }
 
 func (es *EventStream) Debug(msg string) {
 	es.sendEvent(guildevent.TypeDEBUG, msg)
-	es.buildLog().Debug(msg)
+	es.log(slog.LevelDebug, msg)
 }
 
-func (es *EventStream) Debugf(msg string, v ...any) {
-	msg = fmt.Sprintf(msg, v...)
-	es.sendEvent(guildevent.TypeDEBUG, msg)
-	es.buildLog().Debug(msg)
+func (es *EventStream) Debugf(format string, v ...any) {
+	es.Debug(fmt.Sprintf(format, v...))
 }

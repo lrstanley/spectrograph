@@ -1,17 +1,27 @@
+# misc
 *.log
 ~*
 *.tmp
+tmp
 *.txt
-dist
 *.test
 *.prof
 *.conf
-*.toml
-*.db
-vendor
-rice*.go
 .git
 bin
 **/.env
+**/.env.local
+.task
+**/*.md
+# Legal pages, rendered into the frontend at build time.
+!web/app/content/*.md
+spectrograph
+
+# web
 **/node_modules
-**/.gitapicache
+**/.output
+**/.nuxt
+**/.nitro
+**/.cache
+cmd/httpserver/public/dist
+**/e2e/results

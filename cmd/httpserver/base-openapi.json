@@ -1,0 +1,476 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Spectrograph",
+    "description": "Discord bot and web dashboard that automatically manages voice channels.",
+    "version": "0.0.0"
+  },
+  "security": [
+    {
+      "cookieAuth": []
+    }
+  ],
+  "paths": {
+    "/healthy": {
+      "get": {
+        "description": "Liveness/readiness check, which also checks database connectivity. Unauthenticated.",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            },
+            "description": "Service is healthy."
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorInternalServerError"
+          }
+        },
+        "security": [],
+        "summary": "Health check",
+        "tags": [
+          "Meta"
+        ]
+      }
+    },
+    "/invite": {
+      "get": {
+        "description": "Redirects to the Discord bot authorization flow, allowing the user to pick a guild. Intended for browser navigation, not fetch. Unauthenticated.",
+        "operationId": "getBotInvite",
+        "responses": {
+          "307": {
+            "description": "Redirect to the Discord bot authorization URL.",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "summary": "Invite the bot",
+        "tags": [
+          "Meta"
+        ]
+      }
+    },
+    "/invite/{guildSnowflake}": {
+      "get": {
+        "description": "Redirects to the Discord bot authorization flow, pre-selecting the provided guild. Intended for browser navigation, not fetch. Unauthenticated.",
+        "operationId": "getBotGuildInvite",
+        "parameters": [
+          {
+            "description": "Discord snowflake ID of the guild (Guild.guild_id), not the Guild entity ID.",
+            "in": "path",
+            "name": "guildSnowflake",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            }
+          }
+        ],
+        "responses": {
+          "307": {
+            "description": "Redirect to the Discord bot authorization URL.",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "summary": "Invite the bot to a guild",
+        "tags": [
+          "Meta"
+        ]
+      }
+    },
+    "/auth/providers": {
+      "get": {
+        "description": "Lists the available authentication providers. Unauthenticated.",
+        "operationId": "getAuthProviders",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthProviders"
+                }
+              }
+            },
+            "description": "Available authentication providers."
+          }
+        },
+        "security": [],
+        "summary": "List authentication providers",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/providers/{provider}": {
+      "get": {
+        "description": "Begins the OAuth2 flow with the provider (currently only `discord`). Intended for browser navigation, not fetch. Supports a `next` query parameter, which is stored in a cookie and redirected to after authentication completes.",
+        "operationId": "beginAuth",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "discord"
+              ]
+            }
+          },
+          {
+            "description": "Where to redirect to after authentication: a relative path (e.g. `/dashboard`), or an absolute `http`/`https` URL whose hostname matches the API's (any port, so a frontend dev server works). Any other value redirects to `/`.",
+            "in": "query",
+            "name": "next",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "307": {
+            "description": "Redirect to the provider authorization URL."
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorBadRequest"
+          }
+        },
+        "security": [],
+        "summary": "Begin authentication",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/providers/{provider}/callback": {
+      "get": {
+        "description": "OAuth2 redirect target for the provider (not called directly). On success, stores the session cookie and redirects to the `next` URL from beginAuth (or `/`). Failures redirect to the frontend login page instead, on the origin of the `next` URL if it's on the same host: banned users to `/login?reason=banned`, and any other failure (e.g. the user cancelled on Discord, an invalid or expired state, or a Discord API error) to `/login?reason=error&request_id=<id>`, where the request ID matches the server logs.",
+        "operationId": "completeAuth",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "discord"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Authentication failed, redirect to `/login?reason=banned` (banned user) or `/login?reason=error&request_id=<id>` (any other failure)."
+          },
+          "307": {
+            "description": "Authenticated, redirect to `next` or `/`."
+          }
+        },
+        "security": [],
+        "summary": "Complete authentication",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "description": "Clears the session cookie, then redirects to `next` or `/`. Intended for browser navigation, not fetch.",
+        "operationId": "logout",
+        "parameters": [
+          {
+            "description": "Where to redirect to after logging out: a relative path (e.g. `/dashboard`), or an absolute `http`/`https` URL whose hostname matches the API's (any port, so a frontend dev server works). Any other value redirects to `/`.",
+            "in": "query",
+            "name": "next",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Session was cleared, redirect to `next` or `/`."
+          }
+        },
+        "security": [],
+        "summary": "Logout",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/self": {
+      "get": {
+        "description": "Returns the currently authenticated user. Responds with 403 (error `user is banned`) if the user is banned, and 401 if signed out.",
+        "operationId": "getSelf",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "The authenticated user."
+          },
+          "401": {
+            "$ref": "#/components/responses/ErrorUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorForbidden"
+          }
+        },
+        "summary": "Get current user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "description": "Deletes the currently authenticated user (and their guild associations), and clears the session cookie. Guilds and guild configuration are retained.",
+        "operationId": "deleteSelf",
+        "responses": {
+          "204": {
+            "description": "The user was deleted."
+          },
+          "401": {
+            "$ref": "#/components/responses/ErrorUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorForbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorInternalServerError"
+          }
+        },
+        "summary": "Delete current user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{userID}/ban": {
+      "post": {
+        "description": "Bans a user, invalidating their sessions and preventing them from authenticating. System admins only.",
+        "operationId": "banUser",
+        "parameters": [
+          {
+            "description": "The ID of the User entity.",
+            "in": "path",
+            "name": "userID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BanUserBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "The banned user."
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/ErrorUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorNotFound"
+          }
+        },
+        "summary": "Ban user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{userID}/unban": {
+      "post": {
+        "description": "Unbans a user. System admins only.",
+        "operationId": "unbanUser",
+        "parameters": [
+          {
+            "description": "The ID of the User entity.",
+            "in": "path",
+            "name": "userID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "The unbanned user."
+          },
+          "401": {
+            "$ref": "#/components/responses/ErrorUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorNotFound"
+          }
+        },
+        "summary": "Unban user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/guilds/{guildID}/guild-events/stream": {
+      "get": {
+        "description": "Server-Sent Events stream of guild events, for guild admins and system admins (DEBUG events are only included for system admins). Each SSE message has `id` set to the GuildEvent ID, and `data` set to the GuildEvent JSON object, including the eager-loaded `edges.guild` (no `event` name, so use `onmessage`). On connect, the most recent events (up to 100, from the last 2 hours) are sent in ascending order, unless the `Last-Event-ID` header is provided (sent automatically by EventSource on reconnect), in which case only newer events are sent. Keepalives are SSE comments. Access is re-validated on every poll, so the stream ends if the user is banned or loses access to the guild (reconnecting then fails with 403 or 404).",
+        "operationId": "streamGuildEvents",
+        "parameters": [
+          {
+            "description": "The ID of the Guild entity.",
+            "in": "path",
+            "name": "guildID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Resume the stream after this GuildEvent ID.",
+            "in": "header",
+            "name": "Last-Event-ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuildEventRead"
+                }
+              }
+            },
+            "description": "SSE stream of GuildEvent objects."
+          },
+          "401": {
+            "$ref": "#/components/responses/ErrorUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/ErrorForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/ErrorNotFound"
+          }
+        },
+        "summary": "Stream guild events",
+        "tags": [
+          "Guilds",
+          "GuildEvents"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthStatus": {
+        "properties": {
+          "status": {
+            "example": "ok",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "AuthProviders": {
+        "properties": {
+          "providers": {
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "discord"
+            ],
+            "type": "array"
+          }
+        },
+        "required": [
+          "providers"
+        ],
+        "type": "object"
+      },
+      "BanUserBody": {
+        "properties": {
+          "reason": {
+            "description": "Reason for the ban.",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "cookieAuth": {
+        "description": "Encrypted cookie session, set after authenticating through Discord (see beginAuth).",
+        "in": "cookie",
+        "name": "_gothic_session",
+        "type": "apiKey"
+      }
+    }
+  }
+}

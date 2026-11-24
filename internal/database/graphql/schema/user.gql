@@ -1,9 +1,0 @@
-extend type Query {
-    self: User
-}
-
-extend type Mutation {
-    banUser(id: ID!, reason: String!): Boolean!
-    unbanUser(id: ID!): Boolean!
-    deleteAccount(noop: ID): Boolean!
-}

@@ -1,0 +1,4659 @@
+{
+	"openapi": "3.0.3",
+	"info": {
+		"title": "Spectrograph",
+		"description": "Discord bot and web dashboard that automatically manages voice channels.",
+		"version": "0.0.0"
+	},
+	"paths": {
+		"/auth/logout": {
+			"get": {
+				"tags": [
+					"Auth"
+				],
+				"summary": "Logout",
+				"description": "Clears the session cookie, then redirects to `next` or `/`. Intended for browser navigation, not fetch.",
+				"operationId": "logout",
+				"parameters": [
+					{
+						"name": "next",
+						"in": "query",
+						"description": "Where to redirect to after logging out: a relative path (e.g. `/dashboard`), or an absolute `http`/`https` URL whose hostname matches the API's (any port, so a frontend dev server works). Any other value redirects to `/`.",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"302": {
+						"description": "Session was cleared, redirect to `next` or `/`.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/auth/providers": {
+			"get": {
+				"tags": [
+					"Auth"
+				],
+				"summary": "List authentication providers",
+				"description": "Lists the available authentication providers. Unauthenticated.",
+				"operationId": "getAuthProviders",
+				"responses": {
+					"200": {
+						"description": "Available authentication providers.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AuthProviders"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/auth/providers/{provider}": {
+			"get": {
+				"tags": [
+					"Auth"
+				],
+				"summary": "Begin authentication",
+				"description": "Begins the OAuth2 flow with the provider (currently only `discord`). Intended for browser navigation, not fetch. Supports a `next` query parameter, which is stored in a cookie and redirected to after authentication completes.",
+				"operationId": "beginAuth",
+				"parameters": [
+					{
+						"name": "provider",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"discord"
+							]
+						}
+					},
+					{
+						"name": "next",
+						"in": "query",
+						"description": "Where to redirect to after authentication: a relative path (e.g. `/dashboard`), or an absolute `http`/`https` URL whose hostname matches the API's (any port, so a frontend dev server works). Any other value redirects to `/`.",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"307": {
+						"description": "Redirect to the provider authorization URL.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/auth/providers/{provider}/callback": {
+			"get": {
+				"tags": [
+					"Auth"
+				],
+				"summary": "Complete authentication",
+				"description": "OAuth2 redirect target for the provider (not called directly). On success, stores the session cookie and redirects to the `next` URL from beginAuth (or `/`). Failures redirect to the frontend login page instead, on the origin of the `next` URL if it's on the same host: banned users to `/login?reason=banned`, and any other failure (e.g. the user cancelled on Discord, an invalid or expired state, or a Discord API error) to `/login?reason=error&request_id=<id>`, where the request ID matches the server logs.",
+				"operationId": "completeAuth",
+				"parameters": [
+					{
+						"name": "provider",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"discord"
+							]
+						}
+					}
+				],
+				"responses": {
+					"302": {
+						"description": "Authentication failed, redirect to `/login?reason=banned` (banned user) or `/login?reason=error&request_id=<id>` (any other failure).",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						}
+					},
+					"307": {
+						"description": "Authenticated, redirect to `next` or `/`.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guild-admin-configs/{guildadminconfigID}": {
+			"summary": "Operate on a single GuildAdminConfig entity",
+			"description": "Operate on a single GuildAdminConfig entity by its ID.",
+			"get": {
+				"tags": [
+					"GuildAdminConfigs"
+				],
+				"summary": "Retrieve a guildadminconfig",
+				"description": "Retrieve a single GuildAdminConfig entity by its ID. If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getGuildAdminConfig",
+				"responses": {
+					"200": {
+						"description": "The requested GuildAdminConfig entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildAdminConfigRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"GuildAdminConfigs"
+				],
+				"summary": "Update a guildadminconfig",
+				"description": "Update an existing GuildAdminConfig entity. If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "updateGuildAdminConfig",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GuildAdminConfigUpdate"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "The update GuildAdminConfig entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildAdminConfigRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"409": {
+						"$ref": "#/components/responses/ErrorConflict"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildAdminConfigID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guild-admin-configs/{guildadminconfigID}/guild": {
+			"summary": "The guild these settings belong to.",
+			"description": "Get a guildadminconfigs associated guild (Guild entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"GuildAdminConfigs",
+					"Guilds"
+				],
+				"summary": "The guild these settings belong to.",
+				"description": "Get a guildadminconfigs associated guild (Guild entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getGuildAdminConfigGuild",
+				"responses": {
+					"200": {
+						"description": "The requested guild entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildAdminConfigID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guild-configs/{guildconfigID}": {
+			"summary": "Operate on a single GuildConfig entity",
+			"description": "Operate on a single GuildConfig entity by its ID.",
+			"get": {
+				"tags": [
+					"GuildConfigs"
+				],
+				"summary": "Retrieve a guildconfig",
+				"description": "Retrieve a single GuildConfig entity by its ID. If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getGuildConfig",
+				"responses": {
+					"200": {
+						"description": "The requested GuildConfig entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildConfigRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"GuildConfigs"
+				],
+				"summary": "Update a guildconfig",
+				"description": "Update an existing GuildConfig entity. If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "updateGuildConfig",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GuildConfigUpdate"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "The update GuildConfig entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildConfigRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"409": {
+						"$ref": "#/components/responses/ErrorConflict"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildConfigID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guild-configs/{guildconfigID}/guild": {
+			"summary": "The guild these settings belong to.",
+			"description": "Get a guildconfigs associated guild (Guild entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"GuildConfigs",
+					"Guilds"
+				],
+				"summary": "The guild these settings belong to.",
+				"description": "Get a guildconfigs associated guild (Guild entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getGuildConfigGuild",
+				"responses": {
+					"200": {
+						"description": "The requested guild entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildConfigID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guild-events": {
+			"summary": "List guildevents",
+			"description": "List GuildEvent entities (including pagination, filtering, sorting, etc). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"GuildEvents"
+				],
+				"summary": "List guildevents",
+				"description": "List GuildEvent entities (including pagination, filtering, sorting, etc). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "listGuildEvents",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/Page"
+					},
+					{
+						"name": "per_page",
+						"in": "query",
+						"description": "The number of entities to retrieve per page.",
+						"schema": {
+							"type": "integer",
+							"maximum": 500,
+							"minimum": 1,
+							"default": 10
+						}
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "Sort entity results by the given field.",
+						"schema": {
+							"$ref": "#/components/schemas/GuildEventSortableFields",
+							"default": "create_time"
+						}
+					},
+					{
+						"name": "order",
+						"in": "query",
+						"description": "Order the results in ascending or descending order.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							],
+							"default": "desc"
+						}
+					},
+					{
+						"$ref": "#/components/parameters/FilterOperation"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventCreateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventCreateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventCreateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventCreateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventUpdateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventUpdateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventUpdateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventUpdateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventTypeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventTypeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventTypeIn"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventTypeNotIn"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventMessageContains"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventMessageContainsFold"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The requested GuildEvent.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildEventList"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guild-events/{guildeventID}": {
+			"summary": "Operate on a single GuildEvent entity",
+			"description": "Operate on a single GuildEvent entity by its ID.",
+			"get": {
+				"tags": [
+					"GuildEvents"
+				],
+				"summary": "Retrieve a guildevent",
+				"description": "Retrieve a single GuildEvent entity by its ID. If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getGuildEvent",
+				"responses": {
+					"200": {
+						"description": "The requested GuildEvent entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildEventRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildEventID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guild-events/{guildeventID}/guild": {
+			"summary": "The guild these events belong to.",
+			"description": "Get a guildevents associated guild (Guild entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"GuildEvents",
+					"Guilds"
+				],
+				"summary": "The guild these events belong to.",
+				"description": "Get a guildevents associated guild (Guild entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getGuildEventGuild",
+				"responses": {
+					"200": {
+						"description": "The requested guild entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildEventID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guilds": {
+			"summary": "List guilds",
+			"description": "List Guild entities (including pagination, filtering, sorting, etc). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"Guilds"
+				],
+				"summary": "List guilds",
+				"description": "List Guild entities (including pagination, filtering, sorting, etc). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "listGuilds",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/Page"
+					},
+					{
+						"name": "per_page",
+						"in": "query",
+						"description": "The number of entities to retrieve per page.",
+						"schema": {
+							"type": "integer",
+							"maximum": 500,
+							"minimum": 1,
+							"default": 10
+						}
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "Sort entity results by the given field.",
+						"schema": {
+							"$ref": "#/components/schemas/GuildSortableFields",
+							"default": "id"
+						}
+					},
+					{
+						"name": "order",
+						"in": "query",
+						"description": "Order the results in ascending or descending order.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							],
+							"default": "asc"
+						}
+					},
+					{
+						"$ref": "#/components/parameters/FilterOperation"
+					},
+					{
+						"$ref": "#/components/parameters/GuildCreateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildCreateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildCreateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildCreateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildUpdateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildUpdateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildUpdateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildUpdateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildGuildIDEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildGuildIDNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildGuildIDIn"
+					},
+					{
+						"$ref": "#/components/parameters/GuildGuildIDNotIn"
+					},
+					{
+						"$ref": "#/components/parameters/GuildGuildIDEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameContains"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameContainsFold"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameHasPrefix"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameHasSuffix"
+					},
+					{
+						"$ref": "#/components/parameters/GuildJoinedAtGT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildJoinedAtLT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildJoinedAtIsNil"
+					},
+					{
+						"$ref": "#/components/parameters/GuildOwnerIDEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildOwnerIDNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildOwnerIDIsNil"
+					},
+					{
+						"$ref": "#/components/parameters/GuildOwnerIDEqualFold"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The requested Guild.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildList"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guilds/{guildID}": {
+			"summary": "Operate on a single Guild entity",
+			"description": "Operate on a single Guild entity by its ID.",
+			"get": {
+				"tags": [
+					"Guilds"
+				],
+				"summary": "Retrieve a guild",
+				"description": "Retrieve a single Guild entity by its ID. If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getGuild",
+				"responses": {
+					"200": {
+						"description": "The requested Guild entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guilds/{guildID}/admins": {
+			"summary": "The users that are an admin (or owner) of this guild.",
+			"description": "List a guilds associated admins (User entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"Guilds",
+					"Users"
+				],
+				"summary": "The users that are an admin (or owner) of this guild.",
+				"description": "List a guilds associated admins (User entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "listGuildAdmins",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/Page"
+					},
+					{
+						"name": "per_page",
+						"in": "query",
+						"description": "The number of entities to retrieve per page.",
+						"schema": {
+							"type": "integer",
+							"maximum": 500,
+							"minimum": 1,
+							"default": 10
+						}
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "Sort entity results by the given field.",
+						"schema": {
+							"$ref": "#/components/schemas/UserSortableFields",
+							"default": "id"
+						}
+					},
+					{
+						"name": "order",
+						"in": "query",
+						"description": "Order the results in ascending or descending order.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							],
+							"default": "asc"
+						}
+					},
+					{
+						"$ref": "#/components/parameters/FilterOperation"
+					},
+					{
+						"$ref": "#/components/parameters/UserCreateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserCreateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserCreateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/UserCreateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/UserUpdateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUpdateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUpdateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/UserUpdateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/UserUserIDEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUserIDNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUserIDIn"
+					},
+					{
+						"$ref": "#/components/parameters/UserUserIDNotIn"
+					},
+					{
+						"$ref": "#/components/parameters/UserUserIDEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserAdminEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserBannedEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameIn"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameNotIn"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameContains"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameContainsFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameHasPrefix"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameHasSuffix"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameIsNil"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameContains"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameContainsFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameHasPrefix"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameHasSuffix"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailIsNil"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailContains"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailContainsFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailHasPrefix"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailHasSuffix"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The requested admins.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserList"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guilds/{guildID}/guild-admin-config": {
+			"summary": "Admin-defined configuration for the guild (overrides user-defined configuration).",
+			"description": "Get a guilds associated guildAdminConfig (GuildAdminConfig entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"Guilds",
+					"GuildAdminConfigs"
+				],
+				"summary": "Admin-defined configuration for the guild (overrides user-defined configuration).",
+				"description": "Get a guilds associated guildAdminConfig (GuildAdminConfig entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getGuildAdminConfigForGuild",
+				"responses": {
+					"200": {
+						"description": "The requested guildAdminConfig entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildAdminConfigRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guilds/{guildID}/guild-config": {
+			"summary": "User-defined configuration for the guild.",
+			"description": "Get a guilds associated guildConfig (GuildConfig entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"Guilds",
+					"GuildConfigs"
+				],
+				"summary": "User-defined configuration for the guild.",
+				"description": "Get a guilds associated guildConfig (GuildConfig entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getGuildConfigForGuild",
+				"responses": {
+					"200": {
+						"description": "The requested guildConfig entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildConfigRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guilds/{guildID}/guild-events": {
+			"summary": "Events (logs) associated with the guild.",
+			"description": "List a guilds associated guildEvents (GuildEvent entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"Guilds",
+					"GuildEvents"
+				],
+				"summary": "Events (logs) associated with the guild.",
+				"description": "List a guilds associated guildEvents (GuildEvent entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "listGuildEventsForGuild",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/Page"
+					},
+					{
+						"name": "per_page",
+						"in": "query",
+						"description": "The number of entities to retrieve per page.",
+						"schema": {
+							"type": "integer",
+							"maximum": 500,
+							"minimum": 1,
+							"default": 10
+						}
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "Sort entity results by the given field.",
+						"schema": {
+							"$ref": "#/components/schemas/GuildEventSortableFields",
+							"default": "create_time"
+						}
+					},
+					{
+						"name": "order",
+						"in": "query",
+						"description": "Order the results in ascending or descending order.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							],
+							"default": "desc"
+						}
+					},
+					{
+						"$ref": "#/components/parameters/FilterOperation"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventCreateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventCreateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventCreateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventCreateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventUpdateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventUpdateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventUpdateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventUpdateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventTypeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventTypeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventTypeIn"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventTypeNotIn"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventMessageContains"
+					},
+					{
+						"$ref": "#/components/parameters/GuildEventMessageContainsFold"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The requested guildEvents.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildEventList"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/GuildID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/guilds/{guildID}/guild-events/stream": {
+			"get": {
+				"tags": [
+					"Guilds",
+					"GuildEvents"
+				],
+				"summary": "Stream guild events",
+				"description": "Server-Sent Events stream of guild events, for guild admins and system admins (DEBUG events are only included for system admins). Each SSE message has `id` set to the GuildEvent ID, and `data` set to the GuildEvent JSON object, including the eager-loaded `edges.guild` (no `event` name, so use `onmessage`). On connect, the most recent events (up to 100, from the last 2 hours) are sent in ascending order, unless the `Last-Event-ID` header is provided (sent automatically by EventSource on reconnect), in which case only newer events are sent. Keepalives are SSE comments. Access is re-validated on every poll, so the stream ends if the user is banned or loses access to the guild (reconnecting then fails with 403 or 404).",
+				"operationId": "streamGuildEvents",
+				"parameters": [
+					{
+						"name": "guildID",
+						"in": "path",
+						"description": "The ID of the Guild entity.",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "Last-Event-ID",
+						"in": "header",
+						"description": "Resume the stream after this GuildEvent ID.",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "SSE stream of GuildEvent objects.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"text/event-stream": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildEventRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/healthy": {
+			"get": {
+				"tags": [
+					"Meta"
+				],
+				"summary": "Health check",
+				"description": "Liveness/readiness check, which also checks database connectivity. Unauthenticated.",
+				"operationId": "getHealth",
+				"responses": {
+					"200": {
+						"description": "Service is healthy.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HealthStatus"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/invite": {
+			"get": {
+				"tags": [
+					"Meta"
+				],
+				"summary": "Invite the bot",
+				"description": "Redirects to the Discord bot authorization flow, allowing the user to pick a guild. Intended for browser navigation, not fetch. Unauthenticated.",
+				"operationId": "getBotInvite",
+				"responses": {
+					"307": {
+						"description": "Redirect to the Discord bot authorization URL.",
+						"headers": {
+							"Location": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/invite/{guildSnowflake}": {
+			"get": {
+				"tags": [
+					"Meta"
+				],
+				"summary": "Invite the bot to a guild",
+				"description": "Redirects to the Discord bot authorization flow, pre-selecting the provided guild. Intended for browser navigation, not fetch. Unauthenticated.",
+				"operationId": "getBotGuildInvite",
+				"parameters": [
+					{
+						"name": "guildSnowflake",
+						"in": "path",
+						"description": "Discord snowflake ID of the guild (Guild.guild_id), not the Guild entity ID.",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"pattern": "^[0-9]+$"
+						}
+					}
+				],
+				"responses": {
+					"307": {
+						"description": "Redirect to the Discord bot authorization URL.",
+						"headers": {
+							"Location": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/openapi.json": {
+			"get": {
+				"tags": [
+					"Meta"
+				],
+				"summary": "Get OpenAPI spec",
+				"description": "Get the OpenAPI specification for this service.",
+				"operationId": "getOpenAPI",
+				"responses": {
+					"200": {
+						"description": "OpenAPI specification was found",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"additionalProperties": true
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/self": {
+			"get": {
+				"tags": [
+					"Users"
+				],
+				"summary": "Get current user",
+				"description": "Returns the currently authenticated user. Responds with 403 (error `user is banned`) if the user is banned, and 401 if signed out.",
+				"operationId": "getSelf",
+				"responses": {
+					"200": {
+						"description": "The authenticated user.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Users"
+				],
+				"summary": "Delete current user",
+				"description": "Deletes the currently authenticated user (and their guild associations), and clears the session cookie. Guilds and guild configuration are retained.",
+				"operationId": "deleteSelf",
+				"responses": {
+					"204": {
+						"description": "The user was deleted.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/users": {
+			"summary": "List users",
+			"description": "List User entities (including pagination, filtering, sorting, etc). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"Users"
+				],
+				"summary": "List users",
+				"description": "List User entities (including pagination, filtering, sorting, etc). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "listUsers",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/Page"
+					},
+					{
+						"name": "per_page",
+						"in": "query",
+						"description": "The number of entities to retrieve per page.",
+						"schema": {
+							"type": "integer",
+							"maximum": 500,
+							"minimum": 1,
+							"default": 10
+						}
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "Sort entity results by the given field.",
+						"schema": {
+							"$ref": "#/components/schemas/UserSortableFields",
+							"default": "id"
+						}
+					},
+					{
+						"name": "order",
+						"in": "query",
+						"description": "Order the results in ascending or descending order.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							],
+							"default": "asc"
+						}
+					},
+					{
+						"$ref": "#/components/parameters/FilterOperation"
+					},
+					{
+						"$ref": "#/components/parameters/UserCreateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserCreateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserCreateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/UserCreateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/UserUpdateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUpdateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUpdateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/UserUpdateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/UserUserIDEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUserIDNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUserIDIn"
+					},
+					{
+						"$ref": "#/components/parameters/UserUserIDNotIn"
+					},
+					{
+						"$ref": "#/components/parameters/UserUserIDEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserAdminEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserBannedEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameIn"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameNotIn"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameContains"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameContainsFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameHasPrefix"
+					},
+					{
+						"$ref": "#/components/parameters/UserUsernameHasSuffix"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameIsNil"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameContains"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameContainsFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameHasPrefix"
+					},
+					{
+						"$ref": "#/components/parameters/UserGlobalNameHasSuffix"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailIsNil"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailContains"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailContainsFold"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailHasPrefix"
+					},
+					{
+						"$ref": "#/components/parameters/UserEmailHasSuffix"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The requested User.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserList"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/users/{userID}": {
+			"summary": "Operate on a single User entity",
+			"description": "Operate on a single User entity by its ID.",
+			"get": {
+				"tags": [
+					"Users"
+				],
+				"summary": "Retrieve a user",
+				"description": "Retrieve a single User entity by its ID. If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getUser",
+				"responses": {
+					"200": {
+						"description": "The requested User entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/UserID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/users/{userID}/ban": {
+			"post": {
+				"tags": [
+					"Users"
+				],
+				"summary": "Ban user",
+				"description": "Bans a user, invalidating their sessions and preventing them from authenticating. System admins only.",
+				"operationId": "banUser",
+				"parameters": [
+					{
+						"name": "userID",
+						"in": "path",
+						"description": "The ID of the User entity.",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BanUserBody"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "The banned user.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/users/{userID}/banned-by": {
+			"summary": "User that banned this user.",
+			"description": "Get a users associated bannedBy (User entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"Users"
+				],
+				"summary": "User that banned this user.",
+				"description": "Get a users associated bannedBy (User entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "getUserBannedBy",
+				"responses": {
+					"200": {
+						"description": "The requested bannedBy entity.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserRead"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/UserID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/users/{userID}/unban": {
+			"post": {
+				"tags": [
+					"Users"
+				],
+				"summary": "Unban user",
+				"description": "Unbans a user. System admins only.",
+				"operationId": "unbanUser",
+				"parameters": [
+					{
+						"name": "userID",
+						"in": "path",
+						"description": "The ID of the User entity.",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The unbanned user.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"404": {
+						"$ref": "#/components/responses/ErrorNotFound"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		},
+		"/users/{userID}/user-guilds": {
+			"summary": "Guilds that the user is either owner or admin of (and thus can add the connection to the bot).",
+			"description": "List a users associated userGuilds (Guild entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+			"get": {
+				"tags": [
+					"Users",
+					"Guilds"
+				],
+				"summary": "Guilds that the user is either owner or admin of (and thus can add the connection to the bot).",
+				"description": "List a users associated userGuilds (Guild entity type). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -> edge, not entity -> edge -> edge -> etc).",
+				"operationId": "listGuildsForUser",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/Page"
+					},
+					{
+						"name": "per_page",
+						"in": "query",
+						"description": "The number of entities to retrieve per page.",
+						"schema": {
+							"type": "integer",
+							"maximum": 500,
+							"minimum": 1,
+							"default": 10
+						}
+					},
+					{
+						"name": "sort",
+						"in": "query",
+						"description": "Sort entity results by the given field.",
+						"schema": {
+							"$ref": "#/components/schemas/GuildSortableFields",
+							"default": "id"
+						}
+					},
+					{
+						"name": "order",
+						"in": "query",
+						"description": "Order the results in ascending or descending order.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							],
+							"default": "asc"
+						}
+					},
+					{
+						"$ref": "#/components/parameters/FilterOperation"
+					},
+					{
+						"$ref": "#/components/parameters/GuildCreateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildCreateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildCreateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildCreateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildUpdateTimeEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildUpdateTimeNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildUpdateTimeGT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildUpdateTimeLT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildGuildIDEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildGuildIDNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildGuildIDIn"
+					},
+					{
+						"$ref": "#/components/parameters/GuildGuildIDNotIn"
+					},
+					{
+						"$ref": "#/components/parameters/GuildGuildIDEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameEqualFold"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameContains"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameContainsFold"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameHasPrefix"
+					},
+					{
+						"$ref": "#/components/parameters/GuildNameHasSuffix"
+					},
+					{
+						"$ref": "#/components/parameters/GuildJoinedAtGT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildJoinedAtLT"
+					},
+					{
+						"$ref": "#/components/parameters/GuildJoinedAtIsNil"
+					},
+					{
+						"$ref": "#/components/parameters/GuildOwnerIDEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildOwnerIDNEQ"
+					},
+					{
+						"$ref": "#/components/parameters/GuildOwnerIDIsNil"
+					},
+					{
+						"$ref": "#/components/parameters/GuildOwnerIDEqualFold"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The requested userGuilds.",
+						"headers": {
+							"X-Ratelimit-Limit": {
+								"$ref": "#/components/headers/X-Ratelimit-Limit"
+							},
+							"X-Ratelimit-Remaining": {
+								"$ref": "#/components/headers/X-Ratelimit-Remaining"
+							},
+							"X-Ratelimit-Reset": {
+								"$ref": "#/components/headers/X-Ratelimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GuildList"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/ErrorBadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/ErrorUnauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/ErrorForbidden"
+					},
+					"429": {
+						"$ref": "#/components/responses/ErrorTooManyRequests"
+					},
+					"500": {
+						"$ref": "#/components/responses/ErrorInternalServerError"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/PrettyResponse"
+				},
+				{
+					"$ref": "#/components/parameters/UserID"
+				},
+				{
+					"$ref": "#/components/parameters/X-Request-Id"
+				}
+			]
+		}
+	},
+	"components": {
+		"schemas": {
+			"AuthProviders": {
+				"type": "object",
+				"properties": {
+					"providers": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"example": [
+							"discord"
+						]
+					}
+				},
+				"required": [
+					"providers"
+				]
+			},
+			"BanUserBody": {
+				"type": "object",
+				"properties": {
+					"reason": {
+						"description": "Reason for the ban.",
+						"type": "string",
+						"maxLength": 500,
+						"minLength": 1
+					}
+				},
+				"required": [
+					"reason"
+				]
+			},
+			"ErrorBadRequest": {
+				"type": "object",
+				"properties": {
+					"error": {
+						"description": "The underlying error, which may be masked when debugging is disabled.",
+						"type": "string"
+					},
+					"type": {
+						"description": "A summary of the error code based off the HTTP status code or application error code.",
+						"type": "string",
+						"example": "Bad Request"
+					},
+					"code": {
+						"description": "The HTTP status code or other internal application error code.",
+						"type": "integer",
+						"example": 400
+					},
+					"request_id": {
+						"description": "The unique request ID for this error.",
+						"type": "string",
+						"example": "cb6f6f9c1783cdc9752cee2a4e95dd4c"
+					},
+					"timestamp": {
+						"description": "The timestamp of the error, in RFC3339 format.",
+						"type": "string",
+						"format": "date-time",
+						"example": "2024-04-26T12:19:01Z"
+					},
+					"field": {
+						"description": "The name of the invalid field, for validation and constraint errors (when known). The error message is then prefixed with \"<field>: \".",
+						"type": "string",
+						"example": "regex_match"
+					}
+				},
+				"required": [
+					"error",
+					"type",
+					"code",
+					"timestamp"
+				]
+			},
+			"ErrorConflict": {
+				"type": "object",
+				"properties": {
+					"error": {
+						"description": "The underlying error, which may be masked when debugging is disabled.",
+						"type": "string"
+					},
+					"type": {
+						"description": "A summary of the error code based off the HTTP status code or application error code.",
+						"type": "string",
+						"example": "Conflict"
+					},
+					"code": {
+						"description": "The HTTP status code or other internal application error code.",
+						"type": "integer",
+						"example": 409
+					},
+					"request_id": {
+						"description": "The unique request ID for this error.",
+						"type": "string",
+						"example": "cb6f6f9c1783cdc9752cee2a4e95dd4c"
+					},
+					"timestamp": {
+						"description": "The timestamp of the error, in RFC3339 format.",
+						"type": "string",
+						"format": "date-time",
+						"example": "2024-04-26T12:19:01Z"
+					},
+					"field": {
+						"description": "The name of the invalid field, for validation and constraint errors (when known). The error message is then prefixed with \"<field>: \".",
+						"type": "string",
+						"example": "regex_match"
+					}
+				},
+				"required": [
+					"error",
+					"type",
+					"code",
+					"timestamp"
+				]
+			},
+			"ErrorForbidden": {
+				"type": "object",
+				"properties": {
+					"error": {
+						"description": "The underlying error, which may be masked when debugging is disabled.",
+						"type": "string"
+					},
+					"type": {
+						"description": "A summary of the error code based off the HTTP status code or application error code.",
+						"type": "string",
+						"example": "Forbidden"
+					},
+					"code": {
+						"description": "The HTTP status code or other internal application error code.",
+						"type": "integer",
+						"example": 403
+					},
+					"request_id": {
+						"description": "The unique request ID for this error.",
+						"type": "string",
+						"example": "cb6f6f9c1783cdc9752cee2a4e95dd4c"
+					},
+					"timestamp": {
+						"description": "The timestamp of the error, in RFC3339 format.",
+						"type": "string",
+						"format": "date-time",
+						"example": "2024-04-26T12:19:01Z"
+					}
+				},
+				"required": [
+					"error",
+					"type",
+					"code",
+					"timestamp"
+				]
+			},
+			"ErrorInternalServerError": {
+				"type": "object",
+				"properties": {
+					"error": {
+						"description": "The underlying error, which may be masked when debugging is disabled.",
+						"type": "string"
+					},
+					"type": {
+						"description": "A summary of the error code based off the HTTP status code or application error code.",
+						"type": "string",
+						"example": "Internal Server Error"
+					},
+					"code": {
+						"description": "The HTTP status code or other internal application error code.",
+						"type": "integer",
+						"example": 500
+					},
+					"request_id": {
+						"description": "The unique request ID for this error.",
+						"type": "string",
+						"example": "cb6f6f9c1783cdc9752cee2a4e95dd4c"
+					},
+					"timestamp": {
+						"description": "The timestamp of the error, in RFC3339 format.",
+						"type": "string",
+						"format": "date-time",
+						"example": "2024-04-26T12:19:01Z"
+					}
+				},
+				"required": [
+					"error",
+					"type",
+					"code",
+					"timestamp"
+				]
+			},
+			"ErrorNotFound": {
+				"type": "object",
+				"properties": {
+					"error": {
+						"description": "The underlying error, which may be masked when debugging is disabled.",
+						"type": "string"
+					},
+					"type": {
+						"description": "A summary of the error code based off the HTTP status code or application error code.",
+						"type": "string",
+						"example": "Not Found"
+					},
+					"code": {
+						"description": "The HTTP status code or other internal application error code.",
+						"type": "integer",
+						"example": 404
+					},
+					"request_id": {
+						"description": "The unique request ID for this error.",
+						"type": "string",
+						"example": "cb6f6f9c1783cdc9752cee2a4e95dd4c"
+					},
+					"timestamp": {
+						"description": "The timestamp of the error, in RFC3339 format.",
+						"type": "string",
+						"format": "date-time",
+						"example": "2024-04-26T12:19:01Z"
+					}
+				},
+				"required": [
+					"error",
+					"type",
+					"code",
+					"timestamp"
+				]
+			},
+			"ErrorTooManyRequests": {
+				"type": "object",
+				"properties": {
+					"error": {
+						"description": "The underlying error, which may be masked when debugging is disabled.",
+						"type": "string"
+					},
+					"type": {
+						"description": "A summary of the error code based off the HTTP status code or application error code.",
+						"type": "string",
+						"example": "Too Many Requests"
+					},
+					"code": {
+						"description": "The HTTP status code or other internal application error code.",
+						"type": "integer",
+						"example": 429
+					},
+					"request_id": {
+						"description": "The unique request ID for this error.",
+						"type": "string",
+						"example": "cb6f6f9c1783cdc9752cee2a4e95dd4c"
+					},
+					"timestamp": {
+						"description": "The timestamp of the error, in RFC3339 format.",
+						"type": "string",
+						"format": "date-time",
+						"example": "2024-04-26T12:19:01Z"
+					}
+				},
+				"required": [
+					"error",
+					"type",
+					"code",
+					"timestamp"
+				]
+			},
+			"ErrorUnauthorized": {
+				"type": "object",
+				"properties": {
+					"error": {
+						"description": "The underlying error, which may be masked when debugging is disabled.",
+						"type": "string"
+					},
+					"type": {
+						"description": "A summary of the error code based off the HTTP status code or application error code.",
+						"type": "string",
+						"example": "Unauthorized"
+					},
+					"code": {
+						"description": "The HTTP status code or other internal application error code.",
+						"type": "integer",
+						"example": 401
+					},
+					"request_id": {
+						"description": "The unique request ID for this error.",
+						"type": "string",
+						"example": "cb6f6f9c1783cdc9752cee2a4e95dd4c"
+					},
+					"timestamp": {
+						"description": "The timestamp of the error, in RFC3339 format.",
+						"type": "string",
+						"format": "date-time",
+						"example": "2024-04-26T12:19:01Z"
+					}
+				},
+				"required": [
+					"error",
+					"type",
+					"code",
+					"timestamp"
+				]
+			},
+			"FilterOperation": {
+				"description": "Specifies how to combine multiple filters.",
+				"type": "string",
+				"enum": [
+					"and",
+					"or"
+				],
+				"default": "and"
+			},
+			"Guild": {
+				"description": "A single Guild entity.",
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "The ID of the Guild entity.",
+						"type": "integer"
+					},
+					"create_time": {
+						"description": "Time the entity was created.",
+						"type": "string",
+						"format": "date-time"
+					},
+					"update_time": {
+						"description": "Time the entity was last updated.",
+						"type": "string",
+						"format": "date-time"
+					},
+					"guild_id": {
+						"description": "Discord snowflake ID of the guild.",
+						"type": "string"
+					},
+					"name": {
+						"description": "Guild name (2-100 chars, excl. trailing/leading spaces).",
+						"type": "string"
+					},
+					"features": {
+						"description": "Enabled guild features.",
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"default": []
+					},
+					"icon_hash": {
+						"description": "Icon hash.",
+						"type": "string"
+					},
+					"icon_url": {
+						"description": "Icon URL (empty if the guild has no icon).",
+						"type": "string"
+					},
+					"joined_at": {
+						"description": "When the bot joined the guild (null if the bot is not in the guild).",
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"large": {
+						"description": "True if the guild is considered large (according to Discord standards).",
+						"type": "boolean",
+						"default": false
+					},
+					"member_count": {
+						"description": "Total number of members in the guild.",
+						"type": "integer",
+						"default": 0
+					},
+					"owner_id": {
+						"description": "Discord snowflake ID of the user that owns the guild.",
+						"type": "string"
+					},
+					"permissions": {
+						"description": "Permissions of the bot on this guild (excludes overrides).",
+						"type": "integer",
+						"format": "int64",
+						"minimum": 0,
+						"default": 0
+					},
+					"system_channel_flags": {
+						"description": "System channel flags.",
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"create_time",
+					"update_time",
+					"guild_id",
+					"name",
+					"icon_url"
+				]
+			},
+			"GuildAdminConfig": {
+				"description": "A single GuildAdminConfig entity.",
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "The ID of the GuildAdminConfig entity.",
+						"type": "integer"
+					},
+					"create_time": {
+						"description": "Time the entity was created.",
+						"type": "string",
+						"format": "date-time"
+					},
+					"update_time": {
+						"description": "Time the entity was last updated.",
+						"type": "string",
+						"format": "date-time"
+					},
+					"enabled": {
+						"description": "True if the guild should be monitored/acted upon (overrides user-defined settings).",
+						"type": "boolean",
+						"default": true
+					},
+					"default_max_channels": {
+						"description": "Default max channels for the guild (overrides user-defined settings, 0 uses the system default).",
+						"type": "integer",
+						"default": 0
+					},
+					"default_max_clones": {
+						"description": "Default max clones for the guild (overrides user-defined settings, 0 uses the system default).",
+						"type": "integer",
+						"default": 0
+					},
+					"comment": {
+						"description": "Admin comment for the guild.",
+						"type": "string",
+						"default": ""
+					}
+				},
+				"required": [
+					"id",
+					"create_time",
+					"update_time"
+				]
+			},
+			"GuildAdminConfigRead": {
+				"$ref": "#/components/schemas/GuildAdminConfig"
+			},
+			"GuildAdminConfigUpdate": {
+				"description": "A single GuildAdminConfig entity and the fields that can be created/updated.",
+				"type": "object",
+				"properties": {
+					"enabled": {
+						"description": "True if the guild should be monitored/acted upon (overrides user-defined settings).",
+						"type": "boolean",
+						"default": true
+					},
+					"default_max_channels": {
+						"description": "Default max channels for the guild (overrides user-defined settings, 0 uses the system default).",
+						"type": "integer",
+						"default": 0
+					},
+					"default_max_clones": {
+						"description": "Default max clones for the guild (overrides user-defined settings, 0 uses the system default).",
+						"type": "integer",
+						"default": 0
+					},
+					"comment": {
+						"description": "Admin comment for the guild.",
+						"type": "string",
+						"default": ""
+					}
+				}
+			},
+			"GuildConfig": {
+				"description": "A single GuildConfig entity.",
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "The ID of the GuildConfig entity.",
+						"type": "integer"
+					},
+					"create_time": {
+						"description": "Time the entity was created.",
+						"type": "string",
+						"format": "date-time"
+					},
+					"update_time": {
+						"description": "Time the entity was last updated.",
+						"type": "string",
+						"format": "date-time"
+					},
+					"enabled": {
+						"description": "True if the guild should be monitored/acted upon.",
+						"type": "boolean",
+						"default": true
+					},
+					"default_max_clones": {
+						"description": "Default max cloned channels for the guild (0 uses the system default).",
+						"type": "integer",
+						"default": 0
+					},
+					"regex_match": {
+						"description": "Regex match for channel names (empty uses the system default).",
+						"type": "string",
+						"default": ""
+					},
+					"contact_email": {
+						"description": "Contact email for the guild.",
+						"type": "string",
+						"default": ""
+					}
+				},
+				"required": [
+					"id",
+					"create_time",
+					"update_time"
+				]
+			},
+			"GuildConfigRead": {
+				"$ref": "#/components/schemas/GuildConfig"
+			},
+			"GuildConfigUpdate": {
+				"description": "A single GuildConfig entity and the fields that can be created/updated.",
+				"type": "object",
+				"properties": {
+					"enabled": {
+						"description": "True if the guild should be monitored/acted upon.",
+						"type": "boolean",
+						"default": true
+					},
+					"default_max_clones": {
+						"description": "Default max cloned channels for the guild (0 uses the system default).",
+						"type": "integer",
+						"default": 0
+					},
+					"regex_match": {
+						"description": "Regex match for channel names (empty uses the system default).",
+						"type": "string",
+						"default": ""
+					},
+					"contact_email": {
+						"description": "Contact email for the guild.",
+						"type": "string",
+						"default": ""
+					}
+				}
+			},
+			"GuildEdges": {
+				"type": "object",
+				"properties": {
+					"guild_config": {
+						"$ref": "#/components/schemas/GuildConfig"
+					},
+					"guild_admin_config": {
+						"$ref": "#/components/schemas/GuildAdminConfig"
+					}
+				}
+			},
+			"GuildEvent": {
+				"description": "A single GuildEvent entity.",
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "The ID of the GuildEvent entity.",
+						"type": "integer"
+					},
+					"create_time": {
+						"description": "Time the entity was created.",
+						"type": "string",
+						"format": "date-time"
+					},
+					"update_time": {
+						"description": "Time the entity was last updated.",
+						"type": "string",
+						"format": "date-time"
+					},
+					"type": {
+						"$ref": "#/components/schemas/GuildEventTypeEnum"
+					},
+					"message": {
+						"description": "The message associated with the event.",
+						"type": "string"
+					},
+					"metadata": {
+						"description": "Additional metadata associated with the event.",
+						"type": "object",
+						"additionalProperties": true
+					}
+				},
+				"required": [
+					"id",
+					"create_time",
+					"update_time",
+					"type",
+					"message"
+				]
+			},
+			"GuildEventEdges": {
+				"type": "object",
+				"properties": {
+					"guild": {
+						"$ref": "#/components/schemas/Guild"
+					}
+				},
+				"required": [
+					"guild"
+				]
+			},
+			"GuildEventList": {
+				"description": "A paginated result set of GuildEvent entities. Includes eager-loaded edges (if any) for each entity.",
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/PagedResponse"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"content": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/GuildEventRead"
+								}
+							}
+						},
+						"required": [
+							"content"
+						]
+					}
+				]
+			},
+			"GuildEventRead": {
+				"description": "A single GuildEvent entity.",
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/GuildEvent"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"edges": {
+								"$ref": "#/components/schemas/GuildEventEdges"
+							}
+						},
+						"required": [
+							"edges"
+						]
+					}
+				]
+			},
+			"GuildEventSortableFields": {
+				"description": "All potential sortable fields for GuildEvent entities.",
+				"type": "string",
+				"enum": [
+					"create_time",
+					"guild.create_time",
+					"guild.id",
+					"guild.joined_at",
+					"guild.member_count",
+					"guild.name",
+					"guild.update_time",
+					"id",
+					"random",
+					"update_time"
+				],
+				"default": "id"
+			},
+			"GuildEventTypeEnum": {
+				"description": "The type of event that occurred.",
+				"type": "string",
+				"enum": [
+					"INFO",
+					"WARNING",
+					"ERROR",
+					"DEBUG"
+				]
+			},
+			"GuildList": {
+				"description": "A paginated result set of Guild entities. Includes eager-loaded edges (if any) for each entity.",
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/PagedResponse"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"content": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/GuildRead"
+								}
+							}
+						},
+						"required": [
+							"content"
+						]
+					}
+				]
+			},
+			"GuildRead": {
+				"description": "A single Guild entity.",
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Guild"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"edges": {
+								"$ref": "#/components/schemas/GuildEdges"
+							}
+						},
+						"required": [
+							"edges"
+						]
+					}
+				]
+			},
+			"GuildSortableFields": {
+				"description": "All potential sortable fields for Guild entities.",
+				"type": "string",
+				"enum": [
+					"admins.count",
+					"create_time",
+					"guild_admin_config.create_time",
+					"guild_admin_config.id",
+					"guild_admin_config.update_time",
+					"guild_config.create_time",
+					"guild_config.id",
+					"guild_config.update_time",
+					"guild_events.count",
+					"id",
+					"joined_at",
+					"member_count",
+					"name",
+					"random",
+					"update_time"
+				],
+				"default": "id"
+			},
+			"HealthStatus": {
+				"type": "object",
+				"properties": {
+					"status": {
+						"type": "string",
+						"example": "ok"
+					}
+				},
+				"required": [
+					"status"
+				]
+			},
+			"PagedResponse": {
+				"type": "object",
+				"properties": {
+					"page": {
+						"description": "Page which the results are associated with.",
+						"type": "integer",
+						"minimum": 1,
+						"example": 1
+					},
+					"last_page": {
+						"description": "The number of the last page of results.",
+						"type": "integer",
+						"minimum": 1,
+						"example": 3
+					},
+					"is_last_page": {
+						"description": "If true, the current results are the last page of results.",
+						"type": "boolean",
+						"example": false
+					},
+					"total_count": {
+						"description": "The total number of results based on the provided query.",
+						"type": "integer",
+						"minimum": 0,
+						"example": 123
+					}
+				},
+				"required": [
+					"page",
+					"last_page",
+					"is_last_page",
+					"total_count"
+				]
+			},
+			"User": {
+				"description": "A single User entity.",
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "The ID of the User entity.",
+						"type": "integer"
+					},
+					"create_time": {
+						"description": "Time the entity was created.",
+						"type": "string",
+						"format": "date-time"
+					},
+					"update_time": {
+						"description": "Time the entity was last updated.",
+						"type": "string",
+						"format": "date-time"
+					},
+					"user_id": {
+						"description": "Discord snowflake ID of the user.",
+						"type": "string"
+					},
+					"admin": {
+						"description": "Whether or not the user is a spectrograph admin.",
+						"type": "boolean"
+					},
+					"banned": {
+						"description": "Whether or not the user is banned from using the service.",
+						"type": "boolean"
+					},
+					"ban_reason": {
+						"description": "Reason for the user being banned (if any).",
+						"type": "string"
+					},
+					"username": {
+						"description": "The users username, unique across the platform (for migrated users).",
+						"type": "string"
+					},
+					"global_name": {
+						"description": "The users display name, if set.",
+						"type": "string"
+					},
+					"discriminator": {
+						"description": "The users legacy 4-digit discord-tag (\"0\" or empty for migrated users).",
+						"type": "string"
+					},
+					"email": {
+						"description": "The users email address.",
+						"type": "string"
+					},
+					"avatar_hash": {
+						"description": "The users avatar hash.",
+						"type": "string"
+					},
+					"avatar_url": {
+						"description": "The users avatar URL (generated if no avatar present).",
+						"type": "string"
+					},
+					"locale": {
+						"description": "The users chosen language option.",
+						"type": "string"
+					},
+					"bot": {
+						"description": "Whether the user belongs to an OAuth2 application.",
+						"type": "boolean"
+					},
+					"system": {
+						"description": "Whether the user is an Official Discord System user (part of the urgent message system).",
+						"type": "boolean"
+					},
+					"mfa_enabled": {
+						"description": "Whether the user has two factor enabled on their account.",
+						"type": "boolean"
+					},
+					"verified": {
+						"description": "Whether the email on this account has been verified.",
+						"type": "boolean"
+					},
+					"flags": {
+						"description": "The flags on a users account.",
+						"type": "integer",
+						"format": "int64",
+						"minimum": 0
+					},
+					"premium_type": {
+						"description": "The type of Nitro subscription on a users account.",
+						"type": "integer"
+					},
+					"public_flags": {
+						"description": "The public flags on a users account.",
+						"type": "integer",
+						"format": "int64",
+						"minimum": 0
+					}
+				},
+				"required": [
+					"id",
+					"create_time",
+					"update_time",
+					"user_id",
+					"username",
+					"avatar_url"
+				]
+			},
+			"UserList": {
+				"description": "A paginated result set of User entities. Includes eager-loaded edges (if any) for each entity.",
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/PagedResponse"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"content": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/UserRead"
+								}
+							}
+						},
+						"required": [
+							"content"
+						]
+					}
+				]
+			},
+			"UserRead": {
+				"$ref": "#/components/schemas/User"
+			},
+			"UserSortableFields": {
+				"description": "All potential sortable fields for User entities.",
+				"type": "string",
+				"enum": [
+					"banned_by.create_time",
+					"banned_by.email",
+					"banned_by.global_name",
+					"banned_by.id",
+					"banned_by.update_time",
+					"banned_by.username",
+					"banned_users.count",
+					"create_time",
+					"email",
+					"global_name",
+					"id",
+					"random",
+					"update_time",
+					"user_guilds.count",
+					"user_guilds.member_count.sum",
+					"username"
+				],
+				"default": "id"
+			}
+		},
+		"responses": {
+			"ErrorBadRequest": {
+				"description": "Bad Request (http status code 400)",
+				"headers": {
+					"X-Ratelimit-Limit": {
+						"$ref": "#/components/headers/X-Ratelimit-Limit"
+					},
+					"X-Ratelimit-Remaining": {
+						"$ref": "#/components/headers/X-Ratelimit-Remaining"
+					},
+					"X-Ratelimit-Reset": {
+						"$ref": "#/components/headers/X-Ratelimit-Reset"
+					}
+				},
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/ErrorBadRequest"
+						}
+					}
+				}
+			},
+			"ErrorConflict": {
+				"description": "Conflict (http status code 409)",
+				"headers": {
+					"X-Ratelimit-Limit": {
+						"$ref": "#/components/headers/X-Ratelimit-Limit"
+					},
+					"X-Ratelimit-Remaining": {
+						"$ref": "#/components/headers/X-Ratelimit-Remaining"
+					},
+					"X-Ratelimit-Reset": {
+						"$ref": "#/components/headers/X-Ratelimit-Reset"
+					}
+				},
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/ErrorConflict"
+						}
+					}
+				}
+			},
+			"ErrorForbidden": {
+				"description": "Forbidden (http status code 403)",
+				"headers": {
+					"X-Ratelimit-Limit": {
+						"$ref": "#/components/headers/X-Ratelimit-Limit"
+					},
+					"X-Ratelimit-Remaining": {
+						"$ref": "#/components/headers/X-Ratelimit-Remaining"
+					},
+					"X-Ratelimit-Reset": {
+						"$ref": "#/components/headers/X-Ratelimit-Reset"
+					}
+				},
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/ErrorForbidden"
+						}
+					}
+				}
+			},
+			"ErrorInternalServerError": {
+				"description": "Internal Server Error (http status code 500)",
+				"headers": {
+					"X-Ratelimit-Limit": {
+						"$ref": "#/components/headers/X-Ratelimit-Limit"
+					},
+					"X-Ratelimit-Remaining": {
+						"$ref": "#/components/headers/X-Ratelimit-Remaining"
+					},
+					"X-Ratelimit-Reset": {
+						"$ref": "#/components/headers/X-Ratelimit-Reset"
+					}
+				},
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/ErrorInternalServerError"
+						}
+					}
+				}
+			},
+			"ErrorNotFound": {
+				"description": "Not Found (http status code 404)",
+				"headers": {
+					"X-Ratelimit-Limit": {
+						"$ref": "#/components/headers/X-Ratelimit-Limit"
+					},
+					"X-Ratelimit-Remaining": {
+						"$ref": "#/components/headers/X-Ratelimit-Remaining"
+					},
+					"X-Ratelimit-Reset": {
+						"$ref": "#/components/headers/X-Ratelimit-Reset"
+					}
+				},
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/ErrorNotFound"
+						}
+					}
+				}
+			},
+			"ErrorTooManyRequests": {
+				"description": "Too Many Requests (http status code 429)",
+				"headers": {
+					"X-Ratelimit-Limit": {
+						"$ref": "#/components/headers/X-Ratelimit-Limit"
+					},
+					"X-Ratelimit-Remaining": {
+						"$ref": "#/components/headers/X-Ratelimit-Remaining"
+					},
+					"X-Ratelimit-Reset": {
+						"$ref": "#/components/headers/X-Ratelimit-Reset"
+					}
+				},
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/ErrorTooManyRequests"
+						}
+					}
+				}
+			},
+			"ErrorUnauthorized": {
+				"description": "Unauthorized (http status code 401)",
+				"headers": {
+					"X-Ratelimit-Limit": {
+						"$ref": "#/components/headers/X-Ratelimit-Limit"
+					},
+					"X-Ratelimit-Remaining": {
+						"$ref": "#/components/headers/X-Ratelimit-Remaining"
+					},
+					"X-Ratelimit-Reset": {
+						"$ref": "#/components/headers/X-Ratelimit-Reset"
+					}
+				},
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/ErrorUnauthorized"
+						}
+					}
+				}
+			}
+		},
+		"parameters": {
+			"FilterOperation": {
+				"name": "filter_op",
+				"in": "query",
+				"description": "Filter operation to use.",
+				"schema": {
+					"$ref": "#/components/schemas/FilterOperation"
+				}
+			},
+			"GuildAdminConfigID": {
+				"name": "guildadminconfigID",
+				"in": "path",
+				"description": "The ID of the GuildAdminConfig to act upon.",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			},
+			"GuildConfigID": {
+				"name": "guildconfigID",
+				"in": "path",
+				"description": "The ID of the GuildConfig to act upon.",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			},
+			"GuildCreateTimeEQ": {
+				"name": "createTime.eq",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildCreateTimeGT": {
+				"name": "createTime.gt",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be greater than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildCreateTimeLT": {
+				"name": "createTime.lt",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be less than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildCreateTimeNEQ": {
+				"name": "createTime.neq",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildEventCreateTimeEQ": {
+				"name": "createTime.eq",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildEventCreateTimeGT": {
+				"name": "createTime.gt",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be greater than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildEventCreateTimeLT": {
+				"name": "createTime.lt",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be less than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildEventCreateTimeNEQ": {
+				"name": "createTime.neq",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildEventID": {
+				"name": "guildeventID",
+				"in": "path",
+				"description": "The ID of the GuildEvent to act upon.",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			},
+			"GuildEventMessageContains": {
+				"name": "message.has",
+				"in": "query",
+				"description": "Filters field \"message\" to contain the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildEventMessageContainsFold": {
+				"name": "message.ihas",
+				"in": "query",
+				"description": "Filters field \"message\" to contain the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildEventTypeEQ": {
+				"name": "type.eq",
+				"in": "query",
+				"description": "Filters field \"type\" to be equal to the provided value.",
+				"schema": {
+					"$ref": "#/components/schemas/GuildEventTypeEnum"
+				}
+			},
+			"GuildEventTypeIn": {
+				"name": "type.in",
+				"in": "query",
+				"description": "Filters field \"type\" to be within the provided values.",
+				"schema": {
+					"type": "array",
+					"items": {
+						"$ref": "#/components/schemas/GuildEventTypeEnum"
+					}
+				}
+			},
+			"GuildEventTypeNEQ": {
+				"name": "type.neq",
+				"in": "query",
+				"description": "Filters field \"type\" to be not equal to the provided value.",
+				"schema": {
+					"$ref": "#/components/schemas/GuildEventTypeEnum"
+				}
+			},
+			"GuildEventTypeNotIn": {
+				"name": "type.notIn",
+				"in": "query",
+				"description": "Filters field \"type\" to be not within the provided values.",
+				"schema": {
+					"type": "array",
+					"items": {
+						"$ref": "#/components/schemas/GuildEventTypeEnum"
+					}
+				}
+			},
+			"GuildEventUpdateTimeEQ": {
+				"name": "updateTime.eq",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildEventUpdateTimeGT": {
+				"name": "updateTime.gt",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be greater than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildEventUpdateTimeLT": {
+				"name": "updateTime.lt",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be less than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildEventUpdateTimeNEQ": {
+				"name": "updateTime.neq",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildGuildIDEQ": {
+				"name": "guildID.eq",
+				"in": "query",
+				"description": "Filters field \"guild_id\" to be equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildGuildIDEqualFold": {
+				"name": "guildID.ieq",
+				"in": "query",
+				"description": "Filters field \"guild_id\" to be equal to the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildGuildIDIn": {
+				"name": "guildID.in",
+				"in": "query",
+				"description": "Filters field \"guild_id\" to be within the provided values.",
+				"schema": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"GuildGuildIDNEQ": {
+				"name": "guildID.neq",
+				"in": "query",
+				"description": "Filters field \"guild_id\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildGuildIDNotIn": {
+				"name": "guildID.notIn",
+				"in": "query",
+				"description": "Filters field \"guild_id\" to be not within the provided values.",
+				"schema": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"GuildID": {
+				"name": "guildID",
+				"in": "path",
+				"description": "The ID of the Guild to act upon.",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			},
+			"GuildJoinedAtGT": {
+				"name": "joinedAt.gt",
+				"in": "query",
+				"description": "Filters field \"joined_at\" to be greater than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildJoinedAtIsNil": {
+				"name": "joinedAt.null",
+				"in": "query",
+				"description": "Filters field \"joined_at\" to be null/nil.",
+				"schema": {
+					"type": "boolean"
+				}
+			},
+			"GuildJoinedAtLT": {
+				"name": "joinedAt.lt",
+				"in": "query",
+				"description": "Filters field \"joined_at\" to be less than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildNameContains": {
+				"name": "name.has",
+				"in": "query",
+				"description": "Filters field \"name\" to contain the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildNameContainsFold": {
+				"name": "name.ihas",
+				"in": "query",
+				"description": "Filters field \"name\" to contain the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildNameEQ": {
+				"name": "name.eq",
+				"in": "query",
+				"description": "Filters field \"name\" to be equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildNameEqualFold": {
+				"name": "name.ieq",
+				"in": "query",
+				"description": "Filters field \"name\" to be equal to the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildNameHasPrefix": {
+				"name": "name.prefix",
+				"in": "query",
+				"description": "Filters field \"name\" to start with the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildNameHasSuffix": {
+				"name": "name.suffix",
+				"in": "query",
+				"description": "Filters field \"name\" to end with the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildNameNEQ": {
+				"name": "name.neq",
+				"in": "query",
+				"description": "Filters field \"name\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildOwnerIDEQ": {
+				"name": "ownerID.eq",
+				"in": "query",
+				"description": "Filters field \"owner_id\" to be equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildOwnerIDEqualFold": {
+				"name": "ownerID.ieq",
+				"in": "query",
+				"description": "Filters field \"owner_id\" to be equal to the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildOwnerIDIsNil": {
+				"name": "ownerID.null",
+				"in": "query",
+				"description": "Filters field \"owner_id\" to be null/nil.",
+				"schema": {
+					"type": "boolean"
+				}
+			},
+			"GuildOwnerIDNEQ": {
+				"name": "ownerID.neq",
+				"in": "query",
+				"description": "Filters field \"owner_id\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"GuildUpdateTimeEQ": {
+				"name": "updateTime.eq",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildUpdateTimeGT": {
+				"name": "updateTime.gt",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be greater than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildUpdateTimeLT": {
+				"name": "updateTime.lt",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be less than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"GuildUpdateTimeNEQ": {
+				"name": "updateTime.neq",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"Page": {
+				"name": "page",
+				"in": "query",
+				"description": "The page number to retrieve.",
+				"schema": {
+					"type": "integer",
+					"minimum": 1,
+					"default": 1
+				}
+			},
+			"PrettyResponse": {
+				"name": "pretty",
+				"in": "query",
+				"description": "If set to true, any JSON response will be indented.",
+				"schema": {
+					"type": "boolean"
+				}
+			},
+			"UserAdminEQ": {
+				"name": "admin.eq",
+				"in": "query",
+				"description": "Filters field \"admin\" to be equal to the provided value.",
+				"schema": {
+					"type": "boolean"
+				}
+			},
+			"UserBannedEQ": {
+				"name": "banned.eq",
+				"in": "query",
+				"description": "Filters field \"banned\" to be equal to the provided value.",
+				"schema": {
+					"type": "boolean"
+				}
+			},
+			"UserCreateTimeEQ": {
+				"name": "createTime.eq",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"UserCreateTimeGT": {
+				"name": "createTime.gt",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be greater than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"UserCreateTimeLT": {
+				"name": "createTime.lt",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be less than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"UserCreateTimeNEQ": {
+				"name": "createTime.neq",
+				"in": "query",
+				"description": "Filters field \"create_time\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"UserEmailContains": {
+				"name": "email.has",
+				"in": "query",
+				"description": "Filters field \"email\" to contain the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserEmailContainsFold": {
+				"name": "email.ihas",
+				"in": "query",
+				"description": "Filters field \"email\" to contain the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserEmailEQ": {
+				"name": "email.eq",
+				"in": "query",
+				"description": "Filters field \"email\" to be equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserEmailEqualFold": {
+				"name": "email.ieq",
+				"in": "query",
+				"description": "Filters field \"email\" to be equal to the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserEmailHasPrefix": {
+				"name": "email.prefix",
+				"in": "query",
+				"description": "Filters field \"email\" to start with the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserEmailHasSuffix": {
+				"name": "email.suffix",
+				"in": "query",
+				"description": "Filters field \"email\" to end with the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserEmailIsNil": {
+				"name": "email.null",
+				"in": "query",
+				"description": "Filters field \"email\" to be null/nil.",
+				"schema": {
+					"type": "boolean"
+				}
+			},
+			"UserEmailNEQ": {
+				"name": "email.neq",
+				"in": "query",
+				"description": "Filters field \"email\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserGlobalNameContains": {
+				"name": "globalName.has",
+				"in": "query",
+				"description": "Filters field \"global_name\" to contain the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserGlobalNameContainsFold": {
+				"name": "globalName.ihas",
+				"in": "query",
+				"description": "Filters field \"global_name\" to contain the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserGlobalNameEQ": {
+				"name": "globalName.eq",
+				"in": "query",
+				"description": "Filters field \"global_name\" to be equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserGlobalNameEqualFold": {
+				"name": "globalName.ieq",
+				"in": "query",
+				"description": "Filters field \"global_name\" to be equal to the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserGlobalNameHasPrefix": {
+				"name": "globalName.prefix",
+				"in": "query",
+				"description": "Filters field \"global_name\" to start with the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserGlobalNameHasSuffix": {
+				"name": "globalName.suffix",
+				"in": "query",
+				"description": "Filters field \"global_name\" to end with the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserGlobalNameIsNil": {
+				"name": "globalName.null",
+				"in": "query",
+				"description": "Filters field \"global_name\" to be null/nil.",
+				"schema": {
+					"type": "boolean"
+				}
+			},
+			"UserGlobalNameNEQ": {
+				"name": "globalName.neq",
+				"in": "query",
+				"description": "Filters field \"global_name\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserID": {
+				"name": "userID",
+				"in": "path",
+				"description": "The ID of the User to act upon.",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			},
+			"UserUpdateTimeEQ": {
+				"name": "updateTime.eq",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"UserUpdateTimeGT": {
+				"name": "updateTime.gt",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be greater than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"UserUpdateTimeLT": {
+				"name": "updateTime.lt",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be less than the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"UserUpdateTimeNEQ": {
+				"name": "updateTime.neq",
+				"in": "query",
+				"description": "Filters field \"update_time\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"UserUserIDEQ": {
+				"name": "userID.eq",
+				"in": "query",
+				"description": "Filters field \"user_id\" to be equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserUserIDEqualFold": {
+				"name": "userID.ieq",
+				"in": "query",
+				"description": "Filters field \"user_id\" to be equal to the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserUserIDIn": {
+				"name": "userID.in",
+				"in": "query",
+				"description": "Filters field \"user_id\" to be within the provided values.",
+				"schema": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"UserUserIDNEQ": {
+				"name": "userID.neq",
+				"in": "query",
+				"description": "Filters field \"user_id\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserUserIDNotIn": {
+				"name": "userID.notIn",
+				"in": "query",
+				"description": "Filters field \"user_id\" to be not within the provided values.",
+				"schema": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"UserUsernameContains": {
+				"name": "username.has",
+				"in": "query",
+				"description": "Filters field \"username\" to contain the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserUsernameContainsFold": {
+				"name": "username.ihas",
+				"in": "query",
+				"description": "Filters field \"username\" to contain the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserUsernameEQ": {
+				"name": "username.eq",
+				"in": "query",
+				"description": "Filters field \"username\" to be equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserUsernameEqualFold": {
+				"name": "username.ieq",
+				"in": "query",
+				"description": "Filters field \"username\" to be equal to the provided value, case-insensitive.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserUsernameHasPrefix": {
+				"name": "username.prefix",
+				"in": "query",
+				"description": "Filters field \"username\" to start with the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserUsernameHasSuffix": {
+				"name": "username.suffix",
+				"in": "query",
+				"description": "Filters field \"username\" to end with the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserUsernameIn": {
+				"name": "username.in",
+				"in": "query",
+				"description": "Filters field \"username\" to be within the provided values.",
+				"schema": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"UserUsernameNEQ": {
+				"name": "username.neq",
+				"in": "query",
+				"description": "Filters field \"username\" to be not equal to the provided value.",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"UserUsernameNotIn": {
+				"name": "username.notIn",
+				"in": "query",
+				"description": "Filters field \"username\" to be not within the provided values.",
+				"schema": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"X-Request-Id": {
+				"name": "X-Request-Id",
+				"in": "header",
+				"description": "A unique identifier for the request.",
+				"schema": {
+					"type": "string"
+				}
+			}
+		},
+		"headers": {
+			"X-Ratelimit-Limit": {
+				"description": "The maximum number of requests that the consumer is permitted to make in a given period.",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			},
+			"X-Ratelimit-Remaining": {
+				"description": "The number of requests remaining in the current rate limit window.",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			},
+			"X-Ratelimit-Reset": {
+				"description": "The time at which the current rate limit window resets in UTC epoch seconds.",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		},
+		"securitySchemes": {
+			"cookieAuth": {
+				"type": "apiKey",
+				"description": "Encrypted cookie session, set after authenticating through Discord (see beginAuth).",
+				"name": "_gothic_session",
+				"in": "cookie"
+			}
+		}
+	},
+	"security": [
+		{
+			"cookieAuth": []
+		}
+	],
+	"tags": [
+		{
+			"name": "Meta",
+			"description": "Includes various endpoints for meta information about the service, like the OpenAPI spec, version, health, etc."
+		},
+		{
+			"name": "Guilds"
+		},
+		{
+			"name": "GuildConfigs"
+		},
+		{
+			"name": "GuildAdminConfigs"
+		},
+		{
+			"name": "GuildEvents"
+		},
+		{
+			"name": "Users"
+		}
+	]
+}

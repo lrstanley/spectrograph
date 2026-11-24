@@ -1,32 +1,41 @@
 {
-    "unocss.root": "./cmd/httpserver/public/",
-    "editor.formatOnSave": true,
-    "[css]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
     },
-    "[html]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[typescript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[vue]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[markdown]": {
-        "editor.wordWrap": "on",
-        "editor.quickSuggestions": {
-            "comments": false,
-            "strings": false,
-            "other": false
-        },
-        "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
-    },
-    "editor.codeActionsOnSave": {
-        "source.fixAll": true
-    },
-    "typescript.tsdk": "cmd/httpserver/public/node_modules/typescript/lib",
-    "[ignore]": {
-        "editor.defaultFormatter": "foxundermoon.shell-format"
-    },
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+  },
+  "files.exclude": {
+    "**/.nuxt": true,
+    "**/.output": true,
+    "**/.task": true,
+    "spectrograph": true
+  },
+  "go.lintTool": "golangci-lint-v2",
+  "gopls": {
+    "formatting.gofumpt": true
+  },
+  "shellformat.flag": "-s -i 0 -bn -ci -sr"
 }

@@ -1,6 +1,0 @@
-scalar Any
-
-# stub that other mutations should extend.
-type Mutation {
-    ping: String
-}

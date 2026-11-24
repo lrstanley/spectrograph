@@ -1,0 +1,204 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+method: timestamp
+set: [errexit, nounset, pipefail]
+
+dotenv: [.env.local, .env]
+
+vars:
+  PROJECT: spectrograph
+  PACKAGE: github.com/lrstanley/spectrograph/cmd/httpserver
+
+env:
+  CGO_ENABLED: 0
+
+tasks:
+  default:
+    desc: build the project (frontend + backend)
+    cmds:
+      # The frontend's API client is generated from the backend's OpenAPI spec.
+      - task: go-prepare
+      - task: node-build
+      - task: go-build
+
+  license:
+    desc: generate license headers
+    cmds:
+      - curl -sL https://liam.sh/-/gh/g/license-header.sh | bash -s
+
+  clean:
+    desc: clean build artifacts
+    cmds:
+      - rm -rfv {{.PROJECT}} web/.output cmd/httpserver/public/dist
+
+  up:
+    desc: update dependencies
+    aliases: [update, upgrade]
+    cmds:
+      - go get -u ./... && go get -u -t ./... && go get -u tool
+      - task: go-fetch
+      - if [ -f web/package.json ]; then cd web && bun update; fi
+
+  docker-build:
+    desc: build the docker image
+    preconditions:
+      - sh: command -v docker
+        msg: "docker is required, see https://docs.docker.com/get-docker/"
+    cmds:
+      - docker build --file .github/Dockerfile --tag {{.PROJECT}}:latest .
+
+  # backend.
+  go-fetch:
+    desc: tidy go modules
+    aliases: [tidy, download, fetch]
+    run: once
+    cmds:
+      - go mod tidy
+
+  go-codegen:
+    internal: true
+    run: once
+    sources:
+      - internal/database/schema/**/*.go
+      - internal/database/entc.go
+      - cmd/httpserver/base-openapi.json
+    generates:
+      - internal/database/ent/**/*.go
+      - internal/database/ent/rest/openapi.json
+    cmds:
+      - go generate -x ./...
+
+  go-prepare:
+    desc: prepare build environment (code generation)
+    deps: [go-fetch]
+    aliases: [prepare, generate, gen]
+    run: once
+    cmds:
+      - task: go-codegen
+
+  go-dlv:
+    desc: run with delve debugger (pass extra flags after "--")
+    deps: [go-prepare]
+    aliases: [delve, debugger]
+    cmds:
+      - |
+        dlv debug \
+          --headless \
+          --listen=:2345 \
+          --api-version=2 \
+          --log \
+          --allow-non-terminal-interactive \
+          {{.PACKAGE}} -- \
+            --debug \
+            {{.CLI_ARGS}}
+
+  go-debug:
+    desc: 'run in debug mode (pass extra flags after "--", e.g. "--no-worker.enabled")'
+    deps: [go-prepare]
+    aliases: [dev, run, debug]
+    interactive: true
+    cmds:
+      - go run {{.PACKAGE}} --debug {{.CLI_ARGS}}
+
+  go-build:
+    desc: build the application
+    deps: [go-prepare]
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+      - cmd/httpserver/public/dist/**/*
+      - exclude: "**/*_test.go"
+    generates:
+      - "{{.PROJECT}}"
+    cmds:
+      - |
+        go build \
+          -ldflags '-d -s -w -extldflags=-static' \
+          -tags=netgo,osusergo,static_build \
+          -installsuffix netgo \
+          -trimpath \
+          -o {{.PROJECT}} {{.PACKAGE}}
+
+  go-test:
+    desc: run tests (database tests use TEST_DATABASE_URL, falling back to DATABASE_URL)
+    deps: [go-prepare]
+    aliases: [test]
+    cmds:
+      # -race requires cgo.
+      - TEST_DATABASE_URL="${TEST_DATABASE_URL:-${DATABASE_URL:-}}" CGO_ENABLED=1 go test -race -count 3 -timeout 5m {{default "./..." .CLI_ARGS}}
+
+  go-lint:
+    desc: format and lint the backend
+    deps: [go-prepare]
+    aliases: [lint]
+    preconditions:
+      - sh: command -v golangci-lint
+        msg: "golangci-lint is required, see https://golangci-lint.run/welcome/install/"
+    cmds:
+      - golangci-lint fmt
+      - golangci-lint run
+
+  # frontend.
+  node-fetch:
+    desc: install frontend dependencies
+    dir: web
+    run: once
+    preconditions:
+      # Preconditions run in the task's directory (web/).
+      - sh: test -f package.json
+        msg: "web/package.json not found, the frontend lives in web/"
+      - sh: command -v bun
+        msg: "bun is required, see https://bun.sh/"
+    sources:
+      - package.json
+      - bun.lock
+    generates:
+      - node_modules/.bun-tag
+    cmds:
+      - bun install
+      - touch node_modules/.bun-tag
+
+  node-prepare:
+    desc: prepare frontend environment
+    deps: [node-fetch]
+
+  node-lint:
+    desc: format and typecheck the frontend
+    dir: web
+    deps: [node-prepare]
+    cmds:
+      - bunx --bun biome format --write .
+      - bunx vue-tsc -b --noEmit
+
+  node-debug:
+    desc: run the frontend in development mode
+    dir: web
+    deps: [node-prepare]
+    interactive: true
+    cmds:
+      - bun --bun run dev
+
+  node-generate:
+    internal: true
+    dir: web
+    deps: [node-prepare]
+    sources:
+      - "**/*"
+      - ../internal/database/ent/rest/openapi.json
+      - exclude: node_modules/**/*
+      - exclude: .output/**/*
+      - exclude: .nuxt/**/*
+    generates:
+      - .output/public/index.html
+    cmds:
+      - bun --bun run generate
+
+  node-build:
+    desc: build the frontend, and copy it into the backend embed directory
+    cmds:
+      - task: node-generate
+      - rm -rf cmd/httpserver/public/dist
+      - mkdir -p cmd/httpserver/public/dist
+      - cp -a web/.output/public/. cmd/httpserver/public/dist/

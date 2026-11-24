@@ -20,4 +20,5 @@ jobs:
     needs: [go-test, go-lint]
     uses: lrstanley/.github/.github/workflows/docker-release.yml@master
     with:
+      dockerfile: .github/Dockerfile
       scan: false

@@ -1,8 +1,0 @@
-extend type Mutation {
-    updateGuildConfig(id: ID!, input: UpdateGuildConfigInput!): GuildConfig!
-    updateGuildAdminConfig(id: ID!, input: UpdateGuildAdminConfigInput!): GuildAdminConfig!
-}
-
-type Subscription {
-    guildEventAdded(input: GuildEventWhereInput!): GuildEvent!
-}

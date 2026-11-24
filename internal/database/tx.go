@@ -1,48 +1,36 @@
-// Copyright (c) Liam Stanley <me@liamstanley.io>. All rights reserved. Use
-// of this source code is governed by the MIT license that can be found in
+// Copyright (c) Liam Stanley <liam@liam.sh>. All rights reserved. Use of
+// this source code is governed by the MIT license that can be found in
 // the LICENSE file.
 
 package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/apex/log"
 	"github.com/lrstanley/spectrograph/internal/database/ent"
 )
 
-// Commit will commit the transaction, unless the provided error is non-nil, in
-// which case it will rollback the transaction and return a wrapped error.
-func Commit(tx *ent.Tx, err error) error {
+// RunWithTx runs fn within a transaction, committing if fn returns nil, and
+// rolling back otherwise. The transaction is also attached to the context passed
+// to fn (see [ent.TxFromContext]), so mutation observers (see
+// [GuildEventNotifier]) are only notified once it commits.
+func RunWithTx(ctx context.Context, db *ent.Client, fn func(ctx context.Context, tx *ent.Tx) error) error {
+	tx, err := db.Tx(ctx)
 	if err != nil {
-		return Rollback(tx, err)
+		return fmt.Errorf("starting transaction: %w", err)
+	}
+
+	if err = fn(ent.NewTxContext(ctx, tx), tx); err != nil {
+		if rerr := tx.Rollback(); rerr != nil {
+			return errors.Join(err, fmt.Errorf("rolling back transaction: %w", rerr))
+		}
+		return err
 	}
 
 	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("committing transaction: %w", err)
 	}
-
 	return nil
-}
-
-// Rollback will rollback the transaction and return a wrapped error of the original
-// error.
-func Rollback(tx *ent.Tx, err error) error {
-	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%w: %v", err, rerr)
-	}
-
-	return err
-}
-
-type TxFn func(ctx context.Context, logger log.Interface, db *ent.Tx) error
-
-func RunWithTx(ctx context.Context, logger log.Interface, db *ent.Client, fn TxFn) error {
-	tx, err := db.Tx(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to start transaction: %w", err)
-	}
-
-	return Commit(tx, fn(ctx, logger, tx))
 }

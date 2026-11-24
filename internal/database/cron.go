@@ -1,52 +1,37 @@
-// Copyright (c) Liam Stanley <me@liamstanley.io>. All rights reserved. Use
-// of this source code is governed by the MIT license that can be found in
+// Copyright (c) Liam Stanley <liam@liam.sh>. All rights reserved. Use of
+// this source code is governed by the MIT license that can be found in
 // the LICENSE file.
 
 package database
 
 import (
 	"context"
-	"errors"
+	"fmt"
+	"log/slog"
 	"time"
 
-	"github.com/apex/log"
 	"github.com/lrstanley/spectrograph/internal/database/ent"
 	"github.com/lrstanley/spectrograph/internal/database/ent/guildevent"
 	"github.com/lrstanley/spectrograph/internal/database/ent/privacy"
 )
 
-const (
-	oldestGuildEvent = 7 * 24 * time.Hour
-)
+// MaxGuildEventAge is the maximum age of guild events before they are pruned.
+const MaxGuildEventAge = 7 * 24 * time.Hour
 
-func CronGuildEvents(ctx context.Context) error {
-	logger := log.FromContext(ctx).WithField("src", "db-cron-guild-events")
-	ctx = privacy.DecisionContext(ctx, privacy.Allow)
-
-	db := ent.FromContext(ctx)
-	if db == nil {
-		return errors.New("database not found in context")
-	}
-
-	var count int
-	var err error
-
-	timer := time.NewTicker(10 * time.Minute)
-
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		case <-timer.C:
-			if count, err = db.GuildEvent.Delete().Where(
-				guildevent.CreateTimeLT(time.Now().Add(-oldestGuildEvent)),
-			).Exec(ctx); err != nil {
-				logger.WithError(err).Error("failed to delete old guild events")
-			}
-
-			if count > 0 {
-				logger.WithField("count", count).Info("pruned old guild events")
-			}
+// PruneGuildEvents removes guild events older than [MaxGuildEventAge]. Intended
+// to be run on an interval.
+func PruneGuildEvents(db *ent.Client) func(ctx context.Context, logger *slog.Logger) error {
+	return func(ctx context.Context, logger *slog.Logger) error {
+		count, err := db.GuildEvent.Delete().
+			Where(guildevent.CreateTimeLT(time.Now().Add(-MaxGuildEventAge))).
+			Exec(privacy.DecisionContext(ctx, privacy.Allow))
+		if err != nil {
+			return fmt.Errorf("pruning old guild events: %w", err)
 		}
+
+		if count > 0 {
+			logger.InfoContext(ctx, "pruned old guild events", "count", count)
+		}
+		return nil
 	}
 }
